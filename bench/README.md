@@ -31,6 +31,8 @@ Each task is an "approved plan" (`plan.md`) the model must implement in `files/`
 
 Run: `./run_all.sh`, then `python3 summarize.py`.
 
+The code each run produced is reconstructed from the transcripts by `extract_artifacts.py` into `results/artifacts/<model>/<task>_rN/` (only files that differ from the task originals). Each reconstruction is re-validated with the task's `check.sh`; a run whose replay cannot reproduce the recorded result (e.g. it mutated files via bash, which is not re-executed) gets an `INCOMPLETE.md` marker.
+
 ## Reviewer benchmark (`bench/review/`)
 
 Each task is a git repo built on the fly: `base/` is committed, `changed/` is copied on top as the uncommitted working diff — exactly the scope both reviewer prompts define. The model plays taste reviewer or spec reviewer (picked from the task name prefix) and reviews the diff.
