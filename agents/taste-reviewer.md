@@ -2,8 +2,9 @@
 description: >-
   Taste review of the working diff before a commit: does the code follow the
   repo's standards? Never edits code. Runs together with the spec-reviewer
-  before every commit, except trivial ones. Prefer a capable, cost-effective
-  coding model available in the host.
+  before every commit, except trivial ones. Model suggestion, not requirement:
+  ollama-cloud/kimi-k2.7-code. Ask the user which available cost-effective
+  coding model should fill this role during setup.
 tools: read, grep, find, ls, bash
 thinking: high
 ---

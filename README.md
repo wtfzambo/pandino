@@ -20,11 +20,11 @@ Build the Fiat Panda that is needed, not an intergalactic rocket.
 The main agent is the planner and orchestrator:
 
 1. Read the repository instructions and inspect the real code before proposing changes.
-2. For non-trivial or unclear work, run `/skill:grilling` and agree on the plan with the user.
+2. For non-trivial or unclear work, load and follow the grilling skill to agree on the plan with the user. Pi can load matching skills on demand; the user can force it with `/skill:grilling` if the model does not.
 3. Delegate the approved, bounded plan to the implementer.
 4. Before every non-trivial commit, run the taste and spec reviewers together. Fix or discuss their findings before committing.
 
-Choose models by capability, not by hardcoded provider names. A capable, cost-effective coding model is normally enough for taste review. Spec review benefits from the strongest reasoning model available when requirements or diffs are substantial.
+Choose the agent models with the user during setup. The frontmatter names tested examples, not requirements: favor cost-effective coding models for implementation and taste review, and a strong reasoning model for substantial spec reviews. The current evidence and open benchmark work are recorded in [`NOTES.md`](NOTES.md).
 
 ## Install
 
@@ -34,13 +34,13 @@ Into a new or existing repo:
 ./install.sh /path/to/repo
 ```
 
-The script does not overwrite an existing `AGENTS.md` or same-named agent. It reports each skipped file. The grilling skill is the exception: it is refreshed from upstream on every run.
+New files are installed directly. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. This generated staging area is rebuilt on every run, so obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
 
 ## Install with an AI agent
 
 Give the agent this repository and ask:
 
-> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer, semantically merge any skipped files using the conflict rules below, validate the resulting Pi configuration, and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
+> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer, semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
 
 The agent should inspect at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and existing `.pi/agents/` when present. Other tool-specific instruction files count too.
 
@@ -56,7 +56,17 @@ Installation into an established repo is a merge, not a replacement:
 6. Remove stale references to tools or files that the merged setup does not contain.
 7. Resolve conflicts automatically when the precedence is clear. Ask the user only when the choice changes product behavior, security, or an established team workflow.
 
-After merging, run the repository's normal checks and verify that Pi discovers the three agents and the grilling skill. Show the user what was kept, replaced, and left unresolved.
+After merging, remove `.pandino/merge/`, run the repository's normal checks, and verify that Pi discovers the three agents and the grilling skill. Show the user what was kept, replaced, and left unresolved.
+
+## Optional personal skill
+
+Pandino controls code and development workflow, not communication style. For ADHD-friendly, action-first responses, optionally install [i-have-adhd](https://github.com/ayghri/i-have-adhd) once at global scope:
+
+```bash
+npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
+```
+
+The installer remains non-interactive so it can run safely through an agent or CI; the command above lets the user choose this personal preference explicitly.
 
 ## Task tracking (optional)
 
@@ -64,5 +74,5 @@ For projects that need cross-session memory, use [Backlog.md](https://github.com
 
 ## Not included on purpose
 
-- [ponytail](https://github.com/DietrichGebert/ponytail) and personal communication skills (e.g. i-have-adhd) belong in the global pi config (`~/.pi/agent/`, `~/.agents/skills/`), not in per-repo kits — install once, they follow you everywhere. AGENTS.md already embeds ponytail's philosophy (YAGNI, deletion test, comments on known ceilings).
+- Pandino already covers much of Ponytail's simplicity and YAGNI guidance, so combining them is optional and mostly redundant.
 - Toolchain sections (uv/ruff/pytest or npm/eslint/vitest) are per-project: add them below the marker line at the bottom of the installed AGENTS.md.

@@ -7,31 +7,44 @@ kit_dir="$(cd "$(dirname "$0")" && pwd)"
 target="${1:?usage: ./install.sh /path/to/repo}"
 target="$(cd "$target" && pwd)"
 
-copied=()
-skipped=()
+# Generated candidates are disposable and rebuilt from the current kit.
+rm -rf "$target/.pandino/merge"
+staged_count=0
 
-copy_if_absent() {
-    local src="$1" dst="$2"
-    if [ -e "$dst" ]; then
-        skipped+=("$dst")
-    else
+install_or_stage() {
+    local src="$1" dst="$2" stage="$3"
+    if [ ! -e "$dst" ]; then
         mkdir -p "$(dirname "$dst")"
         cp "$src" "$dst"
-        copied+=("$dst")
+        echo "installed  $dst"
+    elif cmp -s "$src" "$dst"; then
+        echo "unchanged  $dst"
+    else
+        mkdir -p "$(dirname "$stage")"
+        cp "$src" "$stage"
+        staged_count=$((staged_count + 1))
+        echo "staged     $stage for $dst"
     fi
 }
 
-copy_if_absent "$kit_dir/AGENTS.md" "$target/AGENTS.md"
+install_or_stage \
+    "$kit_dir/AGENTS.md" \
+    "$target/AGENTS.md" \
+    "$target/.pandino/merge/AGENTS.md"
 
 for agent in "$kit_dir"/agents/*.md; do
-    copy_if_absent "$agent" "$target/.pi/agents/$(basename "$agent")"
+    name="$(basename "$agent")"
+    install_or_stage \
+        "$agent" \
+        "$target/.pi/agents/$name" \
+        "$target/.pandino/merge/agents/$name"
 done
 
 # Grilling skill: always fetch the latest from Matt Pocock's repo.
 mkdir -p "$target/.pi/skills/grilling"
 curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md" \
     -o "$target/.pi/skills/grilling/SKILL.md"
-copied+=("$target/.pi/skills/grilling/SKILL.md (latest)")
+echo "installed  $target/.pi/skills/grilling/SKILL.md (latest)"
 
 # Subagent runtime, project-local.
 if command -v pi > /dev/null; then
@@ -40,8 +53,11 @@ else
     echo "warning: pi not found; run 'pi install -l npm:@tintinweb/pi-subagents' in $target yourself"
 fi
 
-for f in "${copied[@]}"; do echo "installed  $f"; done
-for f in "${skipped[@]}"; do echo "kept       $f (already exists)"; done
+if [ "$staged_count" -gt 0 ]; then
+    echo
+    echo "Merge the staged Pandino candidates into the existing files, then remove"
+    echo "$target/.pandino/merge. See README.md for conflict precedence."
+fi
 
 if [ ! -d "$target/backlog" ]; then
     echo
