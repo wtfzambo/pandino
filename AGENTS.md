@@ -80,6 +80,17 @@ Code without meaningful tests is not reliable, but coverage is not the objective
 - Implement one small runnable slice at a time; keep the repository runnable after each slice.
 - When unsure how an external system behaves, say so and check: read its documentation, or write a small throwaway script that answers the question. Never present a guess as fact.
 
+## Agent workflow
+
+The main agent plans and orchestrates; three subagents in `.pi/agents/` do the specialized work. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report.
+
+1. Plan first. For non-trivial or unclear work, agree on a bounded plan with the user before touching code; load the grilling skill to stress-test it.
+2. Delegate the approved plan to the `implementer` subagent. Give it the full plan, not a summary; it implements without re-litigating, and stops and reports if the plan contradicts the real code — treat that report as a planning bug, not an implementation failure.
+3. Before every non-trivial commit, run `taste-reviewer` and `spec-reviewer` together on the working diff. Taste judges how the code is written, spec judges what it does against what was asked.
+4. Fix or explicitly discuss every must-fix finding before committing. Scope-creep findings from the spec reviewer are product decisions: surface them to the user instead of silently keeping or reverting the extra behavior.
+
+Small fixes the user asked for directly (a rename, a one-line bug) do not need the full loop; use judgment and say what was skipped.
+
 ## Definition of done
 
 A change is complete when its behavior satisfies the requirement, the implementation reads without excessive explanation, public contracts are typed, meaningful behavior is tested, the project's formatter, linter, type checker, and tests all pass, and no dead code, secrets, debug output, or speculative machinery remains.
