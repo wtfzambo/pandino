@@ -7,11 +7,12 @@ scoring its own style favorably.
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
 
-JUDGE_MODEL = "anthropic/claude-fable-5"
+JUDGE_MODEL = os.environ.get("BENCH_JUDGE_MODEL", "anthropic/claude-fable-5")
 
 PROMPT = """You are scoring a code review against a ground-truth list of planted defects.
 

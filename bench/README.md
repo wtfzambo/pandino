@@ -15,7 +15,8 @@ pi -p --no-session --no-extensions --no-skills --mode json \
 - The role prompt is the agent's markdown from `agents/`, frontmatter stripped (regenerate with the `awk '/^---$/{n++; next} n>=2'` one-liner in git history if agents change).
 - The task runs in a temp workdir seeded with the task's files plus the kit `AGENTS.md`, so the model sees the same context a real Pandino repo gives it.
 - `--no-extensions` keeps the environment clean but also unloads the ollama-cloud provider; the harness re-adds only that extension for `ollama-cloud/*` models.
-- The JSON transcript is stored under `results/raw/` and mined for token counts and cost (`summarize.py --one`). Anthropic calls go through the local proxy on :3456, so absolute Claude costs are indicative.
+- The JSON transcript is stored under `results/raw/` and mined for token counts and cost (`summarize.py --one`).
+- Nothing here configures providers: the harness inherits whatever pi's own provider setup resolves for each model ID. Runs work on any machine where `pi -p --model <id>` works. (On the machine of the 2026-07-31 runs, pi routed `anthropic/*` through a local proxy, so absolute Claude costs from those runs are indicative.)
 - 3 runs per model x task; `summarize.py` reports medians.
 
 ## Implementer benchmark (`bench/`)
@@ -44,7 +45,7 @@ Each task is a git repo built on the fly: `base/` is committed, `changed/` is co
 | `spec-defects` | 4 planted spec divergences against `docs/discount-spec.md` (wrong boundary, discount applied to shipping, missing ValueError, unrequested coupon feature); the test suite agrees with the wrong code |
 | `spec-clean` | every spec line traces to code and test; pass = says so |
 
-Scoring is not string matching: `judge.py` sends the review plus the task's `expected.md` ground truth to a judge model (`anthropic/claude-fable-5`, deliberately not a contestant) which returns which planted defects were found and how many must-fix false positives the review invented. Judge verdicts land next to the raw transcripts (`*.judge.json`) for spot-checking.
+Scoring is not string matching: `judge.py` sends the review plus the task's `expected.md` ground truth to a judge model (`anthropic/claude-fable-5` by default, `BENCH_JUDGE_MODEL` to override; pick one that is not a contestant) which returns which planted defects were found and how many must-fix false positives the review invented. Judge verdicts land next to the raw transcripts (`*.judge.json`) for spot-checking.
 
 Run: `./run_all.sh`, then `python3 summarize.py`.
 
