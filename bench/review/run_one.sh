@@ -43,7 +43,7 @@ start=$(date +%s)
 pi_status=$?
 end=$(date +%s)
 
-python3 "$bench_dir/../summarize.py" --last-text "$raw_dir/$slug.jsonl" > "$raw_dir/$slug.review.md"
+python3 "$bench_dir/../implementer/summarize.py" --last-text "$raw_dir/$slug.jsonl" > "$raw_dir/$slug.review.md"
 judge=$(python3 "$bench_dir/judge.py" "$task_dir/expected.md" "$raw_dir/$slug.review.md" "$raw_dir/$slug.judge.json")
-metrics=$(python3 "$bench_dir/../summarize.py" --one "$raw_dir/$slug.jsonl")
+metrics=$(python3 "$bench_dir/../implementer/summarize.py" --one "$raw_dir/$slug.jsonl")
 echo "$model,$role,$task,$run,$judge,$((end - start)),$metrics,$pi_status" >> "$bench_dir/results/results.csv"

@@ -19,7 +19,7 @@ pi -p --no-session --no-extensions --no-skills --mode json \
 - Nothing here configures providers: the harness inherits whatever pi's own provider setup resolves for each model ID. Runs work on any machine where `pi -p --model <id>` works. (On the machine of the 2026-07-31 runs, pi routed `anthropic/*` through a local proxy, so absolute Claude costs from those runs are indicative.)
 - 3 runs per model x task; `summarize.py` reports medians.
 
-## Implementer benchmark (`bench/`)
+## Implementer benchmark (`bench/implementer/`)
 
 Each task is an "approved plan" (`plan.md`) the model must implement in `files/`; `check.sh` decides pass/fail objectively (provided tests, or zero-diff for the adversarial case).
 

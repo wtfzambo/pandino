@@ -1,6 +1,4 @@
 __pycache__/
 # Raw pi transcripts are hundreds of MB; keep the CSVs, reviews, and judge verdicts.
-bench/results/raw/*.jsonl
-bench/review/results/raw/*.jsonl
+bench/*/results/raw/*.jsonl
 bench/*/results/raw/*.err
-bench/results/raw/*.err

@@ -12,7 +12,7 @@ slug="$(echo "$model" | tr '/:.' '---')_${task}_r${run}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 cp -R "$task_dir/files/." "$work/"
-cp "$bench_dir/../AGENTS.md" "$work/AGENTS.md"
+cp "$bench_dir/../../AGENTS.md" "$work/AGENTS.md"
 
 prompt="$(cat "$task_dir/plan.md")"
 
