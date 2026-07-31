@@ -2,8 +2,8 @@
 description: >-
   Taste review of the working diff before a commit: does the code follow the
   repo's standards? Never edits code. Runs together with the spec-reviewer
-  before every commit, except trivial ones. Default model (pass via the model
-  parameter): ollama-cloud/kimi-k2.7-code.
+  before every commit, except trivial ones. Prefer a capable, cost-effective
+  coding model available in the host.
 tools: read, grep, find, ls, bash
 thinking: high
 ---

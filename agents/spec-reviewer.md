@@ -2,8 +2,8 @@
 description: >-
   Adversarial spec review before a commit: does the change do what was asked
   — all of it, and nothing more? Never edits code. Runs together with the
-  taste-reviewer before every commit, except trivial ones. Default model
-  (pass via the model parameter): anthropic/claude-opus-5.
+  taste-reviewer before every commit, except trivial ones. Prefer the strongest
+  reasoning model available when the requirements or diff are substantial.
 tools: read, grep, find, ls, bash
 thinking: high
 ---
