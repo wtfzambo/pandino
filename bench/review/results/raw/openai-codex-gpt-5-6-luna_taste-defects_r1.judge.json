@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the reduce/dense code (1), the unused tie_breaker parameter (2, though only tie_breaker, not key_fn/reverse, and suggests implementing as an alternative to removal), and format_summary nesting (4); missed the what-not-why comment (3); no false positives."
+}

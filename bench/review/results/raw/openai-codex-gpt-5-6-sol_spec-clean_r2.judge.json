@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 0,
+  "notes": "Clean diff correctly passed: review raised only minor nitpicks (indirect ValueError coverage, new public helper) and no must-fix findings."
+}

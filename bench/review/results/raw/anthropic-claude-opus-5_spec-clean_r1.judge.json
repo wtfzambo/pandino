@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is a clean diff; the review correctly passes it with only minor nitpicks (test-target gap, public helper surface, float commentary), none flagged as must-fix."
+}

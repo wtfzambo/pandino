@@ -1,0 +1,9 @@
+{
+  "defects_found": [
+    1,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the clever reduce/double-negation (1) and the dead 'category in totals' check plus format_summary flattening (4); missed the unused speculative parameters (2) and the what-not-why comment (3); the single must-fix maps to a planted defect, so no false positives."
+}

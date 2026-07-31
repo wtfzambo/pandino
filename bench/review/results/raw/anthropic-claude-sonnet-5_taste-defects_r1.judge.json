@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects identified at the correct locations (clever reduce/double-negation, unused speculative params, what-not-why comment, nested conditionals with dead guards); the only extra finding is a minor note, so no false positives."
+}

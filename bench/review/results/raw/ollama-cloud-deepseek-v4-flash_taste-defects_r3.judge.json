@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found (comment signal cited within finding 1; nesting and dead in-check split across findings 3-4); the follow-on unused-import notes are valid consequences of the fix, not false positives."
+}

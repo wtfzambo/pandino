@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the reduce cleverness, speculative parameters, and format_summary nesting/dead check; missed the what-not-why comment defect."
+}

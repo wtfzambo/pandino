@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth says the diff is clean, so the must-fix truncation/collision-suffix finding counts as a false positive; run fails pass criteria."
+}

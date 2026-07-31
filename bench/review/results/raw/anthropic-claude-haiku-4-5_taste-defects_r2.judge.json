@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Review nails the dense reduce implementation, the speculative parameters, and the nested defensiveness in format_summary, but never mentions the 'Fold the totals...' comment explaining what instead of intent; the second must-fix about imports/tie_breaker overlaps defect 2 rather than being a false positive."
+}

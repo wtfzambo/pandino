@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the reduce cleverness (1), format_summary nesting (4), and partially defect 2 (only tie_breaker flagged, key_fn/reverse missed); missed the what-not-why comment (3); no false positives."
+}

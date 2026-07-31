@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the boundary, negative-subtotal, and coupon defects; missed defect 2 and actively endorsed the shipping-discount bug as correct in the 'Good' section."
+}

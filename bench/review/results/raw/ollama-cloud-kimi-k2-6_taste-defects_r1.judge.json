@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found (clever reduce/double-negation, speculative params, how-comment, nesting + dead 'in totals' check); the extra must-fix about recomputed totals describes a real redundancy, not a false positive."
+}

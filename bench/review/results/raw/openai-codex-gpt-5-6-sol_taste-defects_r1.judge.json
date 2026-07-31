@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Review nails the clever reduce/sort rewrite (1), speculative unused parameters (2), and format_summary nesting/dead membership check with early-return fix (4), but never mentions the what-not-why comment (3); no non-planted must-fix findings."
+}

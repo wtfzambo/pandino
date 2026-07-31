@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is a clean diff; review correctly reports a full clean trace with no must-fix findings \u2014 the public-helper note is a minor product-decision nitpick, not a false positive."
+}

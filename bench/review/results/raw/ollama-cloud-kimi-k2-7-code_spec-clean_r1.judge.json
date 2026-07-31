@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is a clean diff; review correctly traces every criterion and reports no must-fix findings, so no misses and no false positives."
+}

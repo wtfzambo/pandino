@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found and tied to the spec; extra must-fix items are test-coverage corollaries of the planted defects, not false positives."
+}

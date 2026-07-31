@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects identified (the clever reduce/ternary shape is split across three must-fix items but all map to defect 1/2; comment and format_summary issues caught as minors); no non-planted must-fix findings."
+}

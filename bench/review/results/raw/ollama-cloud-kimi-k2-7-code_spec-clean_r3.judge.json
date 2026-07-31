@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth is a clean diff; the unlabeled 'Unrequested' finding on discount_rate counts as a must-fix false positive, while the 'Minor' missing-test note is a recorded nitpick that does not fail the run."
+}

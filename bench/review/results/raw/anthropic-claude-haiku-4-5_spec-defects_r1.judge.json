@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Missed defect 1 \u2014 the review incorrectly asserted the boundary uses >= and passed it as correct; found the shipping discount, missing ValueError, and unrequested coupon defects with spec ties, and raised no false must-fix findings."
+}

@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found (reduce fold + comment signal, speculative params, nested branches with dead guard); all must-fix findings map to planted defects, so no false positives."
+}

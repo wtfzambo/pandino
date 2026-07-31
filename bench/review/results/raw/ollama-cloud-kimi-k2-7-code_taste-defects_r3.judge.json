@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Review caught the clever reduce implementation, speculative parameters, and format_summary nesting/dead check, but missed the what-not-why comment on the fold; no spurious must-fix findings."
+}

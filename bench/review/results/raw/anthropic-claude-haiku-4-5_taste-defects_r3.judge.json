@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 1,
+  "notes": "Defects 1, 3, 4 fully found; defect 2 only partially (tie_breaker named as unused in minors, but key_fn/reverse kept as legitimate); the must-fix test_report.py:12 finding is vague and not a real defect, so it counts as a false positive."
+}

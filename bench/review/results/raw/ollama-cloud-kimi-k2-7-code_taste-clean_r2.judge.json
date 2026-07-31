@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 0,
+  "notes": "Clean diff correctly recognized; review raises only a minor naming nitpick (not a must-fix) plus good notes, so no false positives and the run passes."
+}

@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth says clean diff; the review's one must-fix (test length assertion / truncation-suffix cap overflow) is internally well-argued but counts as a false positive under the clean-diff rule."
+}

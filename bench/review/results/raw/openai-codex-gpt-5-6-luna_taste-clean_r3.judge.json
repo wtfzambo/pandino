@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth is a clean diff; the review's must-fix truncation/suffix claim counts as a false positive per the clean-diff rule."
+}

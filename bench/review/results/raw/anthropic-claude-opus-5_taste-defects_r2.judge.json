@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects identified as must-fix with correct locations; remaining minor notes are real or nitpicks, so no false positives."
+}

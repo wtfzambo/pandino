@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth is a clean diff; the slug-length must-fix finding counts as a false positive, so the run fails the zero-must-fix bar."
+}

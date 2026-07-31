@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found (must-fix items 1/2/4 cover defect 1, item 3 covers defect 2, item 5 covers defect 3, item 6 covers defect 4); no must-fix finding falls outside the ground truth."
+}

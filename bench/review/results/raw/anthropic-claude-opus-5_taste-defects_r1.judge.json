@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects found and correctly localized; every must-fix finding maps to a planted defect (the reduce no-op and reverse double-negation are facets of defect 1), so no false positives."
+}

@@ -1,0 +1,6 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth says the diff is clean; the review's one must-fix (test length assertion / suffix-past-cap) counts as a false positive per the clean-diff rule, so the run fails the zero-must-fix bar."
+}

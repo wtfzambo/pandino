@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Review catches the reduce density (1), speculative parameters (2), and format_summary nesting/dead check (4), but never mentions the what-not-why comment (3)."
+}

@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Found the dense reduce, speculative parameters, and format_summary nesting (as minor); missed the what-not-why comment defect."
+}

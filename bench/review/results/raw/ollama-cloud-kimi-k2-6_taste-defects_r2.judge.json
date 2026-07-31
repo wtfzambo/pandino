@@ -1,0 +1,11 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "All four planted defects identified at the correct locations; the unused-import note is minor and derivative, and no must-fix finding falls outside the ground truth."
+}

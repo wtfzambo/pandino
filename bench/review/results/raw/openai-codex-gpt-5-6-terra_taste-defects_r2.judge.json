@@ -1,0 +1,10 @@
+{
+  "defects_found": [
+    1,
+    2,
+    4
+  ],
+  "defects_total": 4,
+  "false_positives": 0,
+  "notes": "Review caught the dense reduce, speculative parameters, and format_summary nesting/dead guard, but missed the what-not-why comment defect (3); no false positives."
+}
