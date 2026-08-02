@@ -3,8 +3,10 @@ description: >-
   Adversarial spec review before a commit: does the change do what was asked
   — all of it, and nothing more? Never edits code. Runs together with the
   taste-reviewer before every commit, except trivial ones. Model suggestion,
-  not requirement: anthropic/claude-opus-5. Ask the user which available strong
-  reasoning model should fill this role during setup.
+  not requirement: ollama-cloud/deepseek-v4-flash (found every planted spec
+  divergence in the 2026-07-31 bench at a fraction of larger models' cost;
+  consider anthropic/claude-opus-5 for genuinely hard reviews). Ask the user
+  which available model should fill this role during setup.
 tools: read, grep, find, ls, bash
 thinking: high
 ---

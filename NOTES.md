@@ -43,7 +43,7 @@ Harness in `bench/review/` (see `bench/README.md`): each task is a git repo buil
 | kimi-k2.6 | 12/12 | 12/12 | 1 | 0.021–0.034 | one invented finding on a clean diff |
 | claude-opus-5 | 12/12 | 12/12 | 4 | 0.23–0.40 | perfect on defects; 4 fp on taste-clean, slowest (up to ~2 min) |
 | claude-sonnet-5 | 12/12 | 12/12 | 2 | 0.064–0.089 | solid all around |
-| kimi-k2.7-code | 11/12 | 12/12 | 2 | 0.021–0.034 | current frontmatter suggestion, still fine |
+| kimi-k2.7-code | 11/12 | 12/12 | 2 | 0.021–0.034 | pre-bench frontmatter suggestion, still fine |
 | gpt-5.6-terra | 9/12 | 12/12 | 2 | 0.026–0.036 | consistently missed the what-not-why comment (taste #3) |
 | gpt-5.6-sol | 9/12 | 12/12 | 1 | 0.078–0.101 | same taste blind spot as terra, 3x the price |
 | gpt-5.6-luna | 9/12 | 12/12 | 3 | 0.003–0.005 | cheap but weakest taste + most clean-diff noise among gpt |

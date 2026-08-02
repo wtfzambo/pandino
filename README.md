@@ -24,7 +24,7 @@ The main agent is the planner and orchestrator:
 3. Delegate the approved, bounded plan to the implementer.
 4. Before every non-trivial commit, run the taste and spec reviewers together. Fix or discuss their findings before committing.
 
-Choose the agent models with the user during setup. The frontmatter names tested examples, not requirements: favor cost-effective coding models for implementation and taste review, and a strong reasoning model for substantial spec reviews. The current evidence and open benchmark work are recorded in [`NOTES.md`](NOTES.md).
+Choose the agent models with the user during setup. The frontmatter names tested examples, not requirements. The 2026-07-31 benchmarks (`bench/`, results in [`NOTES.md`](NOTES.md)) found cost-effective models fully competitive in all three roles: what discriminates is behavior — stopping on a plan that contradicts the code, not inventing findings on clean diffs — not model size. Reserve a heavyweight reasoning model for genuinely hard spec reviews.
 
 ## Install
 
