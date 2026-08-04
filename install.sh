@@ -102,7 +102,7 @@ append_snippet() {
 printf '\n  %sPandino%s %s— build the Fiat Panda that is needed%s\n' \
     "$bold$magenta" "$reset" "$grey" "$reset"
 printf '  %sCoding standards, an implementer and two reviewer agents, and a%s\n' "$grey" "$reset"
-printf '  %splanning skill %s(wired for pi)%s\n' "$grey" "$dim" "$reset"
+printf '  %splanning skill.%s\n' "$grey" "$reset"
 printf '  %sinto%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
@@ -268,4 +268,12 @@ if [ "${#skipped[@]}" -gt 0 ]; then
         printf '  %s  · %s%s\n' "$grey" "$item" "$reset"
     done
 fi
+
+printf '\n  %sThe standards and workflow live in %sAGENTS.md%s%s and work with any%s\n' \
+    "$grey" "$cyan" "$reset" "$grey" "$reset"
+printf '  %scoding agent. The agent definitions went to %s.pi/agents/%s%s, which only%s\n' \
+    "$grey" "$cyan" "$reset" "$grey" "$reset"
+printf '  %spi reads — on another harness, register those three roles where it%s\n' \
+    "$grey" "$reset"
+printf '  %sexpects them.%s\n' "$grey" "$reset"
 echo

@@ -51,7 +51,7 @@ New files are installed directly. `.pandino/` holds installer-managed material, 
 
 ## Install with an AI agent
 
-Installing into an established repo is a merge, not a replacement, and that judgement is worth delegating. Paste this to an agent working in the target repo:
+Installing into an established repo is a merge, not a replacement, and that judgement is worth delegating. The prompt also covers harnesses other than pi, where the agent has to place the role definitions itself. Paste this to an agent working in the target repo:
 
 ```txt
 Install Pandino into this repository.
@@ -68,7 +68,9 @@ Install Pandino into this repository.
 
 5. Make sure the accepted add-ons actually landed: `backlog/` exists, `AGENTS.md` contains Backlog's own guidelines block and the `<!-- pandino:session-continuity -->` section, and `<!-- pandino:parallel-agents -->` if I accepted that too. Append any missing snippet from `.pandino/snippets/` yourself. Never append session continuity without Backlog.md — it would describe a workflow this repo cannot run.
 
-6. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
+6. If you are not running on pi, adapt: the installer writes the agent definitions to `.pi/agents/` and the skill to `.pi/skills/`, which only pi reads. Keep those files as the source of truth, and additionally register the same three roles wherever your own harness looks for them (for example `.claude/agents/`), noting in `AGENTS.md` where they now live. Do not rewrite their content — only relocate or duplicate it. If your harness has no subagent mechanism at all, say so and tell me the workflow will run as one agent adopting each role in turn.
+
+7. Verify the setup: the three agents and the grilling skill are discoverable by whichever harness you run on, this repository's normal checks pass, and show me the final diff with a short summary of what you kept, replaced, added, adapted, and left unresolved.
 
 Resolve obvious duplication yourself. Beyond the two questions in step 2, ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
 ```

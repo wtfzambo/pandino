@@ -82,7 +82,9 @@ Code without meaningful tests is not reliable, but coverage is not the objective
 
 ## Agent workflow
 
-The main agent plans and orchestrates; three subagents in `.pi/agents/` do the specialized work. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report.
+The main agent plans and orchestrates; three subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, defined in `.pi/agents/`. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report.
+
+Those definitions are written for [pi](https://pi.dev). On another harness, read them as role descriptions and apply the workflow with whatever that harness offers: its own subagent mechanism, separate sessions, or a single agent that adopts one role at a time and states which. If a role cannot be delegated at all, run its review yourself against the same definition and say so — do not skip the step because the mechanism is missing.
 
 1. Plan first. For non-trivial or unclear work, agree on a bounded plan with the user before touching code; load the grilling skill to stress-test it.
 2. Delegate the approved plan to the `implementer` subagent. Give it the full plan, not a summary; it implements without re-litigating, and stops and reports if the plan contradicts the real code — treat that report as a planning bug, not an implementation failure.
