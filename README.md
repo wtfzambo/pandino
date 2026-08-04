@@ -1,6 +1,6 @@
 # pandino
 
-<img src="imgs/panda.jpg" alt="A Fiat Panda 4x4 parked on a mountainside" width="100%">
+<img src="imgs/panda.jpg" alt="A Fiat Panda 4x4 parked on a mountainside" width="70%">
 
 Coding rules for your AI agents, plus three helpers: one writes the code, two review it.
 
