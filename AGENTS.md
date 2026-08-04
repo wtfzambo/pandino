@@ -89,7 +89,11 @@ The main agent plans and orchestrates; three subagents in `.pi/agents/` do the s
 3. Before every non-trivial commit, run `taste-reviewer` and `spec-reviewer` together on the working diff. Taste judges how the code is written, spec judges what it does against what was asked.
 4. Fix or explicitly discuss every must-fix finding before committing. Scope-creep findings from the spec reviewer are product decisions: surface them to the user instead of silently keeping or reverting the extra behavior.
 
+5. Verify the integrated result yourself before reporting done. An agent's report describes intent; only the diff describes outcome. Read the diff, re-run the checks rather than trusting reported ones, own the files no mandate covered — docs and cross-cutting comments are nobody's slice by default — and trace one full user path end to end. Slice-level correctness does not imply the path works.
+
 Small fixes the user asked for directly (a rename, a one-line bug) do not need the full loop; use judgment and say what was skipped.
+
+The orchestrator wrote the plan, so it is the least neutral judge of it: a plan's author defends the plan by default. That is why the separate reviewers exist, and why their pass does not replace the orchestrator's — reviewers judge the diff against the spec, while the orchestrator alone knows what was discussed and rejected, which never appears in the diff.
 
 ## Definition of done
 

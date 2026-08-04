@@ -5,7 +5,7 @@ description: >-
   taste-reviewer before every commit, except trivial ones. Model suggestion,
   not requirement: ollama-cloud/deepseek-v4-flash (found every planted spec
   divergence in the 2026-07-31 bench at a fraction of larger models' cost;
-  consider anthropic/claude-opus-5 for genuinely hard reviews). Ask the user
+  consider anthropic/claude-opus-5 for the one whole-branch review before a merge). Ask the user
   which available model should fill this role during setup.
 tools: read, grep, find, ls, bash
 thinking: high

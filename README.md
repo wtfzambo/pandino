@@ -68,6 +68,10 @@ npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
 
 The installer remains non-interactive so it can run safely through an agent or CI; the command above lets the user choose this personal preference explicitly.
 
+## Parallel agents (optional)
+
+For work that genuinely splits across several implementers at once, append `snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. One implementer at a time remains the default.
+
 ## Task tracking (optional)
 
 For projects that need cross-session memory, use [Backlog.md](https://github.com/MrLesk/Backlog.md): run `backlog init` in the target repo, then append `snippets/session-continuity.md` to its AGENTS.md.
