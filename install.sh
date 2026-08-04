@@ -82,7 +82,7 @@ note "Installing into $target"
 want_backlog=no
 if [ -d "$target/backlog" ]; then
     want_backlog=already
-elif confirm "Set up Backlog.md task tracking? It gives agents memory across sessions." y; then
+elif confirm "Set up Backlog.md task tracking? Strongly recommended: it is what gives agents memory across sessions." y; then
     want_backlog=yes
 fi
 
@@ -116,7 +116,8 @@ step "Core files"
 # Appended snippets are Pandino's own, so they must not read as a conflict:
 # compare only the part of the file that precedes them.
 core_only() {
-    awk '/<!-- pandino:/ { exit } { print }' "$1" | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+    awk '/<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
+        | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
 
 if [ -e "$target/AGENTS.md" ] && diff -q <(core_only "$kit_dir/AGENTS.md") <(core_only "$target/AGENTS.md") > /dev/null; then
@@ -168,26 +169,35 @@ skipped=()
 
 case "$want_backlog" in
     already)
+        # Backlog is set up; make sure its own guidelines are in AGENTS.md too.
+        if command -v backlog > /dev/null && ! grep -q "BACKLOG.MD GUIDELINES" "$target/AGENTS.md"; then
+            (cd "$target" && backlog init "$(basename "$target")" \
+                --agent-instructions agents > /dev/null 2>&1)
+            say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
+        fi
         append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
         ;;
     yes)
         if command -v backlog > /dev/null; then
-            # A name, 'none' and --no-git keep init from opening its own prompt;
-            # Pandino owns AGENTS.md, and a repo without git stays without it.
+            # A project name and --no-git keep init from opening its own prompt.
+            # It appends its own AGENTS.md section, which is what teaches the
+            # workflow, so let it: the block carries its own markers and re-runs
+            # cleanly. A repo without git stays without it.
             git_flag=""
             [ -d "$target/.git" ] || git_flag="--no-git"
             (cd "$target" && backlog init "$(basename "$target")" \
-                --agent-instructions none $git_flag > /dev/null)
+                --agent-instructions agents $git_flag > /dev/null 2>&1)
             say installed "$green" "Backlog.md task tracking in $target/backlog"
+            say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
             append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
         else
             say skipped "$yellow" "backlog not found on PATH"
             note "  install it from https://github.com/MrLesk/Backlog.md, then re-run this script"
-            skipped+=("task tracking: install Backlog.md, then re-run this script")
+            skipped+=("task tracking: install Backlog.md, then re-run this script — it is the one add-on worth going back for")
         fi
         ;;
     no)
-        skipped+=("task tracking: run 'backlog init' in $target, then append .pandino/snippets/session-continuity.md to AGENTS.md")
+        skipped+=("task tracking and cross-session memory: re-run this script and accept Backlog.md, or set it up yourself and append .pandino/snippets/session-continuity.md to AGENTS.md")
         ;;
 esac
 

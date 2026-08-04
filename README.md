@@ -37,7 +37,13 @@ curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | 
 
 The script fetches the rest of the kit itself, so there is nothing to clone. Add `--yes` to accept every optional add-on or `--no-input` to skip them all. With a local checkout, `./install.sh /path/to/repo` behaves identically.
 
-It asks two questions: whether to set up [Backlog.md](https://github.com/MrLesk/Backlog.md) task tracking (recommended — it gives agents memory across sessions, defaults to yes), and whether to add the parallel-implementer guidance (niche, defaults to no). Accepted snippets are appended to `AGENTS.md` behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. In an agent or CI, where no terminal is attached, nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
+It asks two questions up front, then works without interrupting again.
+
+**[Backlog.md](https://github.com/MrLesk/Backlog.md) task tracking — strongly recommended, defaults to yes.** It is what gives agents memory across sessions, so Pandino's session-continuity section is installed with it and never without it: that section describes a workflow that needs Backlog to exist. Accepting runs `backlog init`, lets Backlog append its own guidelines to `AGENTS.md`, and adds the session-continuity section. Install the `backlog` command first, or the script will tell you to come back.
+
+**Parallel-implementer guidance — defaults to no.** Only worth it when several implementers run at once.
+
+Snippets are appended behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. In an agent or CI, where no terminal is attached, nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
 
 New files are installed directly. `.pandino/` holds installer-managed material, both rebuilt on every run: `.pandino/merge/` is the disposable conflict staging area, `.pandino/snippets/` the optional sections. Only the former is meant to be deleted after use. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. Obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
 
@@ -50,15 +56,19 @@ Install Pandino into this repository.
 
 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md first, then this repository's own instruction files — at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and any existing `.pi/agents/`.
 
-2. Run `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --no-input`. It will not prompt you.
+2. Ask me two questions before installing anything, and wait for my answers:
+   - Set up Backlog.md task tracking? Strongly recommended — it is what gives agents memory across sessions, and Pandino's session-continuity section depends on it. Say it is recommended, and that you will install `backlog` if it is missing.
+   - Add the parallel-implementer guidance? Only worth it if several implementers will run at once. Default no.
 
-3. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
+3. Run the installer with the answers I gave: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I accepted both, `--no-input` if I declined both. For a mixed answer, use `--no-input` and apply the accepted one yourself as described below. If I accepted Backlog.md and the `backlog` command is missing, install it first (`npm i -g backlog.md`, or see https://github.com/MrLesk/Backlog.md).
 
-4. Decide which optional snippets in `.pandino/snippets/` fit this repository and append those to `AGENTS.md`. Session continuity needs Backlog.md: if this repo has no `backlog/` directory and task tracking would help here, tell me rather than installing it yourself.
+4. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
 
-5. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
+5. Make sure the accepted add-ons actually landed: `backlog/` exists, `AGENTS.md` contains Backlog's own guidelines block and the `<!-- pandino:session-continuity -->` section, and `<!-- pandino:parallel-agents -->` if I accepted that too. Append any missing snippet from `.pandino/snippets/` yourself. Never append session continuity without Backlog.md — it would describe a workflow this repo cannot run.
 
-Resolve obvious duplication yourself. Ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
+6. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
+
+Resolve obvious duplication yourself. Beyond the two questions in step 2, ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
 ```
 
 ## Existing repositories and conflict resolution
@@ -87,7 +97,9 @@ The installer remains non-interactive so it can run safely through an agent or C
 
 ## Optional snippets
 
-`.pandino/snippets/` holds sections that are not right for every repo. An interactive install offers them; a non-interactive one just copies them, leaving the choice to you or to the installing agent. Append the ones that fit to AGENTS.md. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
+`.pandino/snippets/` holds sections that are not right for every repo. An interactive install offers them; a non-interactive one just copies them, leaving the choice to you or to the installing agent. Append the ones that fit to AGENTS.md.
+
+Session continuity is the exception: it belongs with Backlog.md and is installed together with it. Appending it to a repo without Backlog would document a workflow that repo cannot run. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
 
 ### Parallel agents
 

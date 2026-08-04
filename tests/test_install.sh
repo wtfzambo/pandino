@@ -24,6 +24,12 @@ EOF
 cat > "$tmp_dir/bin/backlog" <<'STUB'
 #!/bin/sh
 mkdir -p backlog/tasks
+grep -q "BACKLOG.MD GUIDELINES" AGENTS.md 2>/dev/null || cat >> AGENTS.md <<'BLOCK'
+
+<!-- BACKLOG.MD GUIDELINES START -->
+stub guidelines
+<!-- BACKLOG.MD GUIDELINES END -->
+BLOCK
 exit 0
 STUB
 chmod +x "$tmp_dir/bin/curl" "$tmp_dir/bin/pi" "$tmp_dir/bin/backlog"
@@ -78,9 +84,20 @@ grep -F "appended   session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -F "appended   parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 
+# Backlog.md comes with task tracking, its own guidelines, and session
+# continuity — the section is meaningless without it.
+[ -d "$yes_target/backlog" ]
+grep -F "BACKLOG.MD GUIDELINES" "$yes_target/AGENTS.md" > /dev/null
+
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes2.out"
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
+[ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$yes_target/AGENTS.md")" = "1" ]
 grep -F "unchanged  $yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
 [ ! -e "$yes_target/.pandino/merge" ]
+
+# Declining leaves no Backlog and no session-continuity section.
+if grep -qF "pandino:session-continuity" "$fresh_target/AGENTS.md"; then
+    echo "FAIL: session continuity appended without Backlog.md"; exit 1
+fi
 
 echo "test_install.sh: PASS"
