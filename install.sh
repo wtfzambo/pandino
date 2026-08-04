@@ -19,14 +19,26 @@ if [ ! -f "$kit_dir/agents/implementer.md" ]; then
     trap 'rm -rf "$kit_dir"' EXIT
     if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
         | tar -xz -C "$kit_dir" --strip-components=1 2> /dev/null; then
-        echo "error: could not download the Pandino kit." >&2
-        echo "       If the repository is private, clone it and run ./install.sh instead." >&2
+        printf 'error: could not download the Pandino kit.\n' >&2
+        printf '       Check your connection, or clone the repo and run ./install.sh instead.\n' >&2
         exit 1
     fi
 fi
 
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
+
+# Colors, unless piped to a file or NO_COLOR is set.
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'
+    blue=$'\033[34m'; yellow=$'\033[33m'; red=$'\033[31m'; reset=$'\033[0m'
+else
+    bold=""; dim=""; green=""; blue=""; yellow=""; red=""; reset=""
+fi
+
+say() { printf '%s%-10s%s %s\n' "$2" "$1" "$reset" "$3"; }
+note() { printf '%s%s%s\n' "$dim" "$1" "$reset"; }
+step() { printf '\n%s%s%s\n' "$bold" "$1" "$reset"; }
 
 # Yes/no prompt, second argument is the default (y or n). Without a terminal
 # (agent, CI) nothing is asked and the add-on is skipped, so a non-interactive
@@ -40,9 +52,10 @@ confirm() {
     # Read from the terminal, not stdin: stdin is the script itself
     # when the installer is piped from curl.
     [ -e /dev/tty ] && [ -t 1 ] || return 1
-    local hint="[y/N]" reply
-    [ "$default" = "y" ] && hint="[Y/n]"
-    read -r -p "$question $hint " reply < /dev/tty
+    local hint="${dim}[y/N]${reset}" reply
+    [ "$default" = "y" ] && hint="${dim}[Y/n]${reset}"
+    printf '%s%s%s %s ' "$blue" "$question" "$reset" "$hint" > /dev/tty
+    read -r reply < /dev/tty
     [ -z "$reply" ] && reply="$default"
     [[ "$reply" =~ ^[Yy] ]]
 }
@@ -51,15 +64,32 @@ confirm() {
 append_snippet() {
     local snippet="$1" name="$2"
     if grep -qF "<!-- pandino:$name -->" "$target/AGENTS.md"; then
-        echo "unchanged  $name already in $target/AGENTS.md"
+        say unchanged "$dim" "$name already in $target/AGENTS.md"
         return
     fi
     {
         printf '\n<!-- pandino:%s -->\n' "$name"
         cat "$snippet"
     } >> "$target/AGENTS.md"
-    echo "appended   $name to $target/AGENTS.md"
+    say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
+
+# All questions up front: a tool we call later (Backlog's own prompt) would
+# otherwise leave buffered input behind and swallow the next answer.
+step "Pandino"
+note "Installing into $target"
+
+want_backlog=no
+if [ -d "$target/backlog" ]; then
+    want_backlog=already
+elif confirm "Set up Backlog.md task tracking? It gives agents memory across sessions." y; then
+    want_backlog=yes
+fi
+
+want_parallel=no
+if confirm "Add the parallel-implementer guidance? Only if several implementers run at once." n; then
+    want_parallel=yes
+fi
 
 # Generated candidates are disposable and rebuilt from the current kit.
 rm -rf "$target/.pandino/merge"
@@ -70,16 +100,18 @@ install_or_stage() {
     if [ ! -e "$dst" ]; then
         mkdir -p "$(dirname "$dst")"
         cp "$src" "$dst"
-        echo "installed  $dst"
+        say installed "$green" "$dst"
     elif cmp -s "$src" "$dst"; then
-        echo "unchanged  $dst"
+        say unchanged "$dim" "$dst"
     else
         mkdir -p "$(dirname "$stage")"
         cp "$src" "$stage"
         staged_count=$((staged_count + 1))
-        echo "staged     $stage for $dst"
+        say staged "$yellow" "$stage ${dim}for${reset} $dst"
     fi
 }
+
+step "Core files"
 
 # Appended snippets are Pandino's own, so they must not read as a conflict:
 # compare only the part of the file that precedes them.
@@ -88,7 +120,7 @@ core_only() {
 }
 
 if [ -e "$target/AGENTS.md" ] && diff -q <(core_only "$kit_dir/AGENTS.md") <(core_only "$target/AGENTS.md") > /dev/null; then
-    echo "unchanged  $target/AGENTS.md"
+    say unchanged "$dim" "$target/AGENTS.md"
 else
     install_or_stage \
         "$kit_dir/AGENTS.md" \
@@ -108,59 +140,68 @@ done
 mkdir -p "$target/.pi/skills/grilling"
 curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md" \
     -o "$target/.pi/skills/grilling/SKILL.md"
-echo "installed  $target/.pi/skills/grilling/SKILL.md (latest)"
+say installed "$green" "$target/.pi/skills/grilling/SKILL.md ${dim}(latest)${reset}"
 
 # Optional add-ons: copied so the paths below are real in the target repo,
 # refreshed from the kit on every run. Appending them is the user's choice.
 rm -rf "$target/.pandino/snippets"
 mkdir -p "$target/.pandino/snippets"
 cp "$kit_dir"/snippets/*.md "$target/.pandino/snippets/"
-echo "installed  $target/.pandino/snippets/ (optional, append to AGENTS.md as needed)"
+say installed "$green" "$target/.pandino/snippets/ ${dim}(optional sections)${reset}"
 
 # Subagent runtime, project-local.
 if command -v pi > /dev/null; then
     (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
 else
-    echo "warning: pi not found; run 'pi install -l npm:@tintinweb/pi-subagents' in $target yourself"
+    say warning "$yellow" "pi not found; run 'pi install -l npm:@tintinweb/pi-subagents' in $target yourself"
 fi
 
 if [ "$staged_count" -gt 0 ]; then
-    echo
-    echo "Merge the staged Pandino candidates into the existing files, then remove"
-    echo "$target/.pandino/merge. See README.md for conflict precedence."
+    step "Conflicts to resolve"
+    printf '%sMerge the staged candidates into the existing files, then remove%s\n' "$yellow" "$reset"
+    printf '%s%s/.pandino/merge. See README.md for conflict precedence.%s\n' "$yellow" "$target" "$reset"
 fi
 
-# Optional add-ons. Recommended ones default to yes; each is skipped in
-# non-interactive runs and reported as a manual step at the end.
-echo
+# Act on the answers collected up front.
+step "Optional add-ons"
 skipped=()
 
-if [ -d "$target/backlog" ]; then
-    append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
-elif confirm "Set up Backlog.md task tracking? Recommended: it gives agents memory across sessions." y; then
-    if command -v backlog > /dev/null; then
-        # Explicit name and 'none' keep init non-interactive; Pandino owns AGENTS.md.
-        (cd "$target" && backlog init "$(basename "$target")" --agent-instructions none)
+case "$want_backlog" in
+    already)
         append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
-    else
-        echo "warning: backlog not found. Install it (https://github.com/MrLesk/Backlog.md),"
-        echo "         run 'backlog init' in $target, then re-run this script."
-        skipped+=("task tracking: install Backlog.md, run 'backlog init', then re-run this script")
-    fi
-else
-    skipped+=("task tracking: run 'backlog init' in $target, then append .pandino/snippets/session-continuity.md to AGENTS.md")
-fi
+        ;;
+    yes)
+        if command -v backlog > /dev/null; then
+            # A name, 'none' and --no-git keep init from opening its own prompt;
+            # Pandino owns AGENTS.md, and a repo without git stays without it.
+            git_flag=""
+            [ -d "$target/.git" ] || git_flag="--no-git"
+            (cd "$target" && backlog init "$(basename "$target")" \
+                --agent-instructions none $git_flag > /dev/null)
+            say installed "$green" "Backlog.md task tracking in $target/backlog"
+            append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
+        else
+            say skipped "$yellow" "backlog not found on PATH"
+            note "  install it from https://github.com/MrLesk/Backlog.md, then re-run this script"
+            skipped+=("task tracking: install Backlog.md, then re-run this script")
+        fi
+        ;;
+    no)
+        skipped+=("task tracking: run 'backlog init' in $target, then append .pandino/snippets/session-continuity.md to AGENTS.md")
+        ;;
+esac
 
-if confirm "Add the parallel-implementer guidance? Only useful if several implementers will run at once." n; then
+if [ "$want_parallel" = yes ]; then
     append_snippet "$target/.pandino/snippets/parallel-agents.md" parallel-agents
 else
     skipped+=("parallel implementers: append .pandino/snippets/parallel-agents.md to AGENTS.md")
 fi
 
+step "Done"
+note "Pandino is installed in $target"
 if [ "${#skipped[@]}" -gt 0 ]; then
-    echo
-    echo "optional, not done:"
-    for step in "${skipped[@]}"; do
-        echo "  - $step"
+    printf '%sNot done, if you want it later:%s\n' "$dim" "$reset"
+    for item in "${skipped[@]}"; do
+        printf '%s  - %s%s\n' "$dim" "$item" "$reset"
     done
 fi

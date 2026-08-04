@@ -66,7 +66,7 @@ grep -F "unchanged  $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/resolv
 
 # --no-input must leave AGENTS.md untouched and report the skipped add-ons.
 [ ! -e "$fresh_target/backlog" ]
-grep -F "optional, not done:" "$tmp_dir/fresh.out" > /dev/null
+grep -F "Not done, if you want it later:" "$tmp_dir/fresh.out" > /dev/null
 cmp -s "$repo_dir/AGENTS.md" "$fresh_target/AGENTS.md"
 
 # --yes appends each snippet exactly once, and re-running does not duplicate
