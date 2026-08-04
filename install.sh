@@ -6,11 +6,15 @@
 #   --no-input  skip them all and just print the manual steps
 set -euo pipefail
 
-kit_dir="$(cd "$(dirname "$0")" && pwd)"
+# Piped from curl ($0 is "bash"), there is no script directory to speak of.
+case "$0" in
+    */*) kit_dir="$(cd "$(dirname "$0")" && pwd)" ;;
+    *)   kit_dir="" ;;
+esac
 target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
 
-# Piped from curl the script arrives alone, so fetch the kit it needs.
-if [ ! -d "$kit_dir/agents" ]; then
+# Without the kit beside the script, fetch it.
+if [ ! -f "$kit_dir/agents/implementer.md" ]; then
     kit_dir="$(mktemp -d)"
     trap 'rm -rf "$kit_dir"' EXIT
     if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
