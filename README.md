@@ -32,8 +32,12 @@ Choose the agent models with the user during setup. The frontmatter names tested
 Into a new or existing repo:
 
 ```bash
-./install.sh /path/to/repo
+./install.sh /path/to/repo            # asks about the optional add-ons
+./install.sh /path/to/repo --yes      # accept them all, no questions
+./install.sh /path/to/repo --no-input # skip them all, print them as manual steps
 ```
+
+Attached to a terminal, the script asks whether to set up Backlog.md task tracking (recommended, defaults to yes) and whether to add the parallel-implementer guidance (defaults to no). Accepted snippets are appended to `AGENTS.md` behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. Without a terminal — inside an agent or CI — nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
 
 New files are installed directly. `.pandino/` holds installer-managed material, both rebuilt on every run: `.pandino/merge/` is the disposable conflict staging area, `.pandino/snippets/` the optional sections. Only the former is meant to be deleted after use. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. Obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
 
@@ -41,7 +45,7 @@ New files are installed directly. `.pandino/` holds installer-managed material, 
 
 Give the agent this repository and ask:
 
-> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer, semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Judge each optional snippet in `.pandino/snippets/` against this repository and append the ones that apply to AGENTS.md, saying which you appended and why. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
+> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer (it will not prompt you; decide the optional add-ons yourself and tell me what you chose), semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Judge each optional snippet in `.pandino/snippets/` against this repository and append the ones that apply to AGENTS.md, saying which you appended and why. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
 
 The agent should inspect at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and existing `.pi/agents/` when present. Other tool-specific instruction files count too.
 
@@ -71,7 +75,7 @@ The installer remains non-interactive so it can run safely through an agent or C
 
 ## Optional snippets
 
-`.pandino/snippets/` holds sections that are not right for every repo, so the installer copies them without applying them: append the ones that fit to AGENTS.md, below the marker line. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
+`.pandino/snippets/` holds sections that are not right for every repo. An interactive install offers them; a non-interactive one just copies them, leaving the choice to you or to the installing agent. Append the ones that fit to AGENTS.md. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
 
 ### Parallel agents
 

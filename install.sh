@@ -1,11 +1,46 @@
 #!/usr/bin/env bash
 # Install the coding-practices kit into a target repo (new or existing).
-# Usage: ./install.sh /path/to/repo
+# Usage: ./install.sh /path/to/repo [--yes|--no-input]
+# Interactive only when attached to a terminal, so agents and CI stay unblocked:
+#   --yes       accept every optional add-on without asking
+#   --no-input  skip them all and just print the manual steps
 set -euo pipefail
 
 kit_dir="$(cd "$(dirname "$0")" && pwd)"
-target="${1:?usage: ./install.sh /path/to/repo}"
+target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
 target="$(cd "$target" && pwd)"
+answer_mode="${2:-ask}"
+
+# Yes/no prompt, second argument is the default (y or n). Without a terminal
+# (agent, CI) nothing is asked and the add-on is skipped, so a non-interactive
+# run never blocks.
+confirm() {
+    local question="$1" default="$2"
+    case "$answer_mode" in
+        --yes) return 0 ;;
+        --no-input) return 1 ;;
+    esac
+    [ -t 0 ] || return 1
+    local hint="[y/N]" reply
+    [ "$default" = "y" ] && hint="[Y/n]"
+    read -r -p "$question $hint " reply
+    [ -z "$reply" ] && reply="$default"
+    [[ "$reply" =~ ^[Yy] ]]
+}
+
+# Append a snippet once; a marker line makes re-runs idempotent.
+append_snippet() {
+    local snippet="$1" name="$2"
+    if grep -qF "<!-- pandino:$name -->" "$target/AGENTS.md"; then
+        echo "unchanged  $name already in $target/AGENTS.md"
+        return
+    fi
+    {
+        printf '\n<!-- pandino:%s -->\n' "$name"
+        cat "$snippet"
+    } >> "$target/AGENTS.md"
+    echo "appended   $name to $target/AGENTS.md"
+}
 
 # Generated candidates are disposable and rebuilt from the current kit.
 rm -rf "$target/.pandino/merge"
@@ -27,10 +62,20 @@ install_or_stage() {
     fi
 }
 
-install_or_stage \
-    "$kit_dir/AGENTS.md" \
-    "$target/AGENTS.md" \
-    "$target/.pandino/merge/AGENTS.md"
+# Appended snippets are Pandino's own, so they must not read as a conflict:
+# compare only the part of the file that precedes them.
+core_only() {
+    awk '/<!-- pandino:/ { exit } { print }' "$1" | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+}
+
+if [ -e "$target/AGENTS.md" ] && diff -q <(core_only "$kit_dir/AGENTS.md") <(core_only "$target/AGENTS.md") > /dev/null; then
+    echo "unchanged  $target/AGENTS.md"
+else
+    install_or_stage \
+        "$kit_dir/AGENTS.md" \
+        "$target/AGENTS.md" \
+        "$target/.pandino/merge/AGENTS.md"
+fi
 
 for agent in "$kit_dir"/agents/*.md; do
     name="$(basename "$agent")"
@@ -66,11 +111,37 @@ if [ "$staged_count" -gt 0 ]; then
     echo "$target/.pandino/merge. See README.md for conflict precedence."
 fi
 
+# Optional add-ons. Recommended ones default to yes; each is skipped in
+# non-interactive runs and reported as a manual step at the end.
 echo
-echo "optional next steps:"
-if [ ! -d "$target/backlog" ]; then
-    echo "  - task tracking: run 'backlog init' in $target, then append"
-    echo "    .pandino/snippets/session-continuity.md to AGENTS.md"
+skipped=()
+
+if [ -d "$target/backlog" ]; then
+    append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
+elif confirm "Set up Backlog.md task tracking? Recommended: it gives agents memory across sessions." y; then
+    if command -v backlog > /dev/null; then
+        # Explicit name and 'none' keep init non-interactive; Pandino owns AGENTS.md.
+        (cd "$target" && backlog init "$(basename "$target")" --agent-instructions none)
+        append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
+    else
+        echo "warning: backlog not found. Install it (https://github.com/MrLesk/Backlog.md),"
+        echo "         run 'backlog init' in $target, then re-run this script."
+        skipped+=("task tracking: install Backlog.md, run 'backlog init', then re-run this script")
+    fi
+else
+    skipped+=("task tracking: run 'backlog init' in $target, then append .pandino/snippets/session-continuity.md to AGENTS.md")
 fi
-echo "  - parallel implementers: append .pandino/snippets/parallel-agents.md"
-echo "    to AGENTS.md"
+
+if confirm "Add the parallel-implementer guidance? Only useful if several implementers will run at once." n; then
+    append_snippet "$target/.pandino/snippets/parallel-agents.md" parallel-agents
+else
+    skipped+=("parallel implementers: append .pandino/snippets/parallel-agents.md to AGENTS.md")
+fi
+
+if [ "${#skipped[@]}" -gt 0 ]; then
+    echo
+    echo "optional, not done:"
+    for step in "${skipped[@]}"; do
+        echo "  - $step"
+    done
+fi
