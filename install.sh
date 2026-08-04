@@ -28,6 +28,9 @@ fi
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
 
+# shellcheck source=harnesses.sh
+. "$kit_dir/harnesses.sh"
+
 # Colors, unless piped to a file or NO_COLOR is set.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
     bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'; cyan=$'\033[36m'
@@ -99,13 +102,25 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
+if asking; then
+    printf '\n%s' "$magenta"
+    cat <<'PANDA'
+         ________________
+        /|   |    |   |  \
+     __/_|___|____|___|___\__
+    |                        |
+    |__(_)______________(_)__|
+PANDA
+    printf '%s' "$reset"
+fi
+
 printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
     "$bold$magenta" "$reset" "$grey" "$reset"
 printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sTwo questions, then I get out of your way.%s\n' "$grey" "$reset"
+asking && printf '\n  %sThree quick questions, then I get out of your way.%s\n' "$grey" "$reset"
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
@@ -125,12 +140,22 @@ fi
 
 if asking; then
     heading "Parallel agents" "— running several at once" "niche" "$yellow"
-    body "  How to keep them from stepping on each other. Only for a"
-    body "  @big, messy codebase@ — @say no@ for anything small."
+    body "  How to keep them from stepping on each other. Only if you plan to"
+    body "  @run agents in parallel@ here — @say no@ otherwise."
 fi
 want_parallel=no
 if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
+fi
+
+if asking; then
+    heading "Other tools" "— Claude Code and opencode" "optional" "$cyan"
+    body "  The three helpers are written for pi. I can write them again in the"
+    body "  layout @Claude Code@ and @opencode@ read, from the same source."
+fi
+want_harnesses=no
+if confirm "Also set them up for Claude Code and opencode?" n; then
+    want_harnesses=yes
 fi
 
 # Generated candidates are disposable and rebuilt from the current kit.
@@ -178,6 +203,12 @@ for agent in "$kit_dir"/agents/*.md; do
         "$target/.pi/agents/$name" \
         "$target/.pandino/merge/agents/$name"
 done
+
+if [ "$want_harnesses" = yes ]; then
+    install_for_harnesses "$kit_dir" "$target"
+    say installed "$green" "$target/.claude/agents/ ${dim}(3 agents)${reset}"
+    say installed "$green" "$target/.opencode/agent/ ${dim}(3 agents)${reset}"
+fi
 
 # Grilling skill: always fetch the latest from Matt Pocock's repo.
 mkdir -p "$target/.pi/skills/grilling"
@@ -248,6 +279,9 @@ if [ "$want_parallel" = yes ]; then
 else
     skipped+=("Parallel agents: add .pandino/snippets/parallel-agents.md to AGENTS.md when you need it")
 fi
+
+[ "$want_harnesses" = yes ] \
+    || skipped+=("Claude Code / opencode: run this again and say yes to set the helpers up for them too")
 
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"

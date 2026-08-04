@@ -84,6 +84,14 @@ grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 
+# --yes also writes the agents for the other harnesses, from the same source.
+[ -f "$yes_target/.claude/agents/implementer.md" ]
+[ -f "$yes_target/.opencode/agent/implementer.md" ]
+grep -q "^name: implementer" "$yes_target/.claude/agents/implementer.md"
+grep -q "^mode: subagent" "$yes_target/.opencode/agent/taste-reviewer.md"
+# The body must survive translation unchanged.
+grep -q "You are the taste reviewer" "$yes_target/.claude/agents/taste-reviewer.md"
+
 # Backlog.md comes with task tracking, its own guidelines, and session
 # continuity — the section is meaningless without it.
 [ -d "$yes_target/backlog" ]
