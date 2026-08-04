@@ -14,6 +14,7 @@ Build the Fiat Panda that is needed, not an intergalactic rocket.
 | `spec-reviewer` | `.pi/agents/` | Reviews whether the change does everything requested and nothing more |
 | `grilling` | `.pi/skills/` | Relentless interview to stress-test a plan (fetched latest from [mattpocock/skills](https://github.com/mattpocock/skills)) |
 | `pi-subagents` | `.pi/npm/` | Subagent runtime ([@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents)), project-local |
+| snippets | `.pandino/snippets/` | Optional sections to append to AGENTS.md by hand; installed but never applied automatically |
 
 ## Agent workflow
 
@@ -34,7 +35,7 @@ Into a new or existing repo:
 ./install.sh /path/to/repo
 ```
 
-New files are installed directly. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. This generated staging area is rebuilt on every run, so obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
+New files are installed directly. `.pandino/` holds installer-managed material, both rebuilt on every run: `.pandino/merge/` is the disposable conflict staging area, `.pandino/snippets/` the optional sections. Only the former is meant to be deleted after use. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. Obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
 
 ## Install with an AI agent
 
@@ -70,11 +71,11 @@ The installer remains non-interactive so it can run safely through an agent or C
 
 ## Parallel agents (optional)
 
-For work that genuinely splits across several implementers at once, append `snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. One implementer at a time remains the default.
+For work that genuinely splits across several implementers at once, append `.pandino/snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. One implementer at a time remains the default.
 
 ## Task tracking (optional)
 
-For projects that need cross-session memory, use [Backlog.md](https://github.com/MrLesk/Backlog.md): run `backlog init` in the target repo, then append `snippets/session-continuity.md` to its AGENTS.md.
+For projects that need cross-session memory, use [Backlog.md](https://github.com/MrLesk/Backlog.md): run `backlog init` in the target repo, then append `.pandino/snippets/session-continuity.md` to its AGENTS.md.
 
 ## Not included on purpose
 

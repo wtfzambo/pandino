@@ -46,6 +46,13 @@ curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/prod
     -o "$target/.pi/skills/grilling/SKILL.md"
 echo "installed  $target/.pi/skills/grilling/SKILL.md (latest)"
 
+# Optional add-ons: copied so the paths below are real in the target repo,
+# refreshed from the kit on every run. Appending them is the user's choice.
+rm -rf "$target/.pandino/snippets"
+mkdir -p "$target/.pandino/snippets"
+cp "$kit_dir"/snippets/*.md "$target/.pandino/snippets/"
+echo "installed  $target/.pandino/snippets/ (optional, append to AGENTS.md as needed)"
+
 # Subagent runtime, project-local.
 if command -v pi > /dev/null; then
     (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
@@ -59,9 +66,11 @@ if [ "$staged_count" -gt 0 ]; then
     echo "$target/.pandino/merge. See README.md for conflict precedence."
 fi
 
+echo
+echo "optional next steps:"
 if [ ! -d "$target/backlog" ]; then
-    echo
-    echo "next steps:"
-    echo "  - optional task tracking: run 'backlog init' in $target,"
-    echo "    then append snippets/session-continuity.md to AGENTS.md"
+    echo "  - task tracking: run 'backlog init' in $target, then append"
+    echo "    .pandino/snippets/session-continuity.md to AGENTS.md"
 fi
+echo "  - parallel implementers: append .pandino/snippets/parallel-agents.md"
+echo "    to AGENTS.md"

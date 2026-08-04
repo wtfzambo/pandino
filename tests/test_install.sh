@@ -33,6 +33,8 @@ cmp -s "$repo_dir/agents/implementer.md" "$fresh_target/.pi/agents/implementer.m
 cmp -s "$repo_dir/agents/spec-reviewer.md" "$fresh_target/.pi/agents/spec-reviewer.md"
 cmp -s "$repo_dir/agents/taste-reviewer.md" "$fresh_target/.pi/agents/taste-reviewer.md"
 [ ! -e "$fresh_target/.pandino/merge" ]
+cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
+cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
 
 merge_target="$tmp_dir/merge"
 mkdir -p "$merge_target/.pi/agents"
