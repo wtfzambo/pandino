@@ -102,18 +102,6 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
-if asking; then
-    printf '\n%s' "$magenta"
-    cat <<'PANDA'
-         ________________
-        /|   |    |   |  \
-     __/_|___|____|___|___\__
-    |                        |
-    |__(_)______________(_)__|
-PANDA
-    printf '%s' "$reset"
-fi
-
 printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
     "$bold$magenta" "$reset" "$grey" "$reset"
 printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"

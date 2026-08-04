@@ -1,120 +1,123 @@
 # pandino
 
-Reusable coding-practices kit for AI-driven repos: one AGENTS.md core, a main-agent + implementer + two-reviewer workflow, and the grilling skill for planning.
+Coding rules for your AI agents, plus three helpers: one writes the code, two review it.
 
-The standards and the workflow are harness-agnostic — they live in `AGENTS.md`, which every coding agent reads. The subagents have to land somewhere, so the installer writes them for [pi](https://pi.dev), and offers to write the same three roles for Claude Code (`.claude/agents/`), opencode (`.opencode/agent/`), and Codex (`.codex/agents/`, TOML) from the same source. Only the wrapper differs per tool; the prompt body is identical everywhere.
+The rules live in `AGENTS.md`, which every coding agent reads. The helpers are agent definitions, and each tool wants them in its own place and format, so the installer writes them for [pi](https://pi.dev) and offers to write the same three for Claude Code, opencode, and Codex. Same instructions everywhere, different wrapper.
 
 Build the Fiat Panda that is needed, not an intergalactic rocket.
 
-## What it installs
-
-| Piece | Where it lands | What it does |
-|---|---|---|
-| `AGENTS.md` | repo root | Language-agnostic coding principles, ~90 lines |
-| `implementer` | `.pi/agents/` | Implements an approved plan, one slice at a time |
-| `taste-reviewer` | `.pi/agents/` | Reviews how the code is written against the repo standards |
-| `spec-reviewer` | `.pi/agents/` | Reviews whether the change does everything requested and nothing more |
-| `grilling` | `.pi/skills/` | Relentless interview to stress-test a plan (fetched latest from [mattpocock/skills](https://github.com/mattpocock/skills)) |
-| `pi-subagents` | `.pi/npm/` | Subagent runtime ([@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents)), project-local |
-| snippets | `.pandino/snippets/` | Optional AGENTS.md sections; the installer only copies them, appending is a deliberate choice |
-| the same agents, translated | `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` | Optional: the three roles in the layout Claude Code, opencode, and Codex each read |
-
-## Agent workflow
-
-The main agent is the planner and orchestrator:
-
-1. Read the repository instructions and inspect the real code before proposing changes.
-2. For non-trivial or unclear work, load and follow the grilling skill to agree on the plan with the user. Pi can load matching skills on demand; the user can force it with `/skill:grilling` if the model does not.
-3. Delegate the approved, bounded plan to the implementer.
-4. Before every non-trivial commit, run the taste and spec reviewers together. Fix or discuss their findings before committing.
-
-Choose the agent models with the user during setup. The frontmatter names tested examples, not requirements. The 2026-07-31 benchmarks (`bench/`, results in [`NOTES.md`](NOTES.md)) found cost-effective models fully competitive in all three roles: what discriminates is behavior — stopping on a plan that contradicts the code, not inventing findings on clean diffs — not model size. Reserve a heavyweight reasoning model for genuinely hard spec reviews.
-
 ## Install
 
-Run this in the repo you want to set up:
+Run this inside the repo you want to set up:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
 ```
 
-The script fetches the rest of the kit itself, so there is nothing to clone. Add `--yes` to accept every optional add-on or `--no-input` to skip them all. With a local checkout, `./install.sh /path/to/repo` behaves identically.
+It downloads what it needs, so there is nothing to clone. Add `--yes` to say yes to everything, `--no-input` to say no to everything. If you have a local copy, `./install.sh /path/to/repo` does the same.
 
-It asks two questions up front, then works without interrupting again.
+It asks three questions, then gets out of the way:
 
-**[Backlog.md](https://github.com/MrLesk/Backlog.md) task tracking — strongly recommended, defaults to yes.** It is what gives agents memory across sessions, so Pandino's session-continuity section is installed with it and never without it: that section describes a workflow that needs Backlog to exist. Accepting runs `backlog init`, lets Backlog append its own guidelines to `AGENTS.md`, and adds the session-continuity section. Install the `backlog` command first, or the script will tell you to come back.
+- **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's session-continuity section. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
+- **Notes on running agents in parallel?** Only if you plan to. Defaults to no.
+- **Set the helpers up for the other tools too?** Writes them for Claude Code, opencode, and Codex as well. Defaults to no.
 
-**Parallel-implementer guidance — defaults to no.** Only worth it when several implementers run at once.
+No terminal, like inside an agent or CI? Then it asks nothing, skips all three, and lists them at the end.
 
-Snippets are appended behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. In an agent or CI, where no terminal is attached, nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
+### What it writes
 
-New files are installed directly. `.pandino/` holds installer-managed material, both rebuilt on every run: `.pandino/merge/` is the disposable conflict staging area, `.pandino/snippets/` the optional sections. Only the former is meant to be deleted after use. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. Obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
+| What | Where |
+|---|---|
+| `AGENTS.md` | repo root — the coding rules, ~90 lines |
+| the three helpers | `.pi/agents/` — and `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` if you asked |
+| `grilling` skill | `.pi/skills/` — grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills), refetched every run) |
+| `pi-subagents` | `.pi/npm/` — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
+| optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
+
+The three helpers:
+
+- **implementer** — takes an approved plan and writes the code, one slice at a time.
+- **taste-reviewer** — judges *how* the code is written, against the rules in `AGENTS.md`.
+- **spec-reviewer** — judges *what* it does, against what you asked for.
+
+### If you already have an AGENTS.md
+
+Yours is never overwritten. Anything that clashes goes to `.pandino/merge/` for you to look at, and that folder is rebuilt every run, so old leftovers do not pile up. Merge what you want, then delete it — keep `.pandino/snippets/`, which is not a staging area.
+
+The grilling skill is the exception: it is refetched from upstream every time.
 
 ## Install with an AI agent
 
-Installing into an established repo is a merge, not a replacement, and that judgement is worth delegating. The prompt also covers harnesses other than pi, where the agent has to place the role definitions itself. Paste this to an agent working in the target repo:
+Dropping this into an existing repo is a merge, not a fresh start, and that is worth handing to an agent. Paste this to one working in the target repo:
 
 ```txt
 Install Pandino into this repository.
 
-1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md first, then this repository's own instruction files — at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and any existing `.pi/agents/`.
+1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
 
-2. Ask me two questions before installing anything, and wait for my answers:
-   - Set up Backlog.md task tracking? Strongly recommended — it is what gives agents memory across sessions, and Pandino's session-continuity section depends on it. Say it is recommended, and that you will install `backlog` if it is missing.
-   - Add the parallel-implementer guidance? Only worth it if several implementers will run at once. Default no.
+2. Ask me three questions first, and wait for my answers:
+   - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
+   - Add the notes on running agents in parallel? Only if I plan to. Default no.
+   - Write the helpers for other tools (Claude Code, opencode, Codex) as well as pi? Default no.
 
-3. Run the installer with the answers I gave: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I accepted both, `--no-input` if I declined both. For a mixed answer, use `--no-input` and apply the accepted one yourself as described below. If I accepted Backlog.md and the `backlog` command is missing, install it first (`npm i -g backlog.md`, or see https://github.com/MrLesk/Backlog.md).
+3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
 
-4. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
+4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Then delete .pandino/merge/, but keep .pandino/snippets/.
 
-5. Make sure the accepted add-ons actually landed: `backlog/` exists, `AGENTS.md` contains Backlog's own guidelines block and the `<!-- pandino:session-continuity -->` section, and `<!-- pandino:parallel-agents -->` if I accepted that too. Append any missing snippet from `.pandino/snippets/` yourself. Never append session continuity without Backlog.md — it would describe a workflow this repo cannot run.
+5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block and the <!-- pandino:session-continuity --> section, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add session continuity without Backlog.md — it describes a workflow this repo could not run.
 
-6. If you are not running on pi, adapt: the installer writes the agent definitions to `.pi/agents/` and the skill to `.pi/skills/`, which only pi reads. Keep those files as the source of truth, and additionally register the same three roles wherever your own harness looks for them (for example `.claude/agents/`), noting in `AGENTS.md` where they now live. Do not rewrite their content — only relocate or duplicate it. If your harness has no subagent mechanism at all, say so and tell me the workflow will run as one agent adopting each role in turn.
+6. If you are not running on pi: the installer only wires up .pi/, which pi alone reads. Re-run it with the third question answered yes, or write the same three roles where your tool looks for them. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
 
-7. Verify the setup: the three agents and the grilling skill are discoverable by whichever harness you run on, this repository's normal checks pass, and show me the final diff with a short summary of what you kept, replaced, added, adapted, and left unresolved.
+7. Verify: your tool can see the three helpers and the grilling skill, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
-Resolve obvious duplication yourself. Beyond the two questions in step 2, ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
+Sort out obvious duplication yourself. Past the three questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
 ```
 
-## Existing repositories and conflict resolution
+## How the workflow runs
 
-Installation into an established repo is a merge, not a replacement:
+The main agent plans; the three helpers do the specialised work.
 
-1. Preserve security rules, product requirements, domain constraints, toolchain commands, and repository-specific workflows.
-2. Use Pandino for generic coding and agent-workflow defaults. Use existing local instructions for project-specific behavior.
-3. When two rules say the same thing, keep the clearer version once; do not maintain parallel copies.
-4. When rules conflict, apply this precedence: safety and explicit product requirements, then explicit repository rules, then Pandino defaults.
-5. For an existing same-named agent, preserve useful project-specific context and tools while retaining the role boundary: the implementer edits; reviewers inspect and report but do not edit.
-6. Remove stale references to tools or files that the merged setup does not contain.
-7. Resolve conflicts automatically when the precedence is clear. Ask the user only when the choice changes product behavior, security, or an established team workflow.
+1. Read the repo and the real code before proposing anything.
+2. For anything non-trivial, agree on a plan with the user first — the grilling skill is there to poke holes in it.
+3. Hand the agreed plan to the implementer.
+4. Before any real commit, run both reviewers on the diff. Fix what they find, or explain why not.
+5. Check the result yourself. The agent's report says what it meant to do; only the diff says what happened.
 
-After merging, remove `.pandino/merge/` (keep `.pandino/snippets/`), run the repository's normal checks, and verify that Pi discovers the three agents and the grilling skill. Show the user what was kept, replaced, and left unresolved.
+Pick the models with the user at setup time. The names in the frontmatter are ones that tested well, not requirements — the [benchmarks](NOTES.md) found cheap models perfectly competitive in all three roles. What separates them is behaviour: stopping when the plan contradicts the code, and not inventing problems on a clean diff. Save an expensive model for the one whole-branch review before a merge.
 
-## Optional personal skill
+## When Pandino meets your existing rules
 
-Pandino controls code and development workflow, not communication style. For ADHD-friendly, action-first responses, optionally install [i-have-adhd](https://github.com/ayghri/i-have-adhd) once at global scope:
+Yours win where it matters:
+
+1. Keep your security rules, product requirements, domain constraints, build commands, and team workflows.
+2. Use Pandino for the generic coding and agent-workflow defaults.
+3. Same rule said twice? Keep the clearer one, once.
+4. Rules that contradict? Safety and product requirements first, then your repo's rules, then Pandino's.
+5. Already have an agent with the same name? Keep what is specific to your project, but keep the roles separate: the implementer edits, reviewers only look and report.
+6. Drop references to tools and files the merged setup no longer has.
+7. Decide it yourself when the order above makes it obvious. Ask when the choice affects the product, security, or how the team works.
+
+## Optional snippets
+
+`.pandino/snippets/` holds sections that do not suit every repo, so they are copied but not applied. Add the ones that fit to your `AGENTS.md`.
+
+Edit them there, not in `.pandino/snippets/` — that folder is rewritten on every install.
+
+**Session continuity** is the one exception: it ships with Backlog.md and never without it, because it describes a workflow that needs Backlog to exist.
+
+**Parallel agents** is for when you actually run several at once: build the shared parts first, keep each agent in its own worktree, and watch the gaps between what each was told to do. Skip it otherwise.
+
+## Also worth having
+
+Pandino covers code, not how your agent talks to you. If you want short, action-first replies, install [i-have-adhd](https://github.com/ayghri/i-have-adhd) globally, once:
 
 ```bash
 npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
 ```
 
-The installer remains non-interactive so it can run safely through an agent or CI; the command above lets the user choose this personal preference explicitly.
+It stays out of the installer so nothing personal gets forced on a repo.
 
-## Optional snippets
+## Deliberately not here
 
-`.pandino/snippets/` holds sections that are not right for every repo. An interactive install offers them; a non-interactive one just copies them, leaving the choice to you or to the installing agent. Append the ones that fit to AGENTS.md.
-
-Session continuity is the exception: it belongs with Backlog.md and is installed together with it. Appending it to a repo without Backlog would document a workflow that repo cannot run. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
-
-### Parallel agents
-
-For large, complex codebases where work genuinely splits across several implementers at once, append `.pandino/snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. Skip it on small or short-lived projects: one implementer at a time remains the default.
-
-### Task tracking
-
-For projects that need cross-session memory, use [Backlog.md](https://github.com/MrLesk/Backlog.md): run `backlog init` in the target repo, then append `.pandino/snippets/session-continuity.md` to its AGENTS.md.
-
-## Not included on purpose
-
-- Pandino already covers much of Ponytail's simplicity and YAGNI guidance, so combining them is optional and mostly redundant.
-- Toolchain sections (uv/ruff/pytest or npm/eslint/vitest) are per-project: add them below the marker line at the bottom of the installed AGENTS.md.
+- [Ponytail](https://github.com/DietrichGebert/ponytail) overlaps with Pandino on simplicity and YAGNI, so running both is mostly redundant.
+- Toolchain sections (uv/ruff/pytest, npm/eslint/vitest) belong to your project. Add them under the marker line at the bottom of the installed `AGENTS.md`.
