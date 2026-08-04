@@ -170,18 +170,40 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
+# The banner wears the car's paint: light body on top, dark cladding below.
+# Truecolor when the terminal says so, else the nearest 256-colour greys.
+banner() {
+    local rows=(
+'  ██████╗  █████╗ ███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗'
+'  ██╔══██╗██╔══██╗████╗  ██║██╔══██╗██║████╗  ██║██╔═══██╗'
+'  ██████╔╝███████║██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║   ██║'
+'  ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║'
+'  ██║     ██║  ██║██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝'
+'  ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝'
+    )
+    local truecolor=(
+        '236;236;240' '206;206;213' '176;176;185'
+        '140;140;150' '112;112;122' '92;92;102'
+    )
+    local fallback=(255 252 250 247 244 241)
+    local i
+
+    printf '\n'
+    for i in "${!rows[@]}"; do
+        if [ -z "$reset" ]; then
+            # Colour is off (NO_COLOR, or not a terminal): print it plain.
+            printf '%s\n' "${rows[$i]}"
+        elif [ "${COLORTERM:-}" = truecolor ] || [ "${COLORTERM:-}" = 24bit ]; then
+            printf '\033[38;2;%sm%s\033[0m\n' "${truecolor[$i]}" "${rows[$i]}"
+        else
+            printf '\033[38;5;%sm%s\033[0m\n' "${fallback[$i]}" "${rows[$i]}"
+        fi
+    done
+}
+
 if asking; then
-    printf '\n%s' "$magenta"
-    cat <<'BANNER'
-  ██████╗  █████╗ ███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
-  ██╔══██╗██╔══██╗████╗  ██║██╔══██╗██║████╗  ██║██╔═══██╗
-  ██████╔╝███████║██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║   ██║
-  ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
-  ██║     ██║  ██║██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
-  ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
-BANNER
-    printf '%s\n' "$reset"
-    printf '  %sCoding rules, one agent that writes, two that review.%s\n' "$grey" "$reset"
+    banner
+    printf '\n  %sCoding rules, one agent that writes, two that review.%s\n' "$grey" "$reset"
 else
     printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
         "$bold$magenta" "$reset" "$grey" "$reset"
