@@ -73,6 +73,9 @@ grep -E "unchanged +$merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/resolv
 # --no-input must leave AGENTS.md untouched and report the skipped add-ons.
 [ ! -e "$fresh_target/backlog" ]
 grep -F "Skipped, in case you want them later:" "$tmp_dir/fresh.out" > /dev/null
+grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
+# The recap lists only what was installed: declining leaves no skill behind.
+[ ! -e "$fresh_target/.pi/skills/i-have-adhd" ]
 cmp -s "$repo_dir/AGENTS.md" "$fresh_target/AGENTS.md"
 
 # --yes appends each snippet exactly once, and re-running does not duplicate
@@ -94,6 +97,9 @@ grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.opencode/agent/implementer.md" ]
 grep -q "^name: implementer" "$yes_target/.claude/agents/implementer.md"
 grep -q "^mode: subagent" "$yes_target/.opencode/agent/taste-reviewer.md"
+# --yes takes the skill too, and the recap names it.
+[ -f "$yes_target/.pi/skills/i-have-adhd/SKILL.md" ]
+grep -F ".pi/skills/i-have-adhd/" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.codex/agents/implementer.toml" ]
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/taste-reviewer.toml"
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \

@@ -240,6 +240,16 @@ if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
 fi
 
+if asking; then
+    heading "Short replies" "— the i-have-adhd skill" "optional" "$cyan"
+    body "  Answers that lead with the next action instead of a wall of prose."
+    body "  Turn it on with @/i-have-adhd@, off by saying @stop adhd mode@."
+fi
+want_adhd=no
+if confirm "Add the i-have-adhd skill?" n; then
+    want_adhd=yes
+fi
+
 picked_keys="pi"
 case "$answer_mode" in
     --no-input) ;;
@@ -309,14 +319,25 @@ for harness in $picked_keys; do
     fi
 done
 
-# The skill and the subagent runtime are pi's own, so they follow that choice.
+# Skills and the subagent runtime are pi's own, so they follow that choice.
+# Both are refetched from upstream on every run.
+install_skill() {
+    local name="$1" url="$2"
+    mkdir -p "$target/.pi/skills/$name"
+    if curl -fsSL "$url" -o "$target/.pi/skills/$name/SKILL.md"; then
+        say installed "$green" "$target/.pi/skills/$name/SKILL.md ${dim}(latest)${reset}"
+    else
+        rmdir "$target/.pi/skills/$name" 2> /dev/null
+        say warning "$yellow" "could not download the $name skill"
+    fi
+}
+
 case " $picked_keys " in
     *" pi "*)
-        # Grilling skill: always fetch the latest from Matt Pocock's repo.
-        mkdir -p "$target/.pi/skills/grilling"
-        curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md" \
-            -o "$target/.pi/skills/grilling/SKILL.md"
-        say installed "$green" "$target/.pi/skills/grilling/SKILL.md ${dim}(latest)${reset}"
+        install_skill grilling \
+            "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md"
+        [ "$want_adhd" = yes ] && install_skill i-have-adhd \
+            "https://raw.githubusercontent.com/ayghri/i-have-adhd/main/.cursor/skills/i-have-adhd/SKILL.md"
         ;;
 esac
 
@@ -393,8 +414,39 @@ case "$picked_keys" in
     *) skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex") ;;
 esac
 
+[ "$want_adhd" = yes ] \
+    || skipped+=("Short replies: run this again to add the i-have-adhd skill")
+
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
+
+# Recap: what is now in the repo and what it is for.
+recap() { printf '  %s  · %s%s%s%s%s%s\n' "$grey" "$reset" "$cyan" "$1" "$reset" "$grey$2" "$reset"; }
+
+printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
+recap "AGENTS.md" " — the coding rules, read by every agent"
+for harness in $picked_keys; do
+    case "$harness" in
+        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer" ;;
+        claude)   recap ".claude/agents/" " — the same three, for Claude Code" ;;
+        opencode) recap ".opencode/agent/" " — the same three, for opencode" ;;
+        codex)    recap ".codex/agents/" " — the same three, for Codex" ;;
+    esac
+done
+
+case " $picked_keys " in
+    *" pi "*)
+        recap ".pi/skills/grilling/" " — /skill:grilling picks holes in a plan"
+        if [ "$want_adhd" = yes ]; then
+            recap ".pi/skills/i-have-adhd/" " — /i-have-adhd for short, action-first replies"
+        fi
+        ;;
+esac
+
+if [ "$want_backlog" != no ]; then
+    recap "backlog/" " — tasks your agents read and update between sessions"
+fi
+
 if [ "${#skipped[@]}" -gt 0 ]; then
     printf '\n  %sSkipped, in case you want them later:%s\n' "$grey" "$reset"
     for item in "${skipped[@]}"; do
@@ -402,8 +454,6 @@ if [ "${#skipped[@]}" -gt 0 ]; then
     done
 fi
 
-printf '\n  %sThe rules are in %sAGENTS.md%s%s — every coding agent reads that one.%s\n' \
-    "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %sThe helpers go wherever each editor looks for them.%s\n' \
+printf '\n  %sNothing to configure. Open the repo with your agent and work as usual.%s\n' \
     "$grey" "$reset"
 echo
