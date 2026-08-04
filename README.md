@@ -14,7 +14,7 @@ Build the Fiat Panda that is needed, not an intergalactic rocket.
 | `spec-reviewer` | `.pi/agents/` | Reviews whether the change does everything requested and nothing more |
 | `grilling` | `.pi/skills/` | Relentless interview to stress-test a plan (fetched latest from [mattpocock/skills](https://github.com/mattpocock/skills)) |
 | `pi-subagents` | `.pi/npm/` | Subagent runtime ([@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents)), project-local |
-| snippets | `.pandino/snippets/` | Optional sections to append to AGENTS.md by hand; installed but never applied automatically |
+| snippets | `.pandino/snippets/` | Optional AGENTS.md sections; the installer only copies them, appending is a deliberate choice |
 
 ## Agent workflow
 
@@ -41,7 +41,7 @@ New files are installed directly. `.pandino/` holds installer-managed material, 
 
 Give the agent this repository and ask:
 
-> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer, semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
+> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer, semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Judge each optional snippet in `.pandino/snippets/` against this repository and append the ones that apply to AGENTS.md, saying which you appended and why. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
 
 The agent should inspect at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and existing `.pi/agents/` when present. Other tool-specific instruction files count too.
 
@@ -57,7 +57,7 @@ Installation into an established repo is a merge, not a replacement:
 6. Remove stale references to tools or files that the merged setup does not contain.
 7. Resolve conflicts automatically when the precedence is clear. Ask the user only when the choice changes product behavior, security, or an established team workflow.
 
-After merging, remove `.pandino/merge/`, run the repository's normal checks, and verify that Pi discovers the three agents and the grilling skill. Show the user what was kept, replaced, and left unresolved.
+After merging, remove `.pandino/merge/` (keep `.pandino/snippets/`), run the repository's normal checks, and verify that Pi discovers the three agents and the grilling skill. Show the user what was kept, replaced, and left unresolved.
 
 ## Optional personal skill
 
@@ -69,11 +69,15 @@ npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
 
 The installer remains non-interactive so it can run safely through an agent or CI; the command above lets the user choose this personal preference explicitly.
 
-## Parallel agents (optional)
+## Optional snippets
+
+`.pandino/snippets/` holds sections that are not right for every repo, so the installer copies them without applying them: append the ones that fit to AGENTS.md, below the marker line. The directory is rebuilt from the kit on every install run — edit the appended section in AGENTS.md, never the copy under `.pandino/`, or the next run will discard the edit.
+
+### Parallel agents
 
 For work that genuinely splits across several implementers at once, append `.pandino/snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. One implementer at a time remains the default.
 
-## Task tracking (optional)
+### Task tracking
 
 For projects that need cross-session memory, use [Backlog.md](https://github.com/MrLesk/Backlog.md): run `backlog init` in the target repo, then append `.pandino/snippets/session-continuity.md` to its AGENTS.md.
 
