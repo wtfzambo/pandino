@@ -31,26 +31,30 @@ answer_mode="${2:-ask}"
 # Colors, unless piped to a file or NO_COLOR is set.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
     bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'; cyan=$'\033[36m'
-    blue=$'\033[34m'; yellow=$'\033[33m'; reset=$'\033[0m'
+    blue=$'\033[34m'; yellow=$'\033[33m'; magenta=$'\033[35m'
+    grey=$'\033[90m'; reset=$'\033[0m'
 else
-    bold=""; dim=""; green=""; cyan=""; blue=""; yellow=""; reset=""
+    bold=""; dim=""; green=""; cyan=""; blue=""; yellow=""; magenta=""
+    grey=""; reset=""
 fi
 
 say() { printf '  %s%-9s%s %s\n' "$2" "$1" "$reset" "$3"; }
 note() { printf '%s%s%s\n' "$dim" "$1" "$reset"; }
-step() { printf '\n  %s%s%s\n' "$bold" "$1" "$reset"; }
+step() { printf '\n  %s%s%s\n' "$bold$blue" "$1" "$reset"; }
 
 # Section heading with a rule under it, for the two option blocks.
 heading() {
-    printf '\n  %s%s%s %s%s%s\n' "$bold$cyan" "$1" "$reset" "$dim" "$2" "$reset"
+    printf '\n  %s%s%s %s%s%s %s·%s %s%s%s\n' \
+        "$bold$cyan" "$1" "$reset" "$grey" "$2" "$reset" \
+        "$grey" "$reset" "$4" "$3" "$reset"
 }
 
 # Body line of an option block. Bare words wrapped in @...@ are highlighted,
 # which keeps the source readable next to the escape codes.
 body() {
     [ -z "$1" ] && { echo; return; }
-    printf '  %s%s%s\n' "$dim" "$1" "$reset" \
-        | sed -e "s/@\([^@]*\)@/$(printf '\033[0m\033[36m')\1$(printf '\033[0m\033[2m')/g"
+    printf '  %s%s%s\n' "$grey" "$1" "$reset" \
+        | sed -e "s/@\([^@]*\)@/$(printf '\033[0m\033[36m')\1$(printf '\033[0m\033[90m')/g"
 }
 
 # True when the script will actually put a question to a human, so the
@@ -75,7 +79,7 @@ confirm() {
     local hint="${dim}[y/N]${reset}" reply
     [ "$default" = "y" ] && hint="${dim}[Y/n]${reset}"
     printf '\n  %s?%s %s%s%s %s ' \
-        "$bold$blue" "$reset" "$bold" "$question" "$reset" "$hint" > /dev/tty
+        "$bold$magenta" "$reset" "$bold" "$question" "$reset" "$hint" > /dev/tty
     read -r reply < /dev/tty
     [ -z "$reply" ] && reply="$default"
     [[ "$reply" =~ ^[Yy] ]]
@@ -95,22 +99,23 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
-printf '\n%s  Pandino%s %s— build the Fiat Panda that is needed%s\n' \
-    "$bold$cyan" "$reset" "$dim" "$reset"
-note "  Coding standards, three pi subagents, and the grilling skill."
-printf '  %sinto%s %s\n' "$dim" "$reset" "$target"
+printf '\n  %sPandino%s %s— build the Fiat Panda that is needed%s\n' \
+    "$bold$magenta" "$reset" "$grey" "$reset"
+printf '  %sCoding standards, an implementer and two reviewer agents, and a%s\n' "$grey" "$reset"
+printf '  %splanning skill %s(wired for pi)%s\n' "$grey" "$dim" "$reset"
+printf '  %sinto%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && note "
-  Two questions first, then it runs without interrupting."
+asking && printf '\n  %sTwo questions first, then it runs without interrupting.%s\n' \
+    "$grey" "$reset"
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
     want_backlog=already
 else
     if asking; then
-        heading "Backlog.md" "— task tracking that lives in the repo · recommended"
+        heading "Backlog.md" "— task tracking that lives in the repo" "recommended" "$green"
         body "  Tasks are markdown files under @backlog/@, versioned with your code."
         body "  Gives agents @memory across sessions@: one reads the pickup task and"
         body "  knows where the last session stopped."
@@ -126,12 +131,13 @@ else
 fi
 
 if asking; then
-    heading "Parallel implementers" "— several agents at once · niche"
+    heading "Parallel implementers" "— several agents at once" "niche" "$yellow"
     body "  @Foundations first@, then parallel work on disjoint files. Covers"
     body "  worktree isolation and where bugs hide @between agent mandates@."
     body ""
-    body "  One implementer at a time is the default — @skip this@ unless you"
-    body "  already split work across agents."
+    body "  Worth it on a @large, complex codebase@ where work genuinely splits"
+    body "  across agents. @Skip it@ on small or short-lived projects — one"
+    body "  implementer at a time is the default."
 fi
 want_parallel=no
 if confirm "Add the parallel-implementer guidance?" n; then
@@ -254,12 +260,12 @@ else
     skipped+=("parallel implementers: append .pandino/snippets/parallel-agents.md to AGENTS.md")
 fi
 
-printf '\n%s  Done%s %s— Pandino is installed in %s%s\n' \
-    "$bold$green" "$reset" "$dim" "$target" "$reset"
+printf '\n  %s✓ Done%s %s— Pandino is installed in%s %s%s%s\n' \
+    "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
 if [ "${#skipped[@]}" -gt 0 ]; then
-    printf '\n  %sNot done, if you want it later:%s\n' "$dim" "$reset"
+    printf '\n  %sNot done, if you want it later:%s\n' "$grey" "$reset"
     for item in "${skipped[@]}"; do
-        printf '  %s  · %s%s\n' "$dim" "$item" "$reset"
+        printf '  %s  · %s%s\n' "$grey" "$item" "$reset"
     done
 fi
 echo

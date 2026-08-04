@@ -1,6 +1,6 @@
 ## Parallel implementation
 
-Only for work that genuinely splits across several agents at once. One implementer at a time is the default; parallelism buys wall-clock time and costs orchestration attention, so it must earn its place.
+For large, complex codebases where work genuinely splits across several agents at once. On small or short-lived projects, ignore this section: one implementer at a time is the default. Parallelism buys wall-clock time and costs orchestration attention, so it must earn its place.
 
 ### Foundations first, then parallel
 

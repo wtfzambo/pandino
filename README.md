@@ -1,6 +1,8 @@
 # pandino
 
-Reusable coding-practices kit for AI-driven repos: one AGENTS.md core, a main-agent + implementer + two-reviewer workflow on [pi](https://pi.dev), and the grilling skill for planning.
+Reusable coding-practices kit for AI-driven repos: one AGENTS.md core, a main-agent + implementer + two-reviewer workflow, and the grilling skill for planning.
+
+The standards and the workflow are harness-agnostic — they live in `AGENTS.md`, which every coding agent reads. The installer wires them up for [pi](https://pi.dev) specifically, since the subagents have to land somewhere; on another harness, install `AGENTS.md` by hand and register the three agents in `agents/` the way that harness expects.
 
 Build the Fiat Panda that is needed, not an intergalactic rocket.
 
@@ -103,7 +105,7 @@ Session continuity is the exception: it belongs with Backlog.md and is installed
 
 ### Parallel agents
 
-For work that genuinely splits across several implementers at once, append `.pandino/snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. One implementer at a time remains the default.
+For large, complex codebases where work genuinely splits across several implementers at once, append `.pandino/snippets/parallel-agents.md` to the target repo's AGENTS.md. It covers foundations-first sequencing (instead of a merger agent), worktree isolation, and where bugs hide between mandates. Skip it on small or short-lived projects: one implementer at a time remains the default.
 
 ### Task tracking
 
