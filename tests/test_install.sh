@@ -60,15 +60,15 @@ cmp -s "$tmp_dir/existing-AGENTS.md" "$merge_target/AGENTS.md"
 cmp -s "$tmp_dir/existing-taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
 cmp -s "$repo_dir/AGENTS.md" "$merge_target/.pandino/merge/AGENTS.md"
 cmp -s "$repo_dir/agents/taste-reviewer.md" "$merge_target/.pandino/merge/agents/taste-reviewer.md"
-grep -F "staged     $merge_target/.pandino/merge/AGENTS.md for $merge_target/AGENTS.md" "$tmp_dir/merge.out" > /dev/null
-grep -F "staged     $merge_target/.pandino/merge/agents/taste-reviewer.md for $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/merge.out" > /dev/null
+grep -E "staged +$merge_target/.pandino/merge/AGENTS.md for $merge_target/AGENTS.md" "$tmp_dir/merge.out" > /dev/null
+grep -E "staged +$merge_target/.pandino/merge/agents/taste-reviewer.md for $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/merge.out" > /dev/null
 
 cp "$repo_dir/AGENTS.md" "$merge_target/AGENTS.md"
 cp "$repo_dir/agents/taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
 bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/resolved.out"
 [ ! -e "$merge_target/.pandino/merge" ]
-grep -F "unchanged  $merge_target/AGENTS.md" "$tmp_dir/resolved.out" > /dev/null
-grep -F "unchanged  $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/resolved.out" > /dev/null
+grep -E "unchanged +$merge_target/AGENTS.md" "$tmp_dir/resolved.out" > /dev/null
+grep -E "unchanged +$merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/resolved.out" > /dev/null
 
 # --no-input must leave AGENTS.md untouched and report the skipped add-ons.
 [ ! -e "$fresh_target/backlog" ]
@@ -80,8 +80,8 @@ cmp -s "$repo_dir/AGENTS.md" "$fresh_target/AGENTS.md"
 yes_target="$tmp_dir/yes"
 mkdir "$yes_target"
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes.out"
-grep -F "appended   session-continuity" "$tmp_dir/yes.out" > /dev/null
-grep -F "appended   parallel-agents" "$tmp_dir/yes.out" > /dev/null
+grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
+grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 
 # Backlog.md comes with task tracking, its own guidelines, and session
@@ -92,7 +92,7 @@ grep -F "BACKLOG.MD GUIDELINES" "$yes_target/AGENTS.md" > /dev/null
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes2.out"
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 [ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$yes_target/AGENTS.md")" = "1" ]
-grep -F "unchanged  $yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
+grep -E "unchanged +$yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
 [ ! -e "$yes_target/.pandino/merge" ]
 
 # Declining leaves no Backlog and no session-continuity section.

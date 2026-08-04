@@ -30,15 +30,28 @@ answer_mode="${2:-ask}"
 
 # Colors, unless piped to a file or NO_COLOR is set.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
-    bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'
+    bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'; cyan=$'\033[36m'
     blue=$'\033[34m'; yellow=$'\033[33m'; reset=$'\033[0m'
 else
-    bold=""; dim=""; green=""; blue=""; yellow=""; reset=""
+    bold=""; dim=""; green=""; cyan=""; blue=""; yellow=""; reset=""
 fi
 
-say() { printf '%s%-10s%s %s\n' "$2" "$1" "$reset" "$3"; }
+say() { printf '  %s%-9s%s %s\n' "$2" "$1" "$reset" "$3"; }
 note() { printf '%s%s%s\n' "$dim" "$1" "$reset"; }
-step() { printf '\n%s%s%s\n' "$bold" "$1" "$reset"; }
+step() { printf '\n  %s%s%s\n' "$bold" "$1" "$reset"; }
+
+# Section heading with a rule under it, for the two option blocks.
+heading() {
+    printf '\n  %s%s%s %s%s%s\n' "$bold$cyan" "$1" "$reset" "$dim" "$2" "$reset"
+}
+
+# Body line of an option block. Bare words wrapped in @...@ are highlighted,
+# which keeps the source readable next to the escape codes.
+body() {
+    [ -z "$1" ] && { echo; return; }
+    printf '  %s%s%s\n' "$dim" "$1" "$reset" \
+        | sed -e "s/@\([^@]*\)@/$(printf '\033[0m\033[36m')\1$(printf '\033[0m\033[2m')/g"
+}
 
 # True when the script will actually put a question to a human, so the
 # explanations below are printed for readers, not for agents and CI logs.
@@ -61,7 +74,8 @@ confirm() {
     asking || return 1
     local hint="${dim}[y/N]${reset}" reply
     [ "$default" = "y" ] && hint="${dim}[Y/n]${reset}"
-    printf '%s%s%s %s ' "$blue" "$question" "$reset" "$hint" > /dev/tty
+    printf '\n  %s?%s %s%s%s %s ' \
+        "$bold$blue" "$reset" "$bold" "$question" "$reset" "$hint" > /dev/tty
     read -r reply < /dev/tty
     [ -z "$reply" ] && reply="$default"
     [[ "$reply" =~ ^[Yy] ]]
@@ -81,42 +95,43 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
-step "Pandino"
-note "Coding standards in AGENTS.md, three pi subagents (an implementer and two"
-note "reviewers), and the grilling skill for planning."
-note "Installing into $target"
+printf '\n%s  Pandino%s %s— build the Fiat Panda that is needed%s\n' \
+    "$bold$cyan" "$reset" "$dim" "$reset"
+note "  Coding standards, three pi subagents, and the grilling skill."
+printf '  %sinto%s %s\n' "$dim" "$reset" "$target"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && step "Two questions before anything is written"
+asking && note "
+  Two questions first, then it runs without interrupting."
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
     want_backlog=already
 else
     if asking; then
-        printf '\n%sBacklog.md%s %s— task tracking that lives inside the repo%s\n' \
-            "$bold" "$reset" "$dim" "$reset"
-        note "  Tasks are markdown files under backlog/, versioned with your code."
-        note "  This is what gives agents memory across sessions: an agent reads the"
-        note "  pickup task and knows where the last one stopped. Pandino's"
-        note "  session-continuity section needs it, so the two go in together,"
-        note "  along with Backlog's own usage guidelines in AGENTS.md."
+        heading "Backlog.md" "— task tracking that lives in the repo · recommended"
+        body "  Tasks are markdown files under @backlog/@, versioned with your code."
+        body "  Gives agents @memory across sessions@: one reads the pickup task and"
+        body "  knows where the last session stopped."
+        body ""
+        body "  Adds: @backlog/@, Backlog's usage guidelines, and Pandino's"
+        body "  @session-continuity@ section — which needs Backlog to work at all."
         command -v backlog > /dev/null \
-            || note "  Heads up: the 'backlog' command is not installed yet (npm i -g backlog.md)."
+            || body "  Note: the @backlog@ command is missing (@npm i -g backlog.md@)."
     fi
-    if confirm "Set up Backlog.md task tracking? Strongly recommended." y; then
+    if confirm "Set up Backlog.md task tracking?" y; then
         want_backlog=yes
     fi
 fi
 
 if asking; then
-    printf '\n%sParallel implementers%s %s— guidance for running several at once%s\n' \
-        "$bold" "$reset" "$dim" "$reset"
-    note "  Foundations-first sequencing instead of a merger agent, worktree"
-    note "  isolation, and where bugs hide between agent mandates."
-    note "  Niche: one implementer at a time is the default, so skip it unless you"
-    note "  already split work across agents."
+    heading "Parallel implementers" "— several agents at once · niche"
+    body "  @Foundations first@, then parallel work on disjoint files. Covers"
+    body "  worktree isolation and where bugs hide @between agent mandates@."
+    body ""
+    body "  One implementer at a time is the default — @skip this@ unless you"
+    body "  already split work across agents."
 fi
 want_parallel=no
 if confirm "Add the parallel-implementer guidance?" n; then
@@ -239,11 +254,12 @@ else
     skipped+=("parallel implementers: append .pandino/snippets/parallel-agents.md to AGENTS.md")
 fi
 
-step "Done"
-note "Pandino is installed in $target"
+printf '\n%s  Done%s %s— Pandino is installed in %s%s\n' \
+    "$bold$green" "$reset" "$dim" "$target" "$reset"
 if [ "${#skipped[@]}" -gt 0 ]; then
-    printf '%sNot done, if you want it later:%s\n' "$dim" "$reset"
+    printf '\n  %sNot done, if you want it later:%s\n' "$dim" "$reset"
     for item in "${skipped[@]}"; do
-        printf '%s  - %s%s\n' "$dim" "$item" "$reset"
+        printf '  %s  · %s%s\n' "$dim" "$item" "$reset"
     done
 fi
+echo
