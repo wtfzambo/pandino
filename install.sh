@@ -101,13 +101,13 @@ append_snippet() {
 
 printf '\n  %sPandino%s %s— build the Fiat Panda that is needed%s\n' \
     "$bold$magenta" "$reset" "$grey" "$reset"
-printf '  %sCoding standards, an implementer and two reviewer agents, and a%s\n' "$grey" "$reset"
-printf '  %splanning skill.%s\n' "$grey" "$reset"
-printf '  %sinto%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
+printf '  %sCoding rules for your agents, plus three helpers: one writes code,%s\n' "$grey" "$reset"
+printf '  %stwo review it.%s\n' "$grey" "$reset"
+printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sTwo questions first, then it runs without interrupting.%s\n' \
+asking && printf '\n  %sTwo questions, then I get out of your way.%s\n' \
     "$grey" "$reset"
 
 want_backlog=no
@@ -115,32 +115,32 @@ if [ -d "$target/backlog" ]; then
     want_backlog=already
 else
     if asking; then
-        heading "Backlog.md" "— task tracking that lives in the repo" "recommended" "$green"
-        body "  Tasks are markdown files under @backlog/@, versioned with your code."
-        body "  Gives agents @memory across sessions@: one reads the pickup task and"
-        body "  knows where the last session stopped."
+        heading "Backlog.md" "— a to-do list your agents can read" "recommended" "$green"
+        body "  Tasks are plain markdown files in @backlog/@, committed with your"
+        body "  code. Agents write down where they stopped, so the next one"
+        body "  @picks up where it left off@ instead of starting over."
         body ""
-        body "  Adds: @backlog/@, Backlog's usage guidelines, and Pandino's"
-        body "  @session-continuity@ section — which needs Backlog to work at all."
+        body "  Say yes and I set up @backlog/@ plus the notes your agents need to"
+        body "  use it. Without this they forget everything between sessions."
         command -v backlog > /dev/null \
-            || body "  Note: the @backlog@ command is missing (@npm i -g backlog.md@)."
+            || body "  You do not have it yet — install with @npm i -g backlog.md@"
     fi
-    if confirm "Set up Backlog.md task tracking?" y; then
+    if confirm "Set up Backlog.md?" y; then
         want_backlog=yes
     fi
 fi
 
 if asking; then
-    heading "Parallel implementers" "— several agents at once" "niche" "$yellow"
-    body "  @Foundations first@, then parallel work on disjoint files. Covers"
-    body "  worktree isolation and where bugs hide @between agent mandates@."
+    heading "Parallel agents" "— notes for running several at once" "niche" "$yellow"
+    body "  How to split work between agents without them stepping on each"
+    body "  other: @build the shared parts first@, then let them work on"
+    body "  separate files, and watch the gaps nobody was told to cover."
     body ""
-    body "  Worth it on a @large, complex codebase@ where work genuinely splits"
-    body "  across agents. @Skip it@ on small or short-lived projects — one"
-    body "  implementer at a time is the default."
+    body "  Only useful on a @big, messy codebase@. @Say no@ for anything"
+    body "  small — one agent at a time is the normal way."
 fi
 want_parallel=no
-if confirm "Add the parallel-implementer guidance?" n; then
+if confirm "Add the notes on parallel agents?" n; then
     want_parallel=yes
 fi
 
@@ -207,13 +207,14 @@ say installed "$green" "$target/.pandino/snippets/ ${dim}(optional sections)${re
 if command -v pi > /dev/null; then
     (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
 else
-    say warning "$yellow" "pi not found; run 'pi install -l npm:@tintinweb/pi-subagents' in $target yourself"
+    say warning "$yellow" "pi not found — run 'pi install -l npm:@tintinweb/pi-subagents' here yourself"
 fi
 
 if [ "$staged_count" -gt 0 ]; then
     step "Conflicts to resolve"
-    printf '%sMerge the staged candidates into the existing files, then remove%s\n' "$yellow" "$reset"
-    printf '%s%s/.pandino/merge. See README.md for conflict precedence.%s\n' "$yellow" "$target" "$reset"
+    printf '  %sYou already had some of these files. I kept yours and put mine in%s\n' "$yellow" "$reset"
+    printf '  %s%s/.pandino/merge/%s\n' "$yellow" "$target" "$reset"
+    printf '  %sTake what you want from there, then delete that folder.%s\n' "$yellow" "$reset"
 fi
 
 # Act on the answers collected up front.
@@ -245,35 +246,34 @@ case "$want_backlog" in
             append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
         else
             say skipped "$yellow" "backlog not found on PATH"
-            note "  install it from https://github.com/MrLesk/Backlog.md, then re-run this script"
-            skipped+=("task tracking: install Backlog.md, then re-run this script — it is the one add-on worth going back for")
+            note "  install it with 'npm i -g backlog.md', then run this again"
+            skipped+=("Backlog.md: install it, then run this again. Worth it — it is what gives your agents memory.")
         fi
         ;;
     no)
-        skipped+=("task tracking and cross-session memory: re-run this script and accept Backlog.md, or set it up yourself and append .pandino/snippets/session-continuity.md to AGENTS.md")
+        skipped+=("Backlog.md: run this again and say yes, if you change your mind")
         ;;
 esac
 
 if [ "$want_parallel" = yes ]; then
     append_snippet "$target/.pandino/snippets/parallel-agents.md" parallel-agents
 else
-    skipped+=("parallel implementers: append .pandino/snippets/parallel-agents.md to AGENTS.md")
+    skipped+=("Parallel agents: add .pandino/snippets/parallel-agents.md to AGENTS.md when you need it")
 fi
 
-printf '\n  %s✓ Done%s %s— Pandino is installed in%s %s%s%s\n' \
+printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
 if [ "${#skipped[@]}" -gt 0 ]; then
-    printf '\n  %sNot done, if you want it later:%s\n' "$grey" "$reset"
+    printf '\n  %sSkipped, in case you want them later:%s\n' "$grey" "$reset"
     for item in "${skipped[@]}"; do
         printf '  %s  · %s%s\n' "$grey" "$item" "$reset"
     done
 fi
 
-printf '\n  %sThe standards and workflow live in %sAGENTS.md%s%s and work with any%s\n' \
+printf '\n  %sThe rules are in %sAGENTS.md%s%s — any coding agent reads that. The%s\n' \
     "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %scoding agent. The agent definitions went to %s.pi/agents/%s%s, which only%s\n' \
+printf '  %sthree helpers went to %s.pi/agents/%s%s, which only pi reads. Using%s\n' \
     "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %spi reads — on another harness, register those three roles where it%s\n' \
+printf '  %ssomething else? Copy them where your tool looks for them.%s\n' \
     "$grey" "$reset"
-printf '  %sexpects them.%s\n' "$grey" "$reset"
 echo
