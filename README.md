@@ -45,15 +45,21 @@ New files are installed directly. `.pandino/` holds installer-managed material, 
 
 Installing into an established repo is a merge, not a replacement, and that judgement is worth delegating. Paste this to an agent working in the target repo:
 
-> Install Pandino into this repository.
->
-> 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md first, then this repository's own instruction files — at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and any existing `.pi/agents/`.
-> 2. Run `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --no-input`. It will not prompt you.
-> 3. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
-> 4. Decide which optional snippets in `.pandino/snippets/` fit this repository and append those to `AGENTS.md`. Session continuity needs Backlog.md: if this repo has no `backlog/` directory and task tracking would help here, tell me rather than installing it yourself.
-> 5. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
->
-> Resolve obvious duplication yourself. Ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
+```txt
+Install Pandino into this repository.
+
+1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md first, then this repository's own instruction files — at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and any existing `.pi/agents/`.
+
+2. Run `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --no-input`. It will not prompt you.
+
+3. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
+
+4. Decide which optional snippets in `.pandino/snippets/` fit this repository and append those to `AGENTS.md`. Session continuity needs Backlog.md: if this repo has no `backlog/` directory and task tracking would help here, tell me rather than installing it yourself.
+
+5. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
+
+Resolve obvious duplication yourself. Ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
+```
 
 ## Existing repositories and conflict resolution
 
