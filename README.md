@@ -29,25 +29,33 @@ Choose the agent models with the user during setup. The frontmatter names tested
 
 ## Install
 
-Into a new or existing repo:
+Run this in the repo you want to set up:
 
 ```bash
-./install.sh /path/to/repo            # asks about the optional add-ons
-./install.sh /path/to/repo --yes      # accept them all, no questions
-./install.sh /path/to/repo --no-input # skip them all, print them as manual steps
+curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
 ```
 
-Attached to a terminal, the script asks whether to set up Backlog.md task tracking (recommended, defaults to yes) and whether to add the parallel-implementer guidance (defaults to no). Accepted snippets are appended to `AGENTS.md` behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. Without a terminal — inside an agent or CI — nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
+The script fetches the rest of the kit itself, so there is nothing to clone. Add `--yes` to accept every optional add-on or `--no-input` to skip them all.
+
+> While this repository is private, the one-liner cannot download the kit and exits with an error. Clone it and run `./install.sh /path/to/repo` instead — same behavior, same flags.
+
+It asks two questions: whether to set up [Backlog.md](https://github.com/MrLesk/Backlog.md) task tracking (recommended — it gives agents memory across sessions, defaults to yes), and whether to add the parallel-implementer guidance (niche, defaults to no). Accepted snippets are appended to `AGENTS.md` behind a `<!-- pandino:name -->` marker, so re-running never duplicates them. In an agent or CI, where no terminal is attached, nothing is asked, no add-on is applied, and the skipped ones are listed at the end.
 
 New files are installed directly. `.pandino/` holds installer-managed material, both rebuilt on every run: `.pandino/merge/` is the disposable conflict staging area, `.pandino/snippets/` the optional sections. Only the former is meant to be deleted after use. When `AGENTS.md` or a same-named agent already exists and differs, the script preserves it and stages Pandino's candidate under `.pandino/merge/`. Obsolete candidates do not survive after conflicts are resolved. The script never silently skips a conflict or overwrites local rules. The grilling skill is managed separately and refreshed from upstream on every run.
 
 ## Install with an AI agent
 
-Give the agent this repository and ask:
+Installing into an established repo is a merge, not a replacement, and that judgement is worth delegating. Paste this to an agent working in the target repo:
 
-> Install Pandino into this repository. Read Pandino's README and this repository's existing instruction files first. Run the installer (it will not prompt you; decide the optional add-ons yourself and tell me what you chose), semantically merge anything staged under `.pandino/merge/` using the conflict rules below, then remove the staging directory. Judge each optional snippet in `.pandino/snippets/` against this repository and append the ones that apply to AGENTS.md, saying which you appended and why. Validate the resulting Pi configuration and show me the final diff. Resolve obvious duplication yourself; ask only when two rules genuinely disagree about required behavior.
-
-The agent should inspect at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and existing `.pi/agents/` when present. Other tool-specific instruction files count too.
+> Install Pandino into this repository.
+>
+> 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md first, then this repository's own instruction files — at least `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/`, and any existing `.pi/agents/`.
+> 2. Run `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --no-input`. It will not prompt you. If that fails because the repository is private, ask me for a local checkout and run `./install.sh . --no-input` from it.
+> 3. Semantically merge anything staged under `.pandino/merge/` into the existing files, following the conflict precedence in Pandino's README, then delete `.pandino/merge/` (keep `.pandino/snippets/`).
+> 4. Decide which optional snippets in `.pandino/snippets/` fit this repository and append those to `AGENTS.md`. Session continuity needs Backlog.md: if this repo has no `backlog/` directory and task tracking would help here, tell me rather than installing it yourself.
+> 5. Verify that pi discovers the three agents and the grilling skill, run this repository's normal checks, and show me the final diff with a short summary of what you kept, replaced, added, and left unresolved.
+>
+> Resolve obvious duplication yourself. Ask me only when two rules genuinely disagree about required behavior, or when a choice changes product behavior, security, or an established team workflow.
 
 ## Existing repositories and conflict resolution
 

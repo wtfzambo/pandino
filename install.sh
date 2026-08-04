@@ -8,6 +8,19 @@ set -euo pipefail
 
 kit_dir="$(cd "$(dirname "$0")" && pwd)"
 target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
+
+# Piped from curl the script arrives alone, so fetch the kit it needs.
+if [ ! -d "$kit_dir/agents" ]; then
+    kit_dir="$(mktemp -d)"
+    trap 'rm -rf "$kit_dir"' EXIT
+    if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
+        | tar -xz -C "$kit_dir" --strip-components=1 2> /dev/null; then
+        echo "error: could not download the Pandino kit." >&2
+        echo "       If the repository is private, clone it and run ./install.sh instead." >&2
+        exit 1
+    fi
+fi
+
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
 
@@ -20,10 +33,12 @@ confirm() {
         --yes) return 0 ;;
         --no-input) return 1 ;;
     esac
-    [ -t 0 ] || return 1
+    # Read from the terminal, not stdin: stdin is the script itself
+    # when the installer is piped from curl.
+    [ -e /dev/tty ] && [ -t 1 ] || return 1
     local hint="[y/N]" reply
     [ "$default" = "y" ] && hint="[Y/n]"
-    read -r -p "$question $hint " reply
+    read -r -p "$question $hint " reply < /dev/tty
     [ -z "$reply" ] && reply="$default"
     [[ "$reply" =~ ^[Yy] ]]
 }
