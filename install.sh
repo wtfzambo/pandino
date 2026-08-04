@@ -47,9 +47,9 @@ step() { printf '\n  %s%s%s\n' "$bold$blue" "$1" "$reset"; }
 
 # Section heading with a rule under it, for the two option blocks.
 heading() {
-    printf '\n  %s%s%s %s%s%s %s·%s %s%s%s\n' \
-        "$bold$cyan" "$1" "$reset" "$grey" "$2" "$reset" \
-        "$grey" "$reset" "$4" "$3" "$reset"
+    printf '\n  %s%s%s %s%s%s' "$bold$cyan" "$1" "$reset" "$grey" "$2" "$reset"
+    [ -n "$3" ] && printf ' %s·%s %s%s%s' "$grey" "$reset" "$4" "$3" "$reset"
+    printf '\n'
 }
 
 # Body line of an option block. Bare words wrapped in @...@ are highlighted,
@@ -170,8 +170,22 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
-printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
-    "$bold$magenta" "$reset" "$grey" "$reset"
+if asking; then
+    printf '\n%s' "$magenta"
+    cat <<'BANNER'
+  ██████╗  █████╗ ███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
+  ██╔══██╗██╔══██╗████╗  ██║██╔══██╗██║████╗  ██║██╔═══██╗
+  ██████╔╝███████║██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║   ██║
+  ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
+  ██║     ██║  ██║██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
+  ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
+BANNER
+    printf '%s\n' "$reset"
+    printf '  %sCoding rules, one agent that writes, two that review.%s\n' "$grey" "$reset"
+else
+    printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
+        "$bold$magenta" "$reset" "$grey" "$reset"
+fi
 printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
@@ -184,10 +198,10 @@ if [ -d "$target/backlog" ]; then
 else
     if asking; then
         heading "Backlog.md" "— a to-do list your agents keep" "recommended" "$green"
-        body "  Agents note what they did in @backlog/@, so the next one @picks up@"
-        body "  instead of starting over. Without it, they forget every session."
+        body "  Agents note what they did in @backlog/@, so the next one @picks up where it left off@."
+        body "  Without it they start from zero every session."
         command -v backlog > /dev/null \
-            || body "  Not installed yet — @npm i -g backlog.md@"
+            || body "  Not on your machine yet — install it with @npm i -g backlog.md@"
     fi
     if confirm "Set up Backlog.md?" y; then
         want_backlog=yes
@@ -196,26 +210,26 @@ fi
 
 if asking; then
     heading "Parallel agents" "— running several at once" "niche" "$yellow"
-    body "  How to keep them from stepping on each other. Only if you plan to"
-    body "  @run agents in parallel@ here — @say no@ otherwise."
+    body "  How to keep several agents from stepping on each other."
+    body "  Only if you plan to @run them in parallel@ here — @say no@ otherwise."
 fi
 want_parallel=no
 if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
 fi
 
-picked_keys=""
+picked_keys="pi"
 case "$answer_mode" in
     --no-input) ;;
-    --yes) picked_keys="claude opencode codex" ;;
+    --yes) picked_keys="pi claude opencode codex" ;;
     *)
         if asking; then
-            heading "Other tools" "— same helpers, other editors" "optional" "$cyan"
-            body "  Ticked ones are already on your machine. @space@ toggles,"
-            body "  @arrows@ move, @enter@ confirms."
+            heading "Editors" "— where to put the three helpers" "" ""
+            body "  Ticked ones are already on your machine."
+            body "  @↑↓ move, space select, enter confirm@"
             printf '\n' > /dev/tty
         fi
-        pick_many "claude:Claude Code" "opencode:opencode" "codex:Codex"
+        pick_many "pi:pi" "claude:Claude Code" "opencode:opencode" "codex:Codex"
         ;;
 esac
 
@@ -257,24 +271,32 @@ else
         "$target/.pandino/merge/AGENTS.md"
 fi
 
-for agent in "$kit_dir"/agents/*.md; do
-    name="$(basename "$agent")"
-    install_or_stage \
-        "$agent" \
-        "$target/.pi/agents/$name" \
-        "$target/.pandino/merge/agents/$name"
-done
-
 for harness in $picked_keys; do
-    write_harness_agents "$kit_dir" "$target" "$harness"
-    say installed "$green" "$(harness_dir "$target" "$harness")/ ${dim}(3 agents)${reset}"
+    if [ "$harness" = pi ]; then
+        # pi reads the kit's own format, so conflicts can be staged as usual.
+        for agent in "$kit_dir"/agents/*.md; do
+            name="$(basename "$agent")"
+            install_or_stage \
+                "$agent" \
+                "$target/.pi/agents/$name" \
+                "$target/.pandino/merge/agents/$name"
+        done
+    else
+        write_harness_agents "$kit_dir" "$target" "$harness"
+        say installed "$green" "$(harness_dir "$target" "$harness")/ ${dim}(3 agents)${reset}"
+    fi
 done
 
-# Grilling skill: always fetch the latest from Matt Pocock's repo.
-mkdir -p "$target/.pi/skills/grilling"
-curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md" \
-    -o "$target/.pi/skills/grilling/SKILL.md"
-say installed "$green" "$target/.pi/skills/grilling/SKILL.md ${dim}(latest)${reset}"
+# The skill and the subagent runtime are pi's own, so they follow that choice.
+case " $picked_keys " in
+    *" pi "*)
+        # Grilling skill: always fetch the latest from Matt Pocock's repo.
+        mkdir -p "$target/.pi/skills/grilling"
+        curl -fsSL "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md" \
+            -o "$target/.pi/skills/grilling/SKILL.md"
+        say installed "$green" "$target/.pi/skills/grilling/SKILL.md ${dim}(latest)${reset}"
+        ;;
+esac
 
 # Optional add-ons: copied so the paths below are real in the target repo,
 # refreshed from the kit on every run. Appending them is the user's choice.
@@ -284,16 +306,20 @@ cp "$kit_dir"/snippets/*.md "$target/.pandino/snippets/"
 say installed "$green" "$target/.pandino/snippets/ ${dim}(optional sections)${reset}"
 
 # Subagent runtime, project-local.
-if command -v pi > /dev/null; then
-    (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
-else
-    say warning "$yellow" "pi not found — run 'pi install -l npm:@tintinweb/pi-subagents' here yourself"
-fi
+case " $picked_keys " in
+    *" pi "*)
+        if command -v pi > /dev/null; then
+            (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
+        else
+            say warning "$yellow" "pi not found — run 'pi install -l npm:@tintinweb/pi-subagents' here yourself"
+        fi
+        ;;
+esac
 
 if [ "$staged_count" -gt 0 ]; then
     step "Conflicts to resolve"
-    printf '  %sYou already had some of these. Yours are untouched, mine are in%s\n' "$yellow" "$reset"
-    printf '  %s.pandino/merge/ — take what you want, then delete it.%s\n' "$yellow" "$reset"
+    printf '  %sYou already had some of these files, so I left yours alone.%s\n' "$yellow" "$reset"
+    printf '  %sMine are in .pandino/merge/ — take what you want, then delete it.%s\n' "$yellow" "$reset"
 fi
 
 # Act on the answers collected up front.
@@ -340,8 +366,10 @@ else
     skipped+=("Parallel agents: add .pandino/snippets/parallel-agents.md to AGENTS.md when you need it")
 fi
 
-[ -n "$picked_keys" ] \
-    || skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex")
+case "$picked_keys" in
+    *claude*|*opencode*|*codex*) ;;
+    *) skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex") ;;
+esac
 
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
@@ -352,8 +380,8 @@ if [ "${#skipped[@]}" -gt 0 ]; then
     done
 fi
 
-printf '\n  %sRules in %sAGENTS.md%s%s, read by any agent. Helpers in %s.pi/agents/%s%s,%s\n' \
-    "$grey" "$cyan" "$reset" "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %sread only by pi — on another tool, copy them where it looks.%s\n' \
+printf '\n  %sThe rules are in %sAGENTS.md%s%s — every coding agent reads that one.%s\n' \
+    "$grey" "$cyan" "$reset" "$grey" "$reset"
+printf '  %sThe helpers go wherever each editor looks for them.%s\n' \
     "$grey" "$reset"
 echo
