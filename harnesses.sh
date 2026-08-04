@@ -7,9 +7,9 @@
 #   pi           .pi/agents/          frontmatter: description, tools, thinking
 #   claude code  .claude/agents/      frontmatter: name, description, tools, model
 #   opencode     .opencode/agent/     frontmatter: name, description, mode, tools
-#   codex        no subagent concept — nothing to write
+#   codex        .codex/agents/       TOML: name, description, developer_instructions
 #
-# Only the frontmatter differs; the body is copied verbatim every time.
+# The body is copied verbatim every time; only its wrapper differs.
 
 # Body of a kit agent file: everything after the closing frontmatter fence.
 agent_body() {
@@ -72,15 +72,32 @@ write_opencode_agent() {
     } > "$dst"
 }
 
-# Install the three agents for every harness the repo shows signs of using,
-# plus pi. Echoes one line per harness written.
-install_for_harnesses() {
-    local kit="$1" target="$2"
+# Codex takes TOML, with the prompt in a multi-line string. Reviewers get
+# sandbox_mode = "read-only", which is the same boundary their prompt states.
+write_codex_agent() {
+    local src="$1" dst="$2" name tools
+    name="$(basename "$src" .md)"
+    tools="$(agent_tools "$src")"
+    {
+        printf 'name = "%s"\n' "$name"
+        printf 'description = "%s"\n' "$(agent_description "$src" | sed 's/"/\\"/g')"
+        [ -n "$tools" ] && [ "$tools" != "all" ] && printf 'sandbox_mode = "read-only"\n'
+        printf 'developer_instructions = """\n'
+        # A closing triple quote inside the body would end the string early.
+        agent_body "$src" | sed 's/"""/\x27\x27\x27/g'
+        printf '"""\n'
+    } > "$dst"
+}
 
+# Write the three agents in the layout of every harness other than pi.
+install_for_harnesses() {
+    local kit="$1" target="$2" name
+
+    mkdir -p "$target/.claude/agents" "$target/.opencode/agent" "$target/.codex/agents"
     for agent in "$kit"/agents/*.md; do
-        mkdir -p "$target/.claude/agents"
-        write_claude_agent "$agent" "$target/.claude/agents/$(basename "$agent")"
-        mkdir -p "$target/.opencode/agent"
-        write_opencode_agent "$agent" "$target/.opencode/agent/$(basename "$agent")"
+        name="$(basename "$agent" .md)"
+        write_claude_agent "$agent" "$target/.claude/agents/$name.md"
+        write_opencode_agent "$agent" "$target/.opencode/agent/$name.md"
+        write_codex_agent "$agent" "$target/.codex/agents/$name.toml"
     done
 }

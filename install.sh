@@ -149,12 +149,12 @@ if confirm "Add the parallel-agent notes?" n; then
 fi
 
 if asking; then
-    heading "Other tools" "— Claude Code and opencode" "optional" "$cyan"
-    body "  The three helpers are written for pi. I can write them again in the"
-    body "  layout @Claude Code@ and @opencode@ read, from the same source."
+    heading "Other tools" "— Claude Code, opencode, Codex" "optional" "$cyan"
+    body "  The helpers are written for pi. I can write them again for"
+    body "  @Claude Code@, @opencode@ and @Codex@, from the same source."
 fi
 want_harnesses=no
-if confirm "Also set them up for Claude Code and opencode?" n; then
+if confirm "Set them up for the other tools too?" n; then
     want_harnesses=yes
 fi
 
@@ -208,6 +208,7 @@ if [ "$want_harnesses" = yes ]; then
     install_for_harnesses "$kit_dir" "$target"
     say installed "$green" "$target/.claude/agents/ ${dim}(3 agents)${reset}"
     say installed "$green" "$target/.opencode/agent/ ${dim}(3 agents)${reset}"
+    say installed "$green" "$target/.codex/agents/ ${dim}(3 agents)${reset}"
 fi
 
 # Grilling skill: always fetch the latest from Matt Pocock's repo.
@@ -281,7 +282,7 @@ else
 fi
 
 [ "$want_harnesses" = yes ] \
-    || skipped+=("Claude Code / opencode: run this again and say yes to set the helpers up for them too")
+    || skipped+=("Claude Code, opencode, Codex: run this again and say yes to set the helpers up for them too")
 
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"

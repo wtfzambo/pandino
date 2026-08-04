@@ -2,7 +2,7 @@
 
 Reusable coding-practices kit for AI-driven repos: one AGENTS.md core, a main-agent + implementer + two-reviewer workflow, and the grilling skill for planning.
 
-The standards and the workflow are harness-agnostic — they live in `AGENTS.md`, which every coding agent reads. The subagents have to land somewhere, so the installer writes them for [pi](https://pi.dev), and offers to write the same three roles for Claude Code (`.claude/agents/`) and opencode (`.opencode/agent/`) from the same source. Codex has no subagent mechanism; there the workflow runs as one agent taking each role in turn.
+The standards and the workflow are harness-agnostic — they live in `AGENTS.md`, which every coding agent reads. The subagents have to land somewhere, so the installer writes them for [pi](https://pi.dev), and offers to write the same three roles for Claude Code (`.claude/agents/`), opencode (`.opencode/agent/`), and Codex (`.codex/agents/`, TOML) from the same source. Only the wrapper differs per tool; the prompt body is identical everywhere.
 
 Build the Fiat Panda that is needed, not an intergalactic rocket.
 
@@ -17,7 +17,7 @@ Build the Fiat Panda that is needed, not an intergalactic rocket.
 | `grilling` | `.pi/skills/` | Relentless interview to stress-test a plan (fetched latest from [mattpocock/skills](https://github.com/mattpocock/skills)) |
 | `pi-subagents` | `.pi/npm/` | Subagent runtime ([@tintinweb/pi-subagents](https://www.npmjs.com/package/@tintinweb/pi-subagents)), project-local |
 | snippets | `.pandino/snippets/` | Optional AGENTS.md sections; the installer only copies them, appending is a deliberate choice |
-| the same agents, translated | `.claude/agents/`, `.opencode/agent/` | Optional: the three roles in the layout Claude Code and opencode read. Codex has no subagent concept, so nothing is written for it |
+| the same agents, translated | `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` | Optional: the three roles in the layout Claude Code, opencode, and Codex each read |
 
 ## Agent workflow
 

@@ -89,6 +89,10 @@ grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.opencode/agent/implementer.md" ]
 grep -q "^name: implementer" "$yes_target/.claude/agents/implementer.md"
 grep -q "^mode: subagent" "$yes_target/.opencode/agent/taste-reviewer.md"
+[ -f "$yes_target/.codex/agents/implementer.toml" ]
+grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/taste-reviewer.toml"
+python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
+    "$yes_target"/.codex/agents/*.toml
 # The body must survive translation unchanged.
 grep -q "You are the taste reviewer" "$yes_target/.claude/agents/taste-reviewer.md"
 
