@@ -99,31 +99,24 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
-printf '\n  %sPandino%s %s— build the Fiat Panda that is needed%s\n' \
+printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
     "$bold$magenta" "$reset" "$grey" "$reset"
-printf '  %sCoding rules for your agents, plus three helpers: one writes code,%s\n' "$grey" "$reset"
-printf '  %stwo review it.%s\n' "$grey" "$reset"
-printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
+printf '  %sinto%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sTwo questions, then I get out of your way.%s\n' \
-    "$grey" "$reset"
+asking && printf '\n  %sTwo questions, then I get out of your way.%s\n' "$grey" "$reset"
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
     want_backlog=already
 else
     if asking; then
-        heading "Backlog.md" "— a to-do list your agents can read" "recommended" "$green"
-        body "  Tasks are plain markdown files in @backlog/@, committed with your"
-        body "  code. Agents write down where they stopped, so the next one"
-        body "  @picks up where it left off@ instead of starting over."
-        body ""
-        body "  Say yes and I set up @backlog/@ plus the notes your agents need to"
-        body "  use it. Without this they forget everything between sessions."
+        heading "Backlog.md" "— a to-do list your agents keep" "recommended" "$green"
+        body "  Agents note what they did in @backlog/@, so the next one @picks up@"
+        body "  instead of starting over. Without it, they forget every session."
         command -v backlog > /dev/null \
-            || body "  You do not have it yet — install with @npm i -g backlog.md@"
+            || body "  Not installed yet — @npm i -g backlog.md@"
     fi
     if confirm "Set up Backlog.md?" y; then
         want_backlog=yes
@@ -131,16 +124,12 @@ else
 fi
 
 if asking; then
-    heading "Parallel agents" "— notes for running several at once" "niche" "$yellow"
-    body "  How to split work between agents without them stepping on each"
-    body "  other: @build the shared parts first@, then let them work on"
-    body "  separate files, and watch the gaps nobody was told to cover."
-    body ""
-    body "  Only useful on a @big, messy codebase@. @Say no@ for anything"
-    body "  small — one agent at a time is the normal way."
+    heading "Parallel agents" "— running several at once" "niche" "$yellow"
+    body "  How to keep them from stepping on each other. Only for a"
+    body "  @big, messy codebase@ — @say no@ for anything small."
 fi
 want_parallel=no
-if confirm "Add the notes on parallel agents?" n; then
+if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
 fi
 
@@ -212,9 +201,8 @@ fi
 
 if [ "$staged_count" -gt 0 ]; then
     step "Conflicts to resolve"
-    printf '  %sYou already had some of these files. I kept yours and put mine in%s\n' "$yellow" "$reset"
-    printf '  %s%s/.pandino/merge/%s\n' "$yellow" "$target" "$reset"
-    printf '  %sTake what you want from there, then delete that folder.%s\n' "$yellow" "$reset"
+    printf '  %sYou already had some of these. Yours are untouched, mine are in%s\n' "$yellow" "$reset"
+    printf '  %s.pandino/merge/ — take what you want, then delete it.%s\n' "$yellow" "$reset"
 fi
 
 # Act on the answers collected up front.
@@ -270,10 +258,8 @@ if [ "${#skipped[@]}" -gt 0 ]; then
     done
 fi
 
-printf '\n  %sThe rules are in %sAGENTS.md%s%s — any coding agent reads that. The%s\n' \
-    "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %sthree helpers went to %s.pi/agents/%s%s, which only pi reads. Using%s\n' \
-    "$grey" "$cyan" "$reset" "$grey" "$reset"
-printf '  %ssomething else? Copy them where your tool looks for them.%s\n' \
+printf '\n  %sRules in %sAGENTS.md%s%s, read by any agent. Helpers in %s.pi/agents/%s%s,%s\n' \
+    "$grey" "$cyan" "$reset" "$grey" "$cyan" "$reset" "$grey" "$reset"
+printf '  %sread only by pi — on another tool, copy them where it looks.%s\n' \
     "$grey" "$reset"
 echo
