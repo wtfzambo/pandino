@@ -1,5 +1,7 @@
 # pandino
 
+<img src="imgs/panda.jpg" alt="A Fiat Panda 4x4 parked on a mountainside" width="100%">
+
 Coding rules for your AI agents, plus three helpers: one writes the code, two review it.
 
 The rules live in `AGENTS.md`, which every coding agent reads. The helpers are agent definitions, and each tool wants them in its own place and format, so the installer writes them for [pi](https://pi.dev) and offers to write the same three for Claude Code, opencode, and Codex. Same instructions everywhere, different wrapper.
