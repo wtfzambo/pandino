@@ -12,14 +12,14 @@ Coding agents pull the other way. Ask for a function and you get a class hierarc
 
 Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that keeps them honest: plan before writing, one writer, two reviewers who did not write it, and you reading the diff at the end. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
 
-**What you get**
+## What you get
 
 - Code you can read months later without archaeology.
 - Agents that stop and ask when the plan does not match reality, instead of improvising something plausible.
 - Changes that do what you asked and not four other things.
 - A repo where the next agent — or the next person — can pick up where the last one stopped.
 
-**What it costs**
+## What it costs
 
 - Your agent will argue for the simpler version when you were expecting the clever one.
 - Reviews before commits take an extra minute.
