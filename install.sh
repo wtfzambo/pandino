@@ -31,14 +31,23 @@ answer_mode="${2:-ask}"
 # Colors, unless piped to a file or NO_COLOR is set.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
     bold=$'\033[1m'; dim=$'\033[2m'; green=$'\033[32m'
-    blue=$'\033[34m'; yellow=$'\033[33m'; red=$'\033[31m'; reset=$'\033[0m'
+    blue=$'\033[34m'; yellow=$'\033[33m'; reset=$'\033[0m'
 else
-    bold=""; dim=""; green=""; blue=""; yellow=""; red=""; reset=""
+    bold=""; dim=""; green=""; blue=""; yellow=""; reset=""
 fi
 
 say() { printf '%s%-10s%s %s\n' "$2" "$1" "$reset" "$3"; }
 note() { printf '%s%s%s\n' "$dim" "$1" "$reset"; }
 step() { printf '\n%s%s%s\n' "$bold" "$1" "$reset"; }
+
+# True when the script will actually put a question to a human, so the
+# explanations below are printed for readers, not for agents and CI logs.
+asking() {
+    case "$answer_mode" in
+        --yes|--no-input) return 1 ;;
+    esac
+    [ -e /dev/tty ] && [ -t 1 ]
+}
 
 # Yes/no prompt, second argument is the default (y or n). Without a terminal
 # (agent, CI) nothing is asked and the add-on is skipped, so a non-interactive
@@ -49,9 +58,7 @@ confirm() {
         --yes) return 0 ;;
         --no-input) return 1 ;;
     esac
-    # Read from the terminal, not stdin: stdin is the script itself
-    # when the installer is piped from curl.
-    [ -e /dev/tty ] && [ -t 1 ] || return 1
+    asking || return 1
     local hint="${dim}[y/N]${reset}" reply
     [ "$default" = "y" ] && hint="${dim}[Y/n]${reset}"
     printf '%s%s%s %s ' "$blue" "$question" "$reset" "$hint" > /dev/tty
@@ -74,20 +81,45 @@ append_snippet() {
     say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
 }
 
+step "Pandino"
+note "Coding standards in AGENTS.md, three pi subagents (an implementer and two"
+note "reviewers), and the grilling skill for planning."
+note "Installing into $target"
+
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-step "Pandino"
-note "Installing into $target"
+asking && step "Two questions before anything is written"
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
     want_backlog=already
-elif confirm "Set up Backlog.md task tracking? Strongly recommended: it is what gives agents memory across sessions." y; then
-    want_backlog=yes
+else
+    if asking; then
+        printf '\n%sBacklog.md%s %s— task tracking that lives inside the repo%s\n' \
+            "$bold" "$reset" "$dim" "$reset"
+        note "  Tasks are markdown files under backlog/, versioned with your code."
+        note "  This is what gives agents memory across sessions: an agent reads the"
+        note "  pickup task and knows where the last one stopped. Pandino's"
+        note "  session-continuity section needs it, so the two go in together,"
+        note "  along with Backlog's own usage guidelines in AGENTS.md."
+        command -v backlog > /dev/null \
+            || note "  Heads up: the 'backlog' command is not installed yet (npm i -g backlog.md)."
+    fi
+    if confirm "Set up Backlog.md task tracking? Strongly recommended." y; then
+        want_backlog=yes
+    fi
 fi
 
+if asking; then
+    printf '\n%sParallel implementers%s %s— guidance for running several at once%s\n' \
+        "$bold" "$reset" "$dim" "$reset"
+    note "  Foundations-first sequencing instead of a merger agent, worktree"
+    note "  isolation, and where bugs hide between agent mandates."
+    note "  Niche: one implementer at a time is the default, so skip it unless you"
+    note "  already split work across agents."
+fi
 want_parallel=no
-if confirm "Add the parallel-implementer guidance? Only if several implementers run at once." n; then
+if confirm "Add the parallel-implementer guidance?" n; then
     want_parallel=yes
 fi
 
