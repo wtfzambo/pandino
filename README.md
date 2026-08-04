@@ -20,7 +20,7 @@ It asks three questions, then gets out of the way:
 
 - **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's session-continuity section. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
 - **Notes on running agents in parallel?** Only if you plan to. Defaults to no.
-- **Set the helpers up for the other tools too?** Writes them for Claude Code, opencode, and Codex as well. Defaults to no.
+- **Which other editors?** A list of Claude Code, opencode, and Codex, with the ones already on your machine ticked. Arrows to move, space to toggle, enter to confirm.
 
 No terminal, like inside an agent or CI? Then it asks nothing, skips all three, and lists them at the end.
 
@@ -58,7 +58,7 @@ Install Pandino into this repository.
 2. Ask me three questions first, and wait for my answers:
    - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
    - Add the notes on running agents in parallel? Only if I plan to. Default no.
-   - Write the helpers for other tools (Claude Code, opencode, Codex) as well as pi? Default no.
+   - Which other editors should get the helpers, besides pi? Claude Code, opencode, Codex — whichever I actually use.
 
 3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
 

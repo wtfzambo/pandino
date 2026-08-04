@@ -84,6 +84,11 @@ grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 
+# Without a terminal nothing is auto-selected, so no other harness is written.
+[ ! -e "$fresh_target/.claude" ]
+[ ! -e "$fresh_target/.opencode" ]
+[ ! -e "$fresh_target/.codex" ]
+
 # --yes also writes the agents for the other harnesses, from the same source.
 [ -f "$yes_target/.claude/agents/implementer.md" ]
 [ -f "$yes_target/.opencode/agent/implementer.md" ]

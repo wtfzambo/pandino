@@ -89,15 +89,26 @@ write_codex_agent() {
     } > "$dst"
 }
 
-# Write the three agents in the layout of every harness other than pi.
-install_for_harnesses() {
-    local kit="$1" target="$2" name
+# Where each harness keeps its project-scoped agents.
+harness_dir() {
+    case "$2" in
+        claude)   echo "$1/.claude/agents" ;;
+        opencode) echo "$1/.opencode/agent" ;;
+        codex)    echo "$1/.codex/agents" ;;
+    esac
+}
 
-    mkdir -p "$target/.claude/agents" "$target/.opencode/agent" "$target/.codex/agents"
+# Write the three agents in the layout one harness expects.
+write_harness_agents() {
+    local kit="$1" target="$2" harness="$3" dir name
+    dir="$(harness_dir "$target" "$harness")"
+    mkdir -p "$dir"
     for agent in "$kit"/agents/*.md; do
         name="$(basename "$agent" .md)"
-        write_claude_agent "$agent" "$target/.claude/agents/$name.md"
-        write_opencode_agent "$agent" "$target/.opencode/agent/$name.md"
-        write_codex_agent "$agent" "$target/.codex/agents/$name.toml"
+        case "$harness" in
+            claude)   write_claude_agent "$agent" "$dir/$name.md" ;;
+            opencode) write_opencode_agent "$agent" "$dir/$name.md" ;;
+            codex)    write_codex_agent "$agent" "$dir/$name.toml" ;;
+        esac
     done
 }

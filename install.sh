@@ -88,6 +88,74 @@ confirm() {
     [[ "$reply" =~ ^[Yy] ]]
 }
 
+# Arrow-key multi-select over "key:Label" pairs, preselected when the tool is
+# installed. Sets picked_keys to the chosen keys, space separated.
+# Falls back to the preselection when the terminal cannot do raw mode.
+pick_many() {
+    local options=("$@") labels=() states=() cursor=0 key rest
+    picked_keys=""
+
+    local opt
+    for opt in "${options[@]}"; do
+        labels+=("${opt#*:}")
+        if command -v "${opt%%:*}" > /dev/null; then states+=(on); else states+=(off); fi
+    done
+
+    if ! asking || ! stty -g < /dev/tty > /dev/null 2>&1; then
+        local i
+        for i in "${!options[@]}"; do
+            [ "${states[$i]}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
+        done
+        return
+    fi
+
+    local saved
+    saved="$(stty -g < /dev/tty)"
+    # Restore the terminal even if the user quits mid-prompt.
+    trap 'stty "$saved" < /dev/tty; printf "\033[?25h" > /dev/tty' RETURN INT
+    stty raw -echo < /dev/tty
+    printf '\033[?25l' > /dev/tty
+
+    local first=1 i
+    while :; do
+        [ "$first" = 1 ] || printf '\033[%dA' "${#options[@]}" > /dev/tty
+        first=0
+        for i in "${!options[@]}"; do
+            local mark="${dim}○${reset}" line="$grey"
+            [ "${states[$i]}" = on ] && mark="${green}●${reset}" && line="$reset"
+            if [ "$i" = "$cursor" ]; then
+                printf '\r\033[K    %s❯%s %s %s%s%s\n' \
+                    "$cyan" "$reset" "$mark" "$bold" "${labels[$i]}" "$reset" > /dev/tty
+            else
+                printf '\r\033[K      %s %s%s%s\n' \
+                    "$mark" "$line" "${labels[$i]}" "$reset" > /dev/tty
+            fi
+        done
+
+        IFS= read -r -n1 key < /dev/tty
+        case "$key" in
+            $'\033')
+                IFS= read -r -n2 -t 0.1 rest < /dev/tty
+                case "$rest" in
+                    '[A') cursor=$(( (cursor - 1 + ${#options[@]}) % ${#options[@]} )) ;;
+                    '[B') cursor=$(( (cursor + 1) % ${#options[@]} )) ;;
+                esac
+                ;;
+            ' ')
+                if [ "${states[$cursor]}" = on ]; then states[$cursor]=off; else states[$cursor]=on; fi
+                ;;
+            k) cursor=$(( (cursor - 1 + ${#options[@]}) % ${#options[@]} )) ;;
+            j) cursor=$(( (cursor + 1) % ${#options[@]} )) ;;
+            ''|$'\n'|$'\r') break ;;
+            q|$'\003') states=(); break ;;
+        esac
+    done
+
+    for i in "${!options[@]}"; do
+        [ "${states[$i]:-off}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
+    done
+}
+
 # Append a snippet once; a marker line makes re-runs idempotent.
 append_snippet() {
     local snippet="$1" name="$2"
@@ -136,15 +204,20 @@ if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
 fi
 
-if asking; then
-    heading "Other tools" "— Claude Code, opencode, Codex" "optional" "$cyan"
-    body "  The helpers are written for pi. I can write them again for"
-    body "  @Claude Code@, @opencode@ and @Codex@, from the same source."
-fi
-want_harnesses=no
-if confirm "Set them up for the other tools too?" n; then
-    want_harnesses=yes
-fi
+picked_keys=""
+case "$answer_mode" in
+    --no-input) ;;
+    --yes) picked_keys="claude opencode codex" ;;
+    *)
+        if asking; then
+            heading "Other tools" "— same helpers, other editors" "optional" "$cyan"
+            body "  Ticked ones are already on your machine. @space@ toggles,"
+            body "  @arrows@ move, @enter@ confirms."
+            printf '\n' > /dev/tty
+        fi
+        pick_many "claude:Claude Code" "opencode:opencode" "codex:Codex"
+        ;;
+esac
 
 # Generated candidates are disposable and rebuilt from the current kit.
 rm -rf "$target/.pandino/merge"
@@ -192,12 +265,10 @@ for agent in "$kit_dir"/agents/*.md; do
         "$target/.pandino/merge/agents/$name"
 done
 
-if [ "$want_harnesses" = yes ]; then
-    install_for_harnesses "$kit_dir" "$target"
-    say installed "$green" "$target/.claude/agents/ ${dim}(3 agents)${reset}"
-    say installed "$green" "$target/.opencode/agent/ ${dim}(3 agents)${reset}"
-    say installed "$green" "$target/.codex/agents/ ${dim}(3 agents)${reset}"
-fi
+for harness in $picked_keys; do
+    write_harness_agents "$kit_dir" "$target" "$harness"
+    say installed "$green" "$(harness_dir "$target" "$harness")/ ${dim}(3 agents)${reset}"
+done
 
 # Grilling skill: always fetch the latest from Matt Pocock's repo.
 mkdir -p "$target/.pi/skills/grilling"
@@ -269,8 +340,8 @@ else
     skipped+=("Parallel agents: add .pandino/snippets/parallel-agents.md to AGENTS.md when you need it")
 fi
 
-[ "$want_harnesses" = yes ] \
-    || skipped+=("Claude Code, opencode, Codex: run this again and say yes to set the helpers up for them too")
+[ -n "$picked_keys" ] \
+    || skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex")
 
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
