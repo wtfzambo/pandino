@@ -1,12 +1,31 @@
 # pandino
 
+<p align="center">
 <img src="imgs/panda.jpg" alt="A Fiat Panda 4x4 parked on a mountainside" width="70%">
+</p>
 
-Coding rules for your AI agents, plus three helpers: one writes the code, two review it.
+**Keep your AI agents writing code you can still fix at 3am, two years from now.**
 
-The rules live in `AGENTS.md`, which every coding agent reads. The helpers are agent definitions, and each tool wants them in its own place and format, so the installer writes them for [pi](https://pi.dev) and offers to write the same three for Claude Code, opencode, and Codex. Same instructions everywhere, different wrapper.
+The Fiat Panda is not fast and not clever. It is simple enough that a mechanic in a village with one garage can fix it, it still runs after 400,000 km, and it will take you up a mountain. That is the standard here.
 
-Build the Fiat Panda that is needed, not an intergalactic rocket.
+Coding agents pull the other way. Ask for a function and you get a class hierarchy; ask for a fix and you get a refactor; ask for a feature and you get configuration for five you never wanted. It all works on the day it is written. Then you come back in six months, and nobody — you or the next agent — can tell what any of it is for.
+
+Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that keeps them honest: plan before writing, one writer, two reviewers who did not write it, and you reading the diff at the end. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
+
+**What you get**
+
+- Code you can read months later without archaeology.
+- Agents that stop and ask when the plan does not match reality, instead of improvising something plausible.
+- Changes that do what you asked and not four other things.
+- A repo where the next agent — or the next person — can pick up where the last one stopped.
+
+**What it costs**
+
+- Your agent will argue for the simpler version when you were expecting the clever one.
+- Reviews before commits take an extra minute.
+- Some of your existing code will look worse once something is checking.
+
+If you want the intergalactic rocket, this is the wrong kit. Build the Panda that gets you there.
 
 ## Install
 
@@ -36,11 +55,11 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips all three, 
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
-The three helpers:
+The three helpers, and what each one is there to prevent:
 
-- **implementer** — takes an approved plan and writes the code, one slice at a time.
-- **taste-reviewer** — judges *how* the code is written, against the rules in `AGENTS.md`.
-- **spec-reviewer** — judges *what* it does, against what you asked for.
+- **implementer** — writes the code from an approved plan, one slice at a time. Stops and reports instead of improvising when the plan does not survive contact with the code.
+- **taste-reviewer** — reads *how* it is written. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
+- **spec-reviewer** — reads *what* it does, against what you actually asked for. Catches the missing half of the requirement, and the three features you never requested.
 
 ### If you already have an AGENTS.md
 
@@ -77,13 +96,13 @@ Sort out obvious duplication yourself. Past the three questions in step 2, only 
 
 ## How the workflow runs
 
-The main agent plans; the three helpers do the specialised work.
+One agent plans and coordinates. Three helpers do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan.
 
-1. Read the repo and the real code before proposing anything.
-2. For anything non-trivial, agree on a plan with the user first — the grilling skill is there to poke holes in it.
-3. Hand the agreed plan to the implementer.
-4. Before any real commit, run both reviewers on the diff. Fix what they find, or explain why not.
-5. Check the result yourself. The agent's report says what it meant to do; only the diff says what happened.
+1. Read the repo and the real code first. Most bad changes start as a confident guess about code nobody opened.
+2. Agree on a plan before writing anything non-trivial. The grilling skill exists to attack the plan while it is still cheap to change.
+3. Hand the agreed plan to the implementer. If it turns out the plan contradicts the actual code, the implementer stops and says so rather than inventing a way through — that report is a planning bug, not a failure.
+4. Before a real commit, both reviewers read the diff: one asks whether it is written well, the other whether it does what you asked and nothing more. Fix what they find, or say why not.
+5. Read the diff yourself. Every agent's report describes what it meant to do; only the diff describes what happened. This step is where the bugs nobody was assigned to catch turn up.
 
 Pick the models with the user at setup time. The names in the frontmatter are ones that tested well, not requirements — the [benchmarks](NOTES.md) found cheap models perfectly competitive in all three roles. What separates them is behaviour: stopping when the plan contradicts the code, and not inventing problems on a clean diff. Save an expensive model for the one whole-branch review before a merge.
 
