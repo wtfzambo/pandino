@@ -30,20 +30,20 @@ agent_role() {
 # NOTES.md: terra implements cheapest with a clean stop on a wrong plan;
 # deepseek and glm review perfectly for cents; opus is kept out of routine
 # review (noisiest on clean diffs, 10-100x the cost) and saved for the one
-# whole-branch pass, where that thoroughness is the point.
+# whole-branch pass, where that thoroughness is the point. Claude's fable is
+# absent everywhere: it is the priciest of that family, and opus already fills
+# the one role worth paying for.
 role_preferences() {
     case "$1" in
         implementer)
-            printf '%s\n' gpt-5.6-terra claude-sonnet-5 sonnet gpt-5.6-sol \
-                gpt-5.6 claude-fable-5 fable
+            printf '%s\n' gpt-5.6-terra claude-sonnet-5 sonnet gpt-5.6-sol gpt-5.6
             ;;
         reviewer)
             printf '%s\n' deepseek-v4-flash glm-5.2 kimi-k2.6 kimi-k2.7-code \
-                claude-sonnet-5 sonnet gpt-5.6-terra claude-fable-5 fable
+                claude-sonnet-5 sonnet gpt-5.6-terra
             ;;
         final)
-            printf '%s\n' claude-opus-5 opus claude-fable-5 fable gpt-5.6-sol \
-                gpt-5.6 claude-sonnet-5 sonnet
+            printf '%s\n' claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet
             ;;
     esac
 }

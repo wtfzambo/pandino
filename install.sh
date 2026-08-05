@@ -29,7 +29,7 @@ target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
 
 kit_agents=""
-trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"' EXIT
+trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"; [ -n "${spinner_pid:-}" ] && kill "$spinner_pid" 2> /dev/null' EXIT
 
 # shellcheck source=harnesses.sh
 . "$kit_dir/harnesses.sh"
@@ -72,6 +72,31 @@ asking() {
         --yes|--no-input) return 1 ;;
     esac
     [ -e /dev/tty ] && [ -t 1 ]
+}
+
+# Animated dots on one line, for the few seconds spent shelling out to each
+# editor for its model list. Silent without a terminal, so agent and CI logs
+# stay clean.
+spinner_pid=""
+spinner_start() {
+    asking || return 0
+    (
+        while :; do
+            for dots in '.  ' '.. ' '...'; do
+                printf '\r\033[K  %s%s%s%s' "$grey" "$1" "$dots" "$reset" > /dev/tty
+                sleep 0.3
+            done
+        done
+    ) &
+    spinner_pid=$!
+}
+
+spinner_stop() {
+    [ -n "$spinner_pid" ] || return 0
+    kill "$spinner_pid" 2> /dev/null || true
+    wait "$spinner_pid" 2> /dev/null || true
+    spinner_pid=""
+    printf '\r\033[K' > /dev/tty
 }
 
 # Return the conventional global path for a skill pi already knows about.
@@ -363,16 +388,35 @@ resolve_harness_models() {
     return 0
 }
 
-# One line per harness: which model each of its helpers will run on.
+# One row per harness under a shared header, columns padded to their widest
+# value. Model ids run long and differ per harness, so a label before every
+# value (implementer x, reviewer y) is unreadable at four harnesses.
 print_model_matrix() {
-    local harness impl rev fin
+    local harness role var value
+    local -a widths=(11 9 5)   # the header words are the minimum width
+    local i
+
     for harness in $picked_keys; do
-        impl="model_${harness}_implementer"
-        rev="model_${harness}_reviewer"
-        fin="model_${harness}_final"
-        printf '  %s  · %s%-9s%s %sreviewers%s %s  %simplementer%s %s  %sfinal%s %s\n' \
-            "$grey" "$reset" "$harness" "$grey" "$grey" "$reset" "${!rev:-main model}" \
-            "$grey" "$reset" "${!impl:-main model}" "$grey" "$reset" "${!fin:-main model}"
+        i=0
+        for role in implementer reviewer final; do
+            var="model_${harness}_${role}"
+            value="${!var:-main model}"
+            [ "${#value}" -gt "${widths[$i]}" ] && widths[$i]="${#value}"
+            i=$((i + 1))
+        done
+    done
+
+    printf '  %s    %-9s %-*s  %-*s  %s%s\n' \
+        "$grey" "" "${widths[0]}" "implementer" "${widths[1]}" "reviewers" "final" "$reset"
+    for harness in $picked_keys; do
+        local impl="model_${harness}_implementer"
+        local rev="model_${harness}_reviewer"
+        local fin="model_${harness}_final"
+        printf '  %s  · %s%-9s %-*s  %-*s  %s\n' \
+            "$grey" "$reset" "$harness" \
+            "${widths[0]}" "${!impl:-main model}" \
+            "${widths[1]}" "${!rev:-main model}" \
+            "${!fin:-main model}"
     done
 }
 
@@ -406,9 +450,11 @@ customize_models() {
     return 0
 }
 
+spinner_start "reading model lists"
 for harness in $picked_keys; do
     resolve_harness_models "$harness"
 done
+spinner_stop
 
 # Show the whole assignment at once: four pickers in a row would be a worse
 # question than the one it answers.
@@ -550,7 +596,10 @@ case " $picked_keys " in
     *" pi "*)
         # pi downloads npm packages here. Agents, skills, and settings stay
         # trackable so teammates get the same setup.
-        if [ -d "$target/.git" ] && ! grep -qxF '.pi/npm/' "$target/.gitignore" 2> /dev/null; then
+        # Ask git, not the file: a repo that already ignores all of .pi/ needs
+        # no rule of its own, and grepping for the exact line would miss that.
+        if [ -d "$target/.git" ] \
+            && ! (cd "$target" && git check-ignore -q .pi/npm/ 2> /dev/null); then
             printf '\n# pi project-local package installs.\n.pi/npm/\n' >> "$target/.gitignore"
             say appended "$green" ".pi/npm/ ${dim}to${reset} $target/.gitignore"
         fi
