@@ -12,7 +12,8 @@ core_agents() {
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-mkdir -p "$tmp_dir/bin"
+mkdir -p "$tmp_dir/bin" "$tmp_dir/home"
+export HOME="$tmp_dir/home"
 cat > "$tmp_dir/bin/curl" <<'EOF'
 #!/bin/sh
 while [ "$#" -gt 0 ]; do
@@ -186,6 +187,22 @@ bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes2.out"
 [ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$yes_target/AGENTS.md")" = "1" ]
 grep -E "unchanged +$yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
 [ ! -e "$yes_target/.pandino/merge" ]
+
+# Skills already available in pi's global locations are reused, not copied
+# into every project.
+global_home="$tmp_dir/global-home"
+mkdir -p \
+    "$global_home/.pi/agent/skills/grilling" \
+    "$global_home/.agents/skills/i-have-adhd"
+printf '%s\n' 'global grilling' > "$global_home/.pi/agent/skills/grilling/SKILL.md"
+printf '%s\n' 'global adhd' > "$global_home/.agents/skills/i-have-adhd/SKILL.md"
+global_target="$tmp_dir/global"
+mkdir "$global_target"
+HOME="$global_home" bash "$repo_dir/install.sh" "$global_target" --yes > "$tmp_dir/global.out"
+[ ! -e "$global_target/.pi/skills/grilling" ]
+[ ! -e "$global_target/.pi/skills/i-have-adhd" ]
+grep -F "grilling (global)" "$tmp_dir/global.out" > /dev/null
+grep -F "i-have-adhd (global)" "$tmp_dir/global.out" > /dev/null
 
 # Declining leaves no Backlog and no session-continuity section.
 if grep -qF "pandino:session-continuity" "$fresh_target/AGENTS.md"; then

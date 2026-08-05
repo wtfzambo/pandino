@@ -37,11 +37,11 @@ curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | 
 
 It downloads what it needs, so there is nothing to clone. Add `--yes` to say yes to everything, `--no-input` to say no to everything. If you have a local copy, `./install.sh /path/to/repo` does the same.
 
-It asks four questions, then gets out of the way:
+It asks up to four questions, then gets out of the way:
 
 - **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's session-continuity section. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
 - **Notes on running agents in parallel?** Only if you plan to. Defaults to no.
-- **The i-have-adhd skill?** Replies that lead with the next action instead of a wall of prose. Off until you type `/i-have-adhd`, off again on "stop adhd mode". Defaults to no.
+- **The i-have-adhd skill?** Replies that lead with the next action instead of a wall of prose. Off until you type `/i-have-adhd`, off again on "stop adhd mode". Defaults to no; skipped if pi already has it globally.
 - **Which editors?** A list of pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`.
 
 No terminal, like inside an agent or CI? Then it asks nothing, skips the optional parts, and lists them at the end. Either way it finishes with a recap of what is now in the repo and what each piece is for.
@@ -52,7 +52,7 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips the optiona
 |---|---|
 | `AGENTS.md` | repo root — the coding rules, ~90 lines |
 | the three helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` |
-| skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Both refetched every run |
+| skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
@@ -66,7 +66,7 @@ The three helpers, and what each one is there to prevent:
 
 Yours is never overwritten. Anything that clashes goes to `.pandino/merge/` for you to look at, and that folder is rebuilt every run, so old leftovers do not pile up. Merge what you want, then delete it — keep `.pandino/snippets/`, which is not a staging area.
 
-The grilling skill is the exception: it is refetched from upstream every time.
+The grilling skill is the exception: its local copy is refetched from upstream every time. If it already exists globally, Pandino leaves it there and adds no project copy.
 
 ## Install with an AI agent
 
@@ -77,10 +77,10 @@ Install Pandino into this repository.
 
 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
 
-2. Ask me four questions first, and wait for my answers:
+2. Ask me up to four questions first, and wait for my answers:
    - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
    - Add the notes on running agents in parallel? Only if I plan to. Default no.
-   - Add the i-have-adhd skill, for replies that lead with the next action? It stays off until I type /i-have-adhd. Default no.
+   - Add the i-have-adhd skill, for replies that lead with the next action? It stays off until I type /i-have-adhd. Default no; do not ask or install it locally if pi already has it globally.
    - Which editors should get the helpers? pi, Claude Code, opencode, Codex — whichever I actually use.
 
 3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
@@ -93,7 +93,7 @@ Install Pandino into this repository.
 
 7. Verify: your tool can see the three helpers and the grilling skill, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
-Sort out obvious duplication yourself. Past the four questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
+Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
 ```
 
 ## How the workflow runs
@@ -132,13 +132,13 @@ Edit them there, not in `.pandino/snippets/` — that folder is rewritten on eve
 
 ## Also worth having
 
-The installer offers [i-have-adhd](https://github.com/ayghri/i-have-adhd) per repo. If you want it everywhere instead, install it once at global scope and decline the question:
+The installer offers [i-have-adhd](https://github.com/ayghri/i-have-adhd) per repo. If you want it everywhere instead, install it once at global scope:
 
 ```bash
 npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
 ```
 
-It is off by default either way: nothing changes until you type `/i-have-adhd`.
+Pandino detects the global copy and does not ask for or install a local duplicate. It is off by default either way: nothing changes until you type `/i-have-adhd`.
 
 ## Deliberately not here
 

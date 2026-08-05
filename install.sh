@@ -72,6 +72,20 @@ asking() {
     [ -e /dev/tty ] && [ -t 1 ]
 }
 
+# Return the conventional global path for a skill pi already knows about.
+global_skill_path() {
+    local name="$1" path
+    [ -n "${HOME:-}" ] || return 1
+    for path in \
+        "$HOME/.pi/agent/skills/$name/SKILL.md" \
+        "$HOME/.pi/agent/skills/$name.md" \
+        "$HOME/.agents/skills/$name/SKILL.md"
+    do
+        [ -f "$path" ] && { printf '%s\n' "$path"; return 0; }
+    done
+    return 1
+}
+
 # Yes/no prompt, second argument is the default (y or n). Without a terminal
 # (agent, CI) nothing is asked and the add-on is skipped, so a non-interactive
 # run never blocks.
@@ -216,7 +230,7 @@ printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$res
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sThree quick questions, then I get out of your way.%s\n' "$grey" "$reset"
+asking && printf '\n  %sA few quick questions, then I get out of your way.%s\n' "$grey" "$reset"
 
 want_backlog=no
 if [ -d "$target/backlog" ]; then
@@ -244,14 +258,24 @@ if confirm "Add the parallel-agent notes?" n; then
     want_parallel=yes
 fi
 
-if asking; then
-    heading "Short replies" "— the i-have-adhd skill" "optional" "$cyan"
-    body "  Answers that lead with the next action instead of a wall of prose."
-    body "  Turn it on with @/i-have-adhd@, off by saying @stop adhd mode@."
-fi
+global_grilling="$(global_skill_path grilling || true)"
+global_adhd="$(global_skill_path i-have-adhd || true)"
 want_adhd=no
-if confirm "Add the i-have-adhd skill?" n; then
-    want_adhd=yes
+if [ -n "$global_adhd" ]; then
+    want_adhd=global
+    if asking; then
+        heading "Short replies" "— the i-have-adhd skill" "already global" "$green"
+        body "  pi already has it globally, so this repo needs no copy."
+    fi
+else
+    if asking; then
+        heading "Short replies" "— the i-have-adhd skill" "optional" "$cyan"
+        body "  Answers that lead with the next action instead of a wall of prose."
+        body "  Turn it on with @/i-have-adhd@, off by saying @stop adhd mode@."
+    fi
+    if confirm "Add the i-have-adhd skill?" n; then
+        want_adhd=yes
+    fi
 fi
 
 picked_keys="pi"
@@ -343,8 +367,12 @@ install_skill() {
 
 case " $picked_keys " in
     *" pi "*)
-        install_skill grilling \
-            "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md"
+        if [ -n "$global_grilling" ]; then
+            say unchanged "$dim" "grilling skill already global"
+        else
+            install_skill grilling \
+                "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md"
+        fi
         [ "$want_adhd" = yes ] && install_skill i-have-adhd \
             "https://raw.githubusercontent.com/ayghri/i-have-adhd/main/.cursor/skills/i-have-adhd/SKILL.md"
         ;;
@@ -429,8 +457,8 @@ case "$picked_keys" in
     *) skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex") ;;
 esac
 
-[ "$want_adhd" = yes ] \
-    || skipped+=("Short replies: run this again to add the i-have-adhd skill")
+[ "$want_adhd" = no ] \
+    && skipped+=("Short replies: run this again to add the i-have-adhd skill")
 
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
@@ -451,8 +479,14 @@ done
 
 case " $picked_keys " in
     *" pi "*)
-        recap ".pi/skills/grilling/" " — /skill:grilling picks holes in a plan"
-        if [ "$want_adhd" = yes ]; then
+        if [ -n "$global_grilling" ]; then
+            recap "grilling (global)" " — /skill:grilling picks holes in a plan"
+        else
+            recap ".pi/skills/grilling/" " — /skill:grilling picks holes in a plan"
+        fi
+        if [ "$want_adhd" = global ]; then
+            recap "i-have-adhd (global)" " — /i-have-adhd for short, action-first replies"
+        elif [ "$want_adhd" = yes ]; then
             recap ".pi/skills/i-have-adhd/" " — /i-have-adhd for short, action-first replies"
         fi
         ;;
