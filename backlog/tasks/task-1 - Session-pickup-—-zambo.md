@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-05 16:22'
+updated_date: '2026-08-05 17:12'
 labels:
   - continuity
   - handoff
@@ -18,10 +18,10 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-05. Branch `main` contains implementation commit `144ff42` for completed `TASK-2`; a later pickup-only commit records this snapshot. Both commits are pushed to `origin/main`, and the working tree is clean. The fix makes the editor picker continue when only pi is selected, ignores pi's downloaded `.pi/npm/` runtime while keeping `.pi/agents`, `.pi/skills`, and `.pi/settings.json` trackable, and adds interactive plus non-interactive regression coverage. `bash tests/test_install.sh`, Bash syntax checks, and `git diff --check` pass. Taste/spec reviews were run locally because this harness exposes no subagent delegation tool.
+2026-08-05. Branch `main` contains implementation commit `6fdd37b` for completed `TASK-3`; a later pickup-only commit records this snapshot. Both commits are pushed to `origin/main`, and the working tree is clean. Pandino now detects grilling and i-have-adhd in pi's standard global skill locations, reuses them without project copies, skips the i-have-adhd question when it is already global, and keeps local installation unchanged when globals are absent. README and regression coverage match the behavior. `bash tests/test_install.sh`, Bash syntax checks, and `git diff --check` pass. Taste/spec reviews were run locally because this harness exposes no subagent delegation tool.
 
 WHAT'S NEXT
-1. Nothing is pending for `TASK-2`.
+1. Nothing is pending for `TASK-3`.
 2. For the next change, start with `git log --oneline -3` and the relevant Backlog task.
 
 WAITING ON / GATED BY
@@ -29,8 +29,8 @@ Nothing as of 2026-08-05.
 
 VERIFY
 `git status -sb` should show clean `main` in sync with `origin/main`.
-`git log --oneline -3` should include `144ff42` and the later pickup-only commit.
-`backlog task view TASK-2 --plain` should show Done with all acceptance criteria checked.
+`git log --oneline -3` should include `6fdd37b` and the later pickup-only commit.
+`backlog task view TASK-3 --plain` should show Done with all acceptance criteria checked.
 `bash tests/test_install.sh` should print `test_install.sh: PASS`.
 <!-- SECTION:DESCRIPTION:END -->
 
