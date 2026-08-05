@@ -104,3 +104,49 @@ A change is complete when its behavior satisfies the requirement, the implementa
 <!-- Project-specific sections go below this line: toolchain, domain context,
      session continuity IDs, infra conventions. Keep them short; the principles
      above do not change per project. -->
+
+<!-- BACKLOG.MD GUIDELINES START -->
+<!-- backlog.md-instructions-version: 1.48.0 -->
+<CRITICAL_INSTRUCTION>
+
+## Backlog.md Workflow
+
+This project uses Backlog.md for task and project management.
+
+**For every user request in this project, run `backlog instructions overview` before answering or taking action.**
+
+Use the overview to decide whether to search, read, create, or update Backlog tasks.
+
+Before task lifecycle actions, read the matching detailed guide:
+- `backlog instructions task-creation` before creating or splitting tasks
+- `backlog instructions task-execution` before planning, changing status or assignee, adding a plan or implementation notes, or implementing task work
+- `backlog instructions task-finalization` before checking acceptance criteria, writing final summaries, or moving tasks to terminal statuses
+
+Use `backlog <command> --help` before running unfamiliar commands. Help shows options, fields, and examples.
+
+Do not edit Backlog task, draft, document, decision, or milestone markdown files directly. Use the `backlog` CLI so metadata, relationships, and history stay consistent.
+
+</CRITICAL_INSTRUCTION>
+<!-- BACKLOG.MD GUIDELINES END -->
+
+<!-- pandino:session-continuity -->
+## Session continuity
+
+Context does not persist between agent sessions. Preserve it with one personal Backlog task per operator named `Session pickup — <name>`. The task is a replaceable current snapshot, not a diary; Git history and normal Backlog tasks preserve history.
+
+At the start or resumption of project work:
+
+1. Run `backlog instructions overview`.
+2. Find the operator's task with `backlog search "Session pickup" --plain` and read it with `backlog task view <ID> --plain`.
+3. Follow the durable file and task references in the snapshot instead of relying on duplicated context.
+4. Verify reality with `git status -sb`, `git log --oneline -5`, the referenced Backlog tasks, and any checks named in the snapshot. If reality differs, trust the repository and tools.
+5. Continue from the first actionable item under `WHAT'S NEXT`.
+
+Update the pickup task exactly once, as the last project action of the session or immediately before an explicit handoff — never after each intermediate change, and never as an appended log. The replacement snapshot must answer, in this order:
+
+1. `WHERE WE LEFT OFF` — absolute date, branch and commit, push state, clean or dirty tree, completed and partial work, with durable references.
+2. `WHAT'S NEXT` — ordered concrete actions, preferably with the exact first command or file.
+3. `WAITING ON / GATED BY` — decisions, people, credentials, or external services, with absolute dates.
+4. `VERIFY` — commands that prove the snapshot still matches reality.
+
+Write for a reader with zero memory. Record substantial future work as normal Backlog tasks; the pickup task only points to it. If an operator has no pickup task, create one through the Backlog CLI with the `continuity` and `handoff` labels, high priority, and the operator as assignee.

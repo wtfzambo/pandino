@@ -16,7 +16,7 @@ target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
 # Without the kit beside the script, fetch it.
 if [ ! -f "$kit_dir/agents/implementer.md" ]; then
     kit_dir="$(mktemp -d)"
-    trap 'rm -rf "$kit_dir"' EXIT
+    downloaded_kit="$kit_dir"
     if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
         | tar -xz -C "$kit_dir" --strip-components=1 2> /dev/null; then
         printf 'error: could not download the Pandino kit.\n' >&2
@@ -27,6 +27,9 @@ fi
 
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
+
+kit_agents=""
+trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"' EXIT
 
 # shellcheck source=harnesses.sh
 . "$kit_dir/harnesses.sh"
@@ -294,11 +297,16 @@ core_only() {
         | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
 
-if [ -e "$target/AGENTS.md" ] && diff -q <(core_only "$kit_dir/AGENTS.md") <(core_only "$target/AGENTS.md") > /dev/null; then
+# Pandino's own repo has the optional sections appended to its AGENTS.md, so
+# install the core and let the snippets be appended per repo as usual.
+kit_agents="$(mktemp)"
+core_only "$kit_dir/AGENTS.md" > "$kit_agents"
+
+if [ -e "$target/AGENTS.md" ] && diff -q "$kit_agents" <(core_only "$target/AGENTS.md") > /dev/null; then
     say unchanged "$dim" "$target/AGENTS.md"
 else
     install_or_stage \
-        "$kit_dir/AGENTS.md" \
+        "$kit_agents" \
         "$target/AGENTS.md" \
         "$target/.pandino/merge/AGENTS.md"
 fi

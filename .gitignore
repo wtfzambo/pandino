@@ -2,3 +2,8 @@ __pycache__/
 # Raw pi transcripts are hundreds of MB; keep the CSVs, reviews, and judge verdicts.
 bench/*/results/raw/*.jsonl
 bench/*/results/raw/*.err
+
+# Pandino installed into itself: the agent definitions live in agents/ and the
+# snippets in snippets/, so the generated copies are noise.
+.pi/
+.pandino/

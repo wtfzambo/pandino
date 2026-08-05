@@ -2,6 +2,13 @@
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
+
+# What the installer is expected to write: the kit's AGENTS.md up to the
+# first appended section.
+core_agents() {
+    awk '/<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
+        | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+}
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
@@ -39,7 +46,7 @@ fresh_target="$tmp_dir/fresh"
 mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
 
-cmp -s "$repo_dir/AGENTS.md" "$fresh_target/AGENTS.md"
+diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
 cmp -s "$repo_dir/agents/implementer.md" "$fresh_target/.pi/agents/implementer.md"
 cmp -s "$repo_dir/agents/spec-reviewer.md" "$fresh_target/.pi/agents/spec-reviewer.md"
 cmp -s "$repo_dir/agents/taste-reviewer.md" "$fresh_target/.pi/agents/taste-reviewer.md"
@@ -58,12 +65,12 @@ bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/merge.out"
 
 cmp -s "$tmp_dir/existing-AGENTS.md" "$merge_target/AGENTS.md"
 cmp -s "$tmp_dir/existing-taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
-cmp -s "$repo_dir/AGENTS.md" "$merge_target/.pandino/merge/AGENTS.md"
+diff -q <(core_agents "$repo_dir/AGENTS.md") "$merge_target/.pandino/merge/AGENTS.md" > /dev/null
 cmp -s "$repo_dir/agents/taste-reviewer.md" "$merge_target/.pandino/merge/agents/taste-reviewer.md"
 grep -E "staged +$merge_target/.pandino/merge/AGENTS.md for $merge_target/AGENTS.md" "$tmp_dir/merge.out" > /dev/null
 grep -E "staged +$merge_target/.pandino/merge/agents/taste-reviewer.md for $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/merge.out" > /dev/null
 
-cp "$repo_dir/AGENTS.md" "$merge_target/AGENTS.md"
+core_agents "$repo_dir/AGENTS.md" > "$merge_target/AGENTS.md"
 cp "$repo_dir/agents/taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
 bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/resolved.out"
 [ ! -e "$merge_target/.pandino/merge" ]
@@ -76,7 +83,7 @@ grep -F "Skipped, in case you want them later:" "$tmp_dir/fresh.out" > /dev/null
 grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
 # The recap lists only what was installed: declining leaves no skill behind.
 [ ! -e "$fresh_target/.pi/skills/i-have-adhd" ]
-cmp -s "$repo_dir/AGENTS.md" "$fresh_target/AGENTS.md"
+diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
 
 # --yes appends each snippet exactly once, and re-running does not duplicate
 # them or mistake Pandino's own additions for a local conflict.
