@@ -41,6 +41,7 @@ exit 0
 STUB
 chmod +x "$tmp_dir/bin/curl" "$tmp_dir/bin/pi" "$tmp_dir/bin/backlog"
 export PATH="$tmp_dir/bin:$PATH"
+python_bin="$(command -v python3)"
 
 fresh_target="$tmp_dir/fresh"
 mkdir "$fresh_target"
@@ -94,10 +95,71 @@ grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
 
-# Without a terminal nothing is auto-selected, so no other harness is written.
-[ ! -e "$fresh_target/.claude" ]
-[ ! -e "$fresh_target/.opencode" ]
-[ ! -e "$fresh_target/.codex" ]
+# Without a terminal, the installed editors are preselected. If only pi is
+# available, trailing unselected options must not make pick_many return 1 and
+# abort the installer under set -e.
+fallback_target="$tmp_dir/fallback"
+mkdir "$fallback_target"
+env PATH="$tmp_dir/bin:/usr/bin:/bin" \
+    bash "$repo_dir/install.sh" "$fallback_target" > "$tmp_dir/fallback.out"
+[ -f "$fallback_target/.pi/agents/implementer.md" ]
+[ ! -e "$fallback_target/.claude" ]
+[ ! -e "$fallback_target/.opencode" ]
+[ ! -e "$fallback_target/.codex" ]
+
+# Exercise the same case through a real pseudo-terminal: decline the first
+# three questions, then press Enter with only pi preselected in the picker.
+cat > "$tmp_dir/drive_interactive.py" <<'PY'
+import os
+import pty
+import signal
+import sys
+
+signal.alarm(30)
+installer, target = sys.argv[1:]
+pid, fd = pty.fork()
+if pid == 0:
+    os.execvpe("bash", ["bash", installer, target], os.environ)
+
+data = b""
+for prompt, reply in [
+    (b"Set up Backlog.md?", b"n\r"),
+    (b"Add the parallel-agent notes?", b"n\r"),
+    (b"Add the i-have-adhd skill?", b"n\r"),
+    (b"enter confirm", b"\r"),
+]:
+    while prompt not in data:
+        data += os.read(fd, 65536)
+    os.write(fd, reply)
+
+try:
+    while os.read(fd, 65536):
+        pass
+except OSError:
+    pass
+_, status = os.waitpid(pid, 0)
+raise SystemExit(os.waitstatus_to_exitcode(status))
+PY
+
+interactive_target="$tmp_dir/interactive"
+mkdir "$interactive_target"
+git -C "$interactive_target" init -q
+env PATH="$tmp_dir/bin:/usr/bin:/bin" \
+    "$python_bin" "$tmp_dir/drive_interactive.py" "$repo_dir/install.sh" "$interactive_target"
+[ -f "$interactive_target/.pi/agents/implementer.md" ]
+[ ! -e "$interactive_target/.claude" ]
+
+# Downloaded npm packages stay local. Shareable pi config remains visible to
+# Git. Re-running must not duplicate the ignore rule.
+grep -qxF '.pi/npm/' "$interactive_target/.gitignore"
+mkdir -p "$interactive_target/.pi/npm"
+touch "$interactive_target/.pi/npm/package.json"
+git -C "$interactive_target" check-ignore -q .pi/npm/package.json
+! git -C "$interactive_target" check-ignore -q .pi/agents/implementer.md
+! git -C "$interactive_target" check-ignore -q .pi/skills/grilling/SKILL.md
+! git -C "$interactive_target" check-ignore -q .pi/settings.json
+bash "$repo_dir/install.sh" "$interactive_target" --no-input > "$tmp_dir/interactive2.out"
+[ "$(grep -cxF '.pi/npm/' "$interactive_target/.gitignore")" = 1 ]
 
 # --yes also writes the agents for the other harnesses, from the same source.
 [ -f "$yes_target/.claude/agents/implementer.md" ]

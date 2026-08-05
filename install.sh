@@ -109,7 +109,7 @@ pick_many() {
         for i in "${!options[@]}"; do
             [ "${states[$i]}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
         done
-        return
+        return 0
     fi
 
     local saved
@@ -157,6 +157,7 @@ pick_many() {
     for i in "${!options[@]}"; do
         [ "${states[$i]:-off}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
     done
+    return 0
 }
 
 # Append a snippet once; a marker line makes re-runs idempotent.
@@ -359,6 +360,12 @@ say installed "$green" "$target/.pandino/snippets/ ${dim}(optional sections)${re
 # Subagent runtime, project-local.
 case " $picked_keys " in
     *" pi "*)
+        # pi downloads npm packages here. Agents, skills, and settings stay
+        # trackable so teammates get the same setup.
+        if [ -d "$target/.git" ] && ! grep -qxF '.pi/npm/' "$target/.gitignore" 2> /dev/null; then
+            printf '\n# pi project-local package installs.\n.pi/npm/\n' >> "$target/.gitignore"
+            say appended "$green" ".pi/npm/ ${dim}to${reset} $target/.gitignore"
+        fi
         if command -v pi > /dev/null; then
             (cd "$target" && pi install -l --approve npm:@tintinweb/pi-subagents)
         else
