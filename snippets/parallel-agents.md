@@ -28,4 +28,4 @@ So write mandates that name the files each agent owns, assign the leftovers to y
 
 ### Match review depth to review cost
 
-Review each slice as it lands with a cheap fast model, then run one whole-branch review with the strongest model available before merging. The single expensive pass is where cross-slice contradictions surface — stale user-facing copy, constants that disagree — which per-slice reviews structurally cannot see.
+Review each slice as it lands with the two per-commit reviewers, then run `final-reviewer` once on the whole branch before merging. That single expensive pass is where cross-slice contradictions surface — stale user-facing copy, constants that disagree — which per-slice reviews structurally cannot see.

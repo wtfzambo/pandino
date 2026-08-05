@@ -108,7 +108,7 @@ Install Pandino into this repository.
 
 5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block and the <!-- pandino:session-continuity --> section, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add session continuity without Backlog.md — it describes a workflow this repo could not run.
 
-6. If you are not running on pi: the installer only wires up .pi/, which pi alone reads. Re-run it with the third question answered yes, or write the same three roles where your tool looks for them. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
+6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same four roles where your tool looks for them, each with its model pinned. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
 
 7. Verify: your tool can see the four helpers and the grilling skill, each helper has a model pinned, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
@@ -117,15 +117,16 @@ Sort out obvious duplication yourself. Past the questions in step 2, only ask me
 
 ## How the workflow runs
 
-One agent plans and coordinates. Three helpers do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan.
+One agent plans and coordinates. Four helpers do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan.
 
 1. Read the repo and the real code first. Most bad changes start as a confident guess about code nobody opened.
 2. Agree on a plan before writing anything non-trivial. The grilling skill exists to attack the plan while it is still cheap to change.
 3. Hand the agreed plan to the implementer. If it turns out the plan contradicts the actual code, the implementer stops and says so rather than inventing a way through — that report is a planning bug, not a failure.
 4. Before a real commit, both reviewers read the diff: one asks whether it is written well, the other whether it does what you asked and nothing more. Fix what they find, or say why not.
 5. Read the diff yourself. Every agent's report describes what it meant to do; only the diff describes what happened. This step is where the bugs nobody was assigned to catch turn up.
+6. Before the branch merges, run the final-reviewer once over the whole thing. It reads what the commits add up to, which per-commit review structurally cannot see.
 
-Pick the models with the user at setup time. The names in the frontmatter are ones that tested well, not requirements — the [benchmarks](NOTES.md) found cheap models perfectly competitive in all three roles. What separates them is behaviour: stopping when the plan contradicts the code, and not inventing problems on a clean diff. Save an expensive model for the one whole-branch review before a merge.
+The installer assigns the models, so no helper runs on the model that spawned it — see [which model runs each helper](#which-model-runs-each-helper). The [benchmarks](NOTES.md) found cheap models perfectly competitive at implementing and at reviewing a single commit; what separates them is behaviour, stopping when the plan contradicts the code and not inventing problems on a clean diff. The expensive model is spent once, on `final-reviewer`.
 
 ## When Pandino meets your existing rules
 
