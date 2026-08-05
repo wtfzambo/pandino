@@ -51,16 +51,35 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips the optiona
 | What | Where |
 |---|---|
 | `AGENTS.md` | repo root — the coding rules, ~90 lines |
-| the three helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` |
+| the four helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — each with a model pinned |
+| `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
 | skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
-The three helpers, and what each one is there to prevent:
+The four helpers, and what each one is there to prevent:
 
 - **implementer** — writes the code from an approved plan, one slice at a time. Stops and reports instead of improvising when the plan does not survive contact with the code.
 - **taste-reviewer** — reads *how* it is written. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
 - **spec-reviewer** — reads *what* it does, against what you actually asked for. Catches the missing half of the requirement, and the three features you never requested.
+- **final-reviewer** — one pass over the whole branch before it merges, on the strongest model you have. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
+
+### Which model runs each helper
+
+Left alone, every editor spawns its helpers on whatever model the main agent is running. A reviewer that is the same model as the writer is not a second opinion, so the installer pins one instead.
+
+It reads the models each editor can actually run, assigns one per role, and prints the result:
+
+```
+Models each agent will run on:
+  · pi        reviewers deepseek-v4-flash  implementer gpt-5.6-terra  final claude-opus-5
+```
+
+The split follows the [benchmarks](NOTES.md): a cheap, fast model implements and reviews each commit for cents, and the expensive one is saved for the single whole-branch pass, where its thoroughness is the point rather than noise.
+
+A model that is not available falls back to the next one down the list, and the substitution is printed. If nothing suitable exists, that helper follows the main model and the installer says so — it never pretends to have pinned something.
+
+The choices land in `.pandino/models.json`. Edit that file and re-run the installer to change them; your edits win over the recommendation.
 
 ### If you already have an AGENTS.md
 
@@ -91,7 +110,7 @@ Install Pandino into this repository.
 
 6. If you are not running on pi: the installer only wires up .pi/, which pi alone reads. Re-run it with the third question answered yes, or write the same three roles where your tool looks for them. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
 
-7. Verify: your tool can see the three helpers and the grilling skill, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
+7. Verify: your tool can see the four helpers and the grilling skill, each helper has a model pinned, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
 Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
 ```

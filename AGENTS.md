@@ -82,7 +82,7 @@ Code without meaningful tests is not reliable, but coverage is not the objective
 
 ## Agent workflow
 
-The main agent plans and orchestrates; three subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, defined in `.pi/agents/`. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report.
+The main agent plans and orchestrates; four subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, `final-reviewer`, defined in `.pi/agents/`. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report. Each carries its own pinned model, so a reviewer is never the same model as the writer; do not override it at spawn time.
 
 Those definitions are written for [pi](https://pi.dev). On another harness, read them as role descriptions and apply the workflow with whatever that harness offers: its own subagent mechanism, separate sessions, or a single agent that adopts one role at a time and states which. If a role cannot be delegated at all, run its review yourself against the same definition and say so — do not skip the step because the mechanism is missing.
 
@@ -92,6 +92,8 @@ Those definitions are written for [pi](https://pi.dev). On another harness, read
 4. Fix or explicitly discuss every must-fix finding before committing. Scope-creep findings from the spec reviewer are product decisions: surface them to the user instead of silently keeping or reverting the extra behavior.
 
 5. Verify the integrated result yourself before reporting done. An agent's report describes intent; only the diff describes outcome. Read the diff, re-run the checks rather than trusting reported ones, own the files no mandate covered — docs and cross-cutting comments are nobody's slice by default — and trace one full user path end to end. Slice-level correctness does not imply the path works.
+
+Before a branch merges, run `final-reviewer` once on the whole branch against its merge base. It judges composition and the end-to-end requirement, which per-commit review cannot see; it does not repeat the taste and spec passes.
 
 Small fixes the user asked for directly (a rename, a one-line bug) do not need the full loop; use judgment and say what was skipped.
 

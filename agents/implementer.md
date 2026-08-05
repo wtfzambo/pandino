@@ -1,10 +1,8 @@
 ---
 description: >-
-  Implements an approved plan, one slice at a time. Dumb code over clever code.
-  Model suggestion, not requirement: openai-codex/gpt-5.6-terra with high
-  thinking (top of the 2026-07-31 bench: cheapest, fastest, clean stop on a
-  wrong plan). Ask the user which available cost-effective coding model
-  should fill this role during setup.
+  Implements an approved plan, one slice at a time. Dumb code over clever
+  code. Stops and reports when the plan contradicts the real code, instead of
+  improvising a different design.
 tools: all
 thinking: high
 ---

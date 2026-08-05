@@ -33,6 +33,8 @@ trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"' EXIT
 
 # shellcheck source=harnesses.sh
 . "$kit_dir/harnesses.sh"
+# shellcheck source=models.sh
+. "$kit_dir/models.sh"
 
 # Colors, unless piped to a file or NO_COLOR is set.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
@@ -105,31 +107,43 @@ confirm() {
     [[ "$reply" =~ ^[Yy] ]]
 }
 
-# Arrow-key multi-select over "key:Label" pairs, preselected when the tool is
-# installed. Sets picked_keys to the chosen keys, space separated.
-# Falls back to the preselection when the terminal cannot do raw mode.
-pick_many() {
+# Arrow-key select over "key:Label" pairs, into picked. Mode "many" toggles
+# with space and starts with the installed tools ticked; mode "one" moves a
+# single mark and starts on the first entry. Without raw mode it falls back to
+# that same starting selection, so a dumb terminal still gets a sane answer.
+pick_list() {
+    local mode="$1"; shift
     local options=("$@") labels=() states=() cursor=0 key rest
-    picked_keys=""
+    picked=""
 
     local opt
     for opt in "${options[@]}"; do
         labels+=("${opt#*:}")
-        if command -v "${opt%%:*}" > /dev/null; then states+=(on); else states+=(off); fi
+        if [ "$mode" = one ]; then
+            states+=(off)
+        elif command -v "${opt%%:*}" > /dev/null; then
+            states+=(on)
+        else
+            states+=(off)
+        fi
     done
+    [ "$mode" = one ] && states[0]=on
 
     if ! asking || ! stty -g < /dev/tty > /dev/null 2>&1; then
         local i
         for i in "${!options[@]}"; do
-            [ "${states[$i]}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
+            if [ "${states[$i]}" = on ]; then picked="$picked ${options[$i]%%:*}"; fi
         done
+        picked="${picked# }"
         return 0
     fi
 
     local saved
     saved="$(stty -g < /dev/tty)"
-    # Restore the terminal even if the user quits mid-prompt.
-    trap 'stty "$saved" < /dev/tty; printf "\033[?25h" > /dev/tty' RETURN INT
+    # Restore the terminal even if the user quits mid-prompt. The settings are
+    # baked into the trap rather than read from a local at fire time: a RETURN
+    # trap outlives the call that set it, and would find the variable gone.
+    trap "stty '$saved' < /dev/tty; printf '\033[?25h' > /dev/tty" RETURN INT
     stty raw -echo < /dev/tty
     printf '\033[?25l' > /dev/tty
 
@@ -139,7 +153,11 @@ pick_many() {
         first=0
         for i in "${!options[@]}"; do
             local mark="${dim}○${reset}" line="$grey"
-            [ "${states[$i]}" = on ] && mark="${green}●${reset}" && line="$reset"
+            if [ "$mode" = one ]; then
+                [ "$i" = "$cursor" ] && mark="${green}●${reset}" && line="$reset"
+            elif [ "${states[$i]}" = on ]; then
+                mark="${green}●${reset}"; line="$reset"
+            fi
             if [ "$i" = "$cursor" ]; then
                 printf '\r\033[K    %s❯%s %s %s%s%s\n' \
                     "$cyan" "$reset" "$mark" "$bold" "${labels[$i]}" "$reset" > /dev/tty
@@ -152,25 +170,33 @@ pick_many() {
         IFS= read -r -n1 key < /dev/tty
         case "$key" in
             $'\033')
-                IFS= read -r -n2 -t 0.1 rest < /dev/tty
+                # Whole seconds only: bash 3.2, which macOS still ships,
+                # rejects a fractional timeout outright. The rest of an arrow
+                # key is already in the buffer, so this never actually waits.
+                IFS= read -r -n2 -t 1 rest < /dev/tty
                 case "$rest" in
                     '[A') cursor=$(( (cursor - 1 + ${#options[@]}) % ${#options[@]} )) ;;
                     '[B') cursor=$(( (cursor + 1) % ${#options[@]} )) ;;
                 esac
                 ;;
             ' ')
+                [ "$mode" = one ] && continue
                 if [ "${states[$cursor]}" = on ]; then states[$cursor]=off; else states[$cursor]=on; fi
                 ;;
             k) cursor=$(( (cursor - 1 + ${#options[@]}) % ${#options[@]} )) ;;
             j) cursor=$(( (cursor + 1) % ${#options[@]} )) ;;
-            ''|$'\n'|$'\r') break ;;
+            ''|$'\n'|$'\r')
+                [ "$mode" = one ] && { states=(); states[$cursor]=on; }
+                break
+                ;;
             q|$'\003') states=(); break ;;
         esac
     done
 
     for i in "${!options[@]}"; do
-        [ "${states[$i]:-off}" = on ] && picked_keys="$picked_keys ${options[$i]%%:*}"
+        if [ "${states[$i]:-off}" = on ]; then picked="$picked ${options[$i]%%:*}"; fi
     done
+    picked="${picked# }"
     return 0
 }
 
@@ -289,9 +315,124 @@ case "$answer_mode" in
             body "  @↑↓ move, space select, enter confirm@"
             printf '\n' > /dev/tty
         fi
-        pick_many "pi:pi" "claude:Claude Code" "opencode:opencode" "codex:Codex"
+        pick_list many "pi:pi" "claude:Claude Code" "opencode:opencode" "codex:Codex"
+        picked_keys="$picked"
         ;;
 esac
+
+# Without a pinned model each harness spawns subagents on the orchestrator's
+# own model, so the reviewers are the same model as the writer. Resolve one
+# model per role from what each picked harness can actually run, remembering
+# earlier answers so a re-run does not undo a hand-edited choice.
+models_file="$target/.pandino/models.json"
+model_notes=()
+
+# Anything already chosen wins over the recommendation.
+if [ -f "$models_file" ]; then
+    while IFS='=' read -r key value; do
+        [ -n "$key" ] && printf -v "model_$key" '%s' "$value"
+    done < <(read_saved_models "$models_file")
+fi
+
+# Fill in whichever of one harness's three roles is still unset.
+resolve_harness_models() {
+    local harness="$1" catalog role var first resolved
+    catalog="$(harness_catalog "$harness")"
+    if [ -z "$catalog" ]; then
+        model_notes+=("$harness: could not read its model list, its agents follow the main model")
+        return 0
+    fi
+    for role in implementer reviewer final; do
+        var="model_${harness}_${role}"
+        if [ -n "${!var-}" ]; then continue; fi
+        if ! resolved="$(resolve_role_model "$catalog" "$role")"; then
+            model_notes+=("$harness $role: nothing recommended is available, it follows the main model")
+            continue
+        fi
+        printf -v "$var" '%s' "$resolved"
+        # Only a catalogue spanning providers could have carried the first
+        # choice; Claude Code's aliases and Codex's own slugs never would, so
+        # reporting a substitution there would be noise.
+        case "$catalog" in */*) ;; *) continue ;; esac
+        first="$(role_preferences "$role" | head -1)"
+        case "$resolved" in
+            *"$first") ;;
+            *) model_notes+=("$harness $role: $first unavailable, using ${resolved##*/}") ;;
+        esac
+    done
+    return 0
+}
+
+# One line per harness: which model each of its helpers will run on.
+print_model_matrix() {
+    local harness impl rev fin
+    for harness in $picked_keys; do
+        impl="model_${harness}_implementer"
+        rev="model_${harness}_reviewer"
+        fin="model_${harness}_final"
+        printf '  %s  · %s%-9s%s %sreviewers%s %s  %simplementer%s %s  %sfinal%s %s\n' \
+            "$grey" "$reset" "$harness" "$grey" "$grey" "$reset" "${!rev:-main model}" \
+            "$grey" "$reset" "${!impl:-main model}" "$grey" "$reset" "${!fin:-main model}"
+    done
+}
+
+# Reassign one harness's three roles by hand. Each role offers the models
+# Pandino would consider for it; a role nothing recommended could fill offers
+# the whole catalogue, so an unusual setup is still one prompt, not a restart.
+customize_models() {
+    local harness role catalog cand opts=() list=()
+    for harness in $picked_keys; do list+=("$harness:$harness"); done
+    printf '\n  %sWhich editor?%s\n\n' "$grey" "$reset" > /dev/tty
+    pick_list one "${list[@]}"
+    harness="$picked"
+    [ -n "$harness" ] || return 0
+
+    catalog="$(harness_catalog "$harness")"
+    for role in implementer reviewer final; do
+        opts=()
+        while IFS= read -r cand; do
+            [ -n "$cand" ] && opts+=("$cand:${cand##*/}")
+        done < <(role_candidates "$catalog" "$role")
+        if [ "${#opts[@]}" -eq 0 ]; then
+            while IFS= read -r cand; do
+                [ -n "$cand" ] && opts+=("$cand:$cand")
+            done < <(printf '%s\n' "$catalog")
+        fi
+        [ "${#opts[@]}" -gt 0 ] || continue
+        printf '\n  %s%s%s\n\n' "$grey" "$role" "$reset" > /dev/tty
+        pick_list one "${opts[@]}"
+        [ -n "$picked" ] && printf -v "model_${harness}_${role}" '%s' "$picked"
+    done
+    return 0
+}
+
+for harness in $picked_keys; do
+    resolve_harness_models "$harness"
+done
+
+# Show the whole assignment at once: four pickers in a row would be a worse
+# question than the one it answers.
+if asking && [ -n "${picked_keys// /}" ]; then
+    heading "Models" "— which model runs each helper" "" ""
+    body "  A reviewer on the writer's own model is not a second opinion,"
+    body "  so each helper gets its own, from what your editors can run."
+    printf '\n' > /dev/tty
+    print_model_matrix > /dev/tty
+    for note in ${model_notes+"${model_notes[@]}"}; do
+        printf '  %s    %s%s\n' "$yellow" "$note" "$reset" > /dev/tty
+    done
+    printf '\n  %s?%s %sEnter%s accept %s·%s %se%s customize ' \
+        "$bold$magenta" "$reset" "$bold" "$reset" "$grey" "$reset" "$bold" "$reset" > /dev/tty
+    read -r -n1 model_reply < /dev/tty
+    printf '\n' > /dev/tty
+    case "$model_reply" in
+        e|E) customize_models ;;
+    esac
+fi
+
+# Remember the assignment so the next run reuses it verbatim.
+mkdir -p "$target/.pandino"
+save_models "$models_file" $picked_keys
 
 # Generated candidates are disposable and rebuilt from the current kit.
 rm -rf "$target/.pandino/merge"
@@ -322,6 +463,12 @@ core_only() {
         | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
 
+# An agent file without its model pin, so two of them can be compared for
+# local edits without the pin counting as one.
+without_model_line() {
+    grep -v '^model: ' "$1"
+}
+
 # Pandino's own repo has the optional sections appended to its AGENTS.md, so
 # install the core and let the snippets be appended per repo as usual.
 kit_agents="$(mktemp)"
@@ -336,19 +483,32 @@ else
         "$target/.pandino/merge/AGENTS.md"
 fi
 
+agent_count="$(find "$kit_dir/agents" -name '*.md' | wc -l | tr -d ' ')"
 for harness in $picked_keys; do
     if [ "$harness" = pi ]; then
         # pi reads the kit's own format, so conflicts can be staged as usual.
+        # The pinned model still has to be written in, so translate first.
         for agent in "$kit_dir"/agents/*.md; do
             name="$(basename "$agent")"
-            install_or_stage \
-                "$agent" \
-                "$target/.pi/agents/$name" \
-                "$target/.pandino/merge/agents/$name"
+            pinned="$(mktemp)"
+            write_harness_agent "$agent" pi "$pinned"
+            # The model line is Pandino's to rewrite: an installed agent that
+            # differs from the kit only there is our own earlier output, not a
+            # local edit, so changing models.json takes effect on a re-run.
+            dst="$target/.pi/agents/$name"
+            if [ -e "$dst" ] && ! cmp -s "$pinned" "$dst" \
+                && diff -q <(without_model_line "$agent") <(without_model_line "$dst") > /dev/null
+            then
+                cp "$pinned" "$dst"
+                say updated "$green" "$dst"
+            else
+                install_or_stage "$pinned" "$dst" "$target/.pandino/merge/agents/$name"
+            fi
+            rm -f "$pinned"
         done
     else
         write_harness_agents "$kit_dir" "$target" "$harness"
-        say installed "$green" "$(harness_dir "$target" "$harness")/ ${dim}(3 agents)${reset}"
+        say installed "$green" "$(harness_dir "$target" "$harness")/ ${dim}($agent_count agents)${reset}"
     fi
 done
 
@@ -470,10 +630,10 @@ printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
 recap "AGENTS.md" " — the coding rules, read by every agent"
 for harness in $picked_keys; do
     case "$harness" in
-        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer" ;;
-        claude)   recap ".claude/agents/" " — the same three, for Claude Code" ;;
-        opencode) recap ".opencode/agent/" " — the same three, for opencode" ;;
-        codex)    recap ".codex/agents/" " — the same three, for Codex" ;;
+        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, final-reviewer" ;;
+        claude)   recap ".claude/agents/" " — the same four, for Claude Code" ;;
+        opencode) recap ".opencode/agent/" " — the same four, for opencode" ;;
+        codex)    recap ".codex/agents/" " — the same four, for Codex" ;;
     esac
 done
 
@@ -495,6 +655,13 @@ esac
 if [ "$want_backlog" != no ]; then
     recap "backlog/" " — tasks your agents read and update between sessions"
 fi
+
+printf '\n  %sModels each agent will run on:%s\n' "$grey" "$reset"
+print_model_matrix
+for note in ${model_notes+"${model_notes[@]}"}; do
+    printf '  %s    %s%s\n' "$yellow" "$note" "$reset"
+done
+printf '  %s    edit .pandino/models.json to change them%s\n' "$grey" "$reset"
 
 if [ "${#skipped[@]}" -gt 0 ]; then
     printf '\n  %sSkipped, in case you want them later:%s\n' "$grey" "$reset"

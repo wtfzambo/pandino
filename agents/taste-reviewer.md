@@ -2,11 +2,7 @@
 description: >-
   Taste review of the working diff before a commit: does the code follow the
   repo's standards? Never edits code. Runs together with the spec-reviewer
-  before every commit, except trivial ones. Model suggestion, not requirement:
-  ollama-cloud/deepseek-v4-flash (perfect score and cheapest in the
-  2026-07-31 bench; glm-5.2 and kimi-k2.7-code also strong). Ask the user
-  which available cost-effective coding model should fill this role during
-  setup.
+  before every commit, except trivial ones.
 tools: read, grep, find, ls, bash
 thinking: high
 ---
