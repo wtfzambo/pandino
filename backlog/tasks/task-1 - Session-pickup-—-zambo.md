@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-05 21:00'
+updated_date: '2026-08-05 21:22'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,22 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-05. Branch `main` contains implementation commit `6bbb609` for completed `TASK-4`; a later pickup-only commit records this snapshot. Both are pushed to `origin/main` and the tree is clean. Each installed agent now carries a real model pin in its harness native format, resolved from live catalogues (`pi --list-models`, `opencode models`, Codex `models_cache.json`, Claude Code aliases), with curated fallbacks and visible substitutions. A fourth agent, `final-reviewer`, does one whole-branch pass on the strongest available model, scoped to composition and the end-to-end requirement. Assignments persist in `.pandino/models.json`, where a hand edit outranks the recommendation on re-run. Interactive install shows one matrix with Enter/customize instead of one picker per harness. Two pre-existing picker bugs were fixed along the way: `read -t 0.1` is rejected by bash 3.2 (stock macOS), and the picker RETURN trap outlived the function whose local it read.
+2026-08-05. Branch `main` at implementation commit `77ccef6`, with a later pickup-only commit recording this snapshot. Both pushed to `origin/main`, tree clean. `TASK-4` (done, commit `6bbb609`) pinned a model per agent role in every harness and added `final-reviewer`; `77ccef6` then dropped Claude fable from all three preference lists (priciest of its family, and it sat ahead of opus for the expensive role), animated the few seconds spent reading the model catalogues, gave the matrix a header with aligned columns, and stopped adding `.pi/npm/` to a `.gitignore` that already ignores `.pi/` by asking `git check-ignore` instead of grepping.
+
+Pandino is now installed into its own repo for pi only: four pinned agents in `.pi/agents/`, `pi-subagents` runtime active, `grilling` local and `i-have-adhd` reused from global. That directory is gitignored here, so the dogfooding setup is local to this machine and a fresh clone must re-run `./install.sh . --no-input`.
 
 WHAT IS NEXT
-1. Nothing is pending for `TASK-4`.
-2. Worth doing when convenient: run the new `final-reviewer` on the next real branch here, since it has never run on this repo.
-3. For the next change, start with `git log --oneline -3` and the relevant Backlog task.
+1. Nothing is pending.
+2. The four subagents have never actually been used on this repo. The next non-trivial change should go through `implementer`, then `taste-reviewer` and `spec-reviewer`, and `final-reviewer` before a merge.
+3. Open question the user raised and nobody has answered: `snippets/parallel-agents.md` ends by describing "one whole-branch review with the strongest model available" without naming `final-reviewer`, which is now exactly that. Decide whether to name it there.
 
 WAITING ON / GATED BY
 Nothing as of 2026-08-05.
 
 VERIFY
 `git status -sb` should show clean `main` in sync with `origin/main`.
-`git log --oneline -3` should include `6bbb609` and the later pickup-only commit.
-`backlog task view TASK-4 --plain` should show Done with all acceptance criteria checked.
+`git log --oneline -3` should include `77ccef6` and the later pickup-only commit.
+`ls .pi/agents/` should list four agents, each with a `model:` line.
 `bash tests/test_install.sh` should print `test_install.sh: PASS`.
 <!-- SECTION:DESCRIPTION:END -->
 
