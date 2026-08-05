@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-05 11:36'
+updated_date: '2026-08-05 11:52'
 labels:
   - continuity
   - handoff
@@ -16,56 +16,70 @@ ordinal: 1000
 
 ## WHERE WE LEFT OFF
 
-**2026-08-05.** Branch `main`, at `8f329f2`, pushed and clean.
+**2026-08-05.** Branch `main` at `c5e3bc6`, pushed, working tree clean.
+Public repo: https://github.com/wtfzambo/pandino
 
-Pandino now installs itself into a repo, offers Backlog.md, the parallel-agent
-notes, the i-have-adhd skill, and writes the three agents for whichever of pi,
-Claude Code, opencode and Codex you pick. Backlog was finally initialised on
-Pandino's own repo in this session, which is what created this task.
+Pandino is complete and self-hosting: it installs into a repo, and this repo
+uses its own output. Nothing is half-finished.
 
-Done and committed since the kit's first version:
+What the session produced, on top of the original kit:
 
-- **Model benchmarks** — `bench/implementer/` and `bench/review/`, both runnable
-  with `run_all.sh` then `summarize.py`. 48 implementer runs and 120 reviewer
-  runs, results in `NOTES.md`. Reviewer scoring uses an LLM judge
-  (`bench/review/judge.py`, override with `BENCH_JUDGE_MODEL`).
-  Verdicts: gpt-5.6-terra for the implementer, deepseek-v4-flash for both
-  reviewers. Raw `.jsonl` transcripts are gitignored; the CSVs, reviews, judge
-  verdicts and reconstructed code under `results/artifacts/` are committed.
-- **Installer** — interactive when a terminal is attached, silent for agents and
-  CI. Four questions up front, then it works uninterrupted, and ends with a
-  recap of what landed.
-- **AGENTS.md** — gained the agent-workflow section (plan → implementer → both
-  reviewers → verify yourself), and the note that the orchestrator is the least
-  neutral judge of its own plan.
-- **Multi-harness** — `harnesses.sh` translates the kit's own `agents/*.md` into
-  each tool's format. The kit files stay the single source of truth.
+- **Model benchmarks.** `bench/implementer/` (4 tasks x 4 models x 3 runs) and
+  `bench/review/` (4 tasks x 10 models x 3 runs). Reviewer runs are scored by an
+  LLM judge, `bench/review/judge.py`, overridable with `BENCH_JUDGE_MODEL`.
+  Results and the reasoning behind them are in `NOTES.md`; the routing verdicts
+  landed in the agent frontmatter — `gpt-5.6-terra` for the implementer,
+  `deepseek-v4-flash` for both reviewers. Raw `.jsonl` transcripts are
+  gitignored, everything else under `results/` is committed, including the code
+  each implementer run produced (`results/artifacts/`, rebuilt by
+  `extract_artifacts.py`).
+- **Installer.** Interactive when a terminal is attached, silent for agents and
+  CI. Four questions up front — Backlog.md, parallel-agent notes, i-have-adhd,
+  and an arrow-key picker for which editors get the agents — then it runs
+  uninterrupted and ends with a recap of what landed. Reachable through the
+  curl one-liner in the README.
+- **Four harnesses.** `harnesses.sh` translates `agents/*.md` into each tool's
+  format: pi, Claude Code, opencode, Codex. The kit files stay the single source
+  of truth; only the wrapper differs. Symlinks were tried and rejected —
+  opencode refuses pi's frontmatter outright.
+- **AGENTS.md.** Gained the agent-workflow section: plan, delegate to the
+  implementer, run both reviewers, then verify the integrated result yourself,
+  plus the note that a plan's author is its least neutral judge.
+- **Backlog.** Initialised here in this session, which is what created this task.
 
 ## WHAT'S NEXT
 
-Nothing is half-finished. Options, in no particular order:
+Nothing is blocking. Pick from:
 
-1. Re-run the reviewer benchmark with a multi-file diff. The current tasks are
-   single-file with four planted defects each, which is why every model except
-   Haiku scored full marks on spec review — the exercise does not discriminate
-   at that size. See the follow-up list at the bottom of `NOTES.md`.
-2. Use Pandino's own workflow on Pandino: next non-trivial change, delegate to
-   the `implementer` agent and run both reviewers, instead of editing directly.
-3. Regenerate `bench/*/prompts/` and `bench/implementer/implementer-prompt.md`
-   if the agent definitions in `agents/` change — they are snapshots, and stale
-   ones would benchmark the wrong prompt.
+1. **Use the workflow on itself.** The next non-trivial change to Pandino should
+   go through the `implementer` agent and both reviewers rather than direct
+   edits. It has never been exercised on this repo.
+2. **Harder reviewer benchmark.** The current tasks are single-file with four
+   planted defects, which is why every model except Haiku scored full marks on
+   spec review. A multi-file diff with cross-file spec tracing would separate
+   them. Full follow-up list at the bottom of `NOTES.md`.
+3. **Regenerate the benchmark prompts if the agents change.**
+   `bench/implementer/implementer-prompt.md` and `bench/review/prompts/` are
+   snapshots of `agents/*.md` with the frontmatter stripped. Stale copies would
+   benchmark the wrong prompt.
 
 ## WAITING ON / GATED BY
 
-Nothing. The repo is public at https://github.com/wtfzambo/pandino, the curl
-one-liner in the README works, and no decision is pending.
+Nothing. No pending decision, no external dependency, no unanswered question.
 
 ## VERIFY
 
 ```bash
-git -C . log --oneline -3          # expect 8f329f2 at the top
+git log --oneline -1               # expect c5e3bc6
 git status -sb                     # expect clean, main in sync with origin
 bash tests/test_install.sh         # expect: test_install.sh: PASS
-python3 bench/implementer/summarize.py   # 4 tasks x 4 models, medians
-python3 bench/review/summarize.py        # 4 tasks x 10 models, medians
+python3 bench/implementer/summarize.py   # 16 rows of medians
+python3 bench/review/summarize.py        # 40 rows of medians
+```
+
+A real install, into a throwaway directory:
+
+```bash
+d=$(mktemp -d) && git -C "$d" init -q && ./install.sh "$d" --no-input
+grep -c 'pandino:' "$d/AGENTS.md"  # expect 0: only the core ships
 ```
