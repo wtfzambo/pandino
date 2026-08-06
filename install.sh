@@ -272,9 +272,9 @@ banner() {
 
 if asking; then
     banner
-    printf '\n  %sCoding rules, one agent that writes, two that review.%s\n' "$grey" "$reset"
+    printf '\n  %sCoding rules, one agent writes, separate agents review.%s\n' "$grey" "$reset"
 else
-    printf '\n  %sPandino%s %s— coding rules, one agent that writes, two that review%s\n' \
+    printf '\n  %sPandino%s %s— coding rules, one agent writes, separate agents review%s\n' \
         "$bold$magenta" "$reset" "$grey" "$reset"
 fi
 printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$reset"
@@ -629,6 +629,7 @@ case "$want_backlog" in
                 --agent-instructions agents > /dev/null 2>&1)
             say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
         fi
+        append_snippet "$target/.pandino/snippets/document-governance.md" document-governance
         append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
         ;;
     yes)
@@ -643,6 +644,7 @@ case "$want_backlog" in
                 --agent-instructions agents $git_flag > /dev/null 2>&1)
             say installed "$green" "Backlog.md task tracking in $target/backlog"
             say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
+            append_snippet "$target/.pandino/snippets/document-governance.md" document-governance
             append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
         else
             say skipped "$yellow" "backlog not found on PATH"
@@ -679,10 +681,10 @@ printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
 recap "AGENTS.md" " — the coding rules, read by every agent"
 for harness in $picked_keys; do
     case "$harness" in
-        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, final-reviewer" ;;
-        claude)   recap ".claude/agents/" " — the same four, for Claude Code" ;;
-        opencode) recap ".opencode/agent/" " — the same four, for opencode" ;;
-        codex)    recap ".codex/agents/" " — the same four, for Codex" ;;
+        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, docs-reviewer, final-reviewer" ;;
+        claude)   recap ".claude/agents/" " — the same five, for Claude Code" ;;
+        opencode) recap ".opencode/agent/" " — the same five, for opencode" ;;
+        codex)    recap ".codex/agents/" " — the same five, for Codex" ;;
     esac
 done
 

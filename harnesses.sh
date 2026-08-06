@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Write the four agent definitions in the layout each harness expects.
+# Write the five agent definitions in the layout each harness expects.
 # Sourced by install.sh; the kit's own copies under agents/ stay the source
 # of truth, these are translations of them.
 #

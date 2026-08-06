@@ -10,7 +10,7 @@ The Fiat Panda is not fast and not clever. It is simple enough that a mechanic i
 
 Coding agents pull the other way. Ask for a function and you get a class hierarchy; ask for a fix and you get a refactor; ask for a feature and you get configuration for five you never wanted. It all works on the day it is written. Then you come back in six months, and nobody — you or the next agent — can tell what any of it is for.
 
-Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that keeps them honest: plan before writing, one writer, two reviewers who did not write it, and you reading the diff at the end. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
+Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that keeps them honest: plan before writing, one writer, two per-commit reviewers who did not write it, a conditional documentation review, a final whole-branch review, and you reading the diff at the end. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
 
 ## What you get
 
@@ -39,7 +39,7 @@ It downloads what it needs, so there is nothing to clone. Add `--yes` to say yes
 
 It asks up to four questions, then gets out of the way:
 
-- **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's session-continuity section. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
+- **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's document-governance and session-continuity sections. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
 - **Notes on running agents in parallel?** Only if you plan to. Defaults to no.
 - **The i-have-adhd skill?** Replies that lead with the next action instead of a wall of prose. Off until you type `/i-have-adhd`, off again on "stop adhd mode". Defaults to no; skipped if pi already has it globally.
 - **Which editors?** A list of pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`.
@@ -51,17 +51,18 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips the optiona
 | What | Where |
 |---|---|
 | `AGENTS.md` | repo root — the coding rules, ~90 lines |
-| the four helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — each with a model pinned |
+| the five helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — each with a model pinned |
 | `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
 | skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
-The four helpers, and what each one is there to prevent:
+The five helpers, and what each one is there to prevent:
 
 - **implementer** — writes the code from an approved plan, one slice at a time. Stops and reports instead of improvising when the plan does not survive contact with the code.
 - **taste-reviewer** — reads *how* it is written. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
 - **spec-reviewer** — reads *what* it does, against what you actually asked for. Catches the missing half of the requirement, and the three features you never requested.
+- **docs-reviewer** — optional, once before the final review when a branch changes documented behavior or authority. Catches drift between the final code and its specifications, decisions, procedures, codebase docs, and findings; it is not part of the per-commit loop.
 - **final-reviewer** — one pass over the whole branch before it merges, on the strongest model you have. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
 
 ### Which model runs each helper
@@ -106,25 +107,25 @@ Install Pandino into this repository.
 
 4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Then delete .pandino/merge/, but keep .pandino/snippets/.
 
-5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block and the <!-- pandino:session-continuity --> section, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add session continuity without Backlog.md — it describes a workflow this repo could not run.
+5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block plus <!-- pandino:document-governance --> and <!-- pandino:session-continuity -->, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add document governance or session continuity without Backlog.md — they describe workflows this repo could not run.
 
-6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same four roles where your tool looks for them, each with its model pinned. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
+6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same five roles where your tool looks for them, each with its model pinned. Copy the instructions as they are, do not reword them. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
 
-7. Verify: your tool can see the four helpers and the grilling skill, each helper has a model pinned, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
+7. Verify: your tool can see the five helpers and the grilling skill, each helper has a model pinned, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
 Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
 ```
 
 ## How the workflow runs
 
-One agent plans and coordinates. Four helpers do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan.
+One agent plans and coordinates. Five helpers do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan.
 
 1. Read the repo and the real code first. Most bad changes start as a confident guess about code nobody opened.
 2. Agree on a plan before writing anything non-trivial. The grilling skill exists to attack the plan while it is still cheap to change.
 3. Hand the agreed plan to the implementer. If it turns out the plan contradicts the actual code, the implementer stops and says so rather than inventing a way through — that report is a planning bug, not a failure.
 4. Before a real commit, both reviewers read the diff: one asks whether it is written well, the other whether it does what you asked and nothing more. Fix what they find, or say why not.
 5. Read the diff yourself. Every agent's report describes what it meant to do; only the diff describes what happened. This step is where the bugs nobody was assigned to catch turn up.
-6. Before the branch merges, run the final-reviewer once over the whole thing. It reads what the commits add up to, which per-commit review structurally cannot see.
+6. Before the branch merges, run the optional docs-reviewer once when the branch changes documented behavior, public contracts, procedures, architecture/codebase structure, authoritative docs, decisions, or findings. Then run the final-reviewer once over the whole thing. It reads what the commits add up to, which per-commit review structurally cannot see.
 
 The installer assigns the models, so no helper runs on the model that spawned it — see [which model runs each helper](#which-model-runs-each-helper). The [benchmarks](NOTES.md) found cheap models perfectly competitive at implementing and at reviewing a single commit; what separates them is behaviour, stopping when the plan contradicts the code and not inventing problems on a clean diff. The expensive model is spent once, on `final-reviewer`.
 
@@ -146,7 +147,7 @@ Yours win where it matters:
 
 Edit them there, not in `.pandino/snippets/` — that folder is rewritten on every install.
 
-**Session continuity** is the one exception: it ships with Backlog.md and never without it, because it describes a workflow that needs Backlog to exist.
+**Document governance** and **session continuity** ship with Backlog.md and never without it. Governance routes current specifications, procedures, decisions, tasks, codebase explanations, and durable falsified hypotheses without creating an empty `FINDINGS.md`; session continuity describes a workflow that needs Backlog to exist.
 
 **Parallel agents** is for when you actually run several at once: build the shared parts first, keep each agent in its own worktree, and watch the gaps between what each was told to do. Skip it otherwise.
 

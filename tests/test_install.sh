@@ -63,13 +63,14 @@ mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
 
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
-for agent in implementer spec-reviewer taste-reviewer final-reviewer; do
+for agent in implementer spec-reviewer taste-reviewer docs-reviewer final-reviewer; do
     diff -q <(agent_without_pin "$repo_dir/agents/$agent.md") \
         <(agent_without_pin "$fresh_target/.pi/agents/$agent.md") > /dev/null
 done
 [ ! -e "$fresh_target/.pandino/merge" ]
 cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
 cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
+cmp -s "$repo_dir/snippets/document-governance.md" "$fresh_target/.pandino/snippets/document-governance.md"
 
 merge_target="$tmp_dir/merge"
 mkdir -p "$merge_target/.pi/agents"
@@ -105,15 +106,20 @@ grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
 # The recap lists only what was installed: declining leaves no skill behind.
 [ ! -e "$fresh_target/.pi/skills/i-have-adhd" ]
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
+[ ! -e "$fresh_target/FINDINGS.md" ]
+! grep -qF "pandino:document-governance" "$fresh_target/AGENTS.md"
 
 # --yes appends each snippet exactly once, and re-running does not duplicate
 # them or mistake Pandino's own additions for a local conflict.
 yes_target="$tmp_dir/yes"
 mkdir "$yes_target"
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes.out"
+grep -E "appended +document-governance" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
-[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
+[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "3" ]
+grep -F "Current product truth belongs in \`backlog/docs/specs/\`" "$yes_target/AGENTS.md" > /dev/null
+[ ! -e "$yes_target/FINDINGS.md" ]
 
 # Without a terminal, the installed editors are preselected. If only pi is
 # available, trailing unselected options must not make pick_many return 1 and
@@ -192,6 +198,7 @@ grep -q "^mode: subagent" "$yes_target/.opencode/agent/taste-reviewer.md"
 grep -F ".pi/skills/i-have-adhd/" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.codex/agents/implementer.toml" ]
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/taste-reviewer.toml"
+grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/docs-reviewer.toml"
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$yes_target"/.codex/agents/*.toml
 # The body must survive translation unchanged.
@@ -203,7 +210,8 @@ grep -q "You are the taste reviewer" "$yes_target/.claude/agents/taste-reviewer.
 grep -F "BACKLOG.MD GUIDELINES" "$yes_target/AGENTS.md" > /dev/null
 
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes2.out"
-[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "2" ]
+[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "3" ]
+[ "$(grep -c '<!-- pandino:document-governance -->' "$yes_target/AGENTS.md")" = "1" ]
 [ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$yes_target/AGENTS.md")" = "1" ]
 grep -E "unchanged +$yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
 [ ! -e "$yes_target/.pandino/merge" ]
@@ -251,9 +259,9 @@ cat > "$pin_home/.codex/models_cache.json" <<'JSON'
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
-# The fourth role ships everywhere, and reviewers do not run the implementer's
+# The fifth role ships everywhere, and reviewers do not run the implementer's
 # model by accident.
-for agent in implementer taste-reviewer spec-reviewer final-reviewer; do
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer; do
     [ -f "$pin_target/.pi/agents/$agent.md" ]
     [ -f "$pin_target/.claude/agents/$agent.md" ]
     [ -f "$pin_target/.opencode/agent/$agent.md" ]
@@ -266,9 +274,10 @@ done
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$pin_target"/.codex/agents/*.toml
 
-# Both per-commit reviewers share one model; the whole-branch pass gets its own.
+# Non-final reviewers share one model; the whole-branch pass gets its own.
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/taste-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/spec-reviewer.md"
+grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/docs-reviewer.md"
 grep -qx "model: openai/gpt-5.6-terra" "$pin_target/.opencode/agent/implementer.md"
 grep -qx "model: openai/claude-opus-5" "$pin_target/.opencode/agent/final-reviewer.md"
 # Claude Code takes subscription aliases, not provider-qualified ids.
@@ -389,5 +398,6 @@ python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi
 if grep -qF "pandino:session-continuity" "$fresh_target/AGENTS.md"; then
     echo "FAIL: session continuity appended without Backlog.md"; exit 1
 fi
+! find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .
 
 echo "test_install.sh: PASS"

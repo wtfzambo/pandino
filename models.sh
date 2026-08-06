@@ -16,8 +16,8 @@
 #   codex     ~/.codex/models_cache.json  bare slug
 #   claude    fixed aliases            fable, opus, sonnet, haiku
 
-# Which role an agent file fills. Both per-commit reviewers share the reviewer
-# model; only the whole-branch pass gets the expensive one.
+# Which role an agent file fills. Non-final reviewers share the reviewer model;
+# docs-reviewer is conditional, not per-commit.
 agent_role() {
     case "$(basename "$1" .md)" in
         implementer)    echo implementer ;;

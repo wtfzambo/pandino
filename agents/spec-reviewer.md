@@ -14,8 +14,8 @@ Scope: the diff you are given — the working diff before a commit, or the branc
 Find the spec yourself; do not wait for it to be quoted to you:
 
 1. The Backlog task named in the request, the branch name, or the commit messages (`backlog task view <ID> --plain`).
-2. The project spec under `docs/` for the requirements the task points to.
-3. If no spec exists anywhere, say so explicitly and review only what the diff claims about itself (commit messages, stated intent).
+2. The project's documented routing, then the authoritative current specification it names. Pandino with Backlog.md defaults to `backlog/docs/specs/`; another repository may name `spec/`, `docs/`, or another location.
+3. If no specification exists in that routing, say so explicitly and review only what the diff claims about itself (commit messages, stated intent).
 
 Then interrogate the diff on three fronts:
 
