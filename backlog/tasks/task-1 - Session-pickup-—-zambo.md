@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-05 21:22'
+updated_date: '2026-08-06 00:39'
 labels:
   - continuity
   - handoff
@@ -18,22 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-05. Branch `main` at implementation commit `77ccef6`, with a later pickup-only commit recording this snapshot. Both pushed to `origin/main`, tree clean. `TASK-4` (done, commit `6bbb609`) pinned a model per agent role in every harness and added `final-reviewer`; `77ccef6` then dropped Claude fable from all three preference lists (priciest of its family, and it sat ahead of opus for the expensive role), animated the few seconds spent reading the model catalogues, gave the matrix a header with aligned columns, and stopped adding `.pi/npm/` to a `.gitignore` that already ignores `.pi/` by asking `git check-ignore` instead of grepping.
+2026-08-06. Branch `main` at implementation commit `692cc89`, with a later pickup-only commit recording this snapshot. Both pushed to `origin/main`; tree clean. `TASK-5` is done: Pandino now installs five agents, including the conditional read-only `docs-reviewer`; Backlog-enabled installs append the idempotent `document-governance` section; current specs route to `backlog/docs/specs/`, runbooks and codebase docs under `backlog/docs/`, decisions and tasks keep their Backlog homes, and root `FINDINGS.md` is created only after the first durable evidence-backed falsified hypothesis. No OKF, validator, generated index/log, migration, or empty findings scaffold was added. Spec/final reviewers follow project routing rather than assuming root `docs/`. Taste, spec, docs, and final reviews completed; final-reviewer returned merge and its minor cleanup findings were applied. `bash tests/test_install.sh`, shell syntax, and diff checks pass.
 
-Pandino is now installed into its own repo for pi only: four pinned agents in `.pi/agents/`, `pi-subagents` runtime active, `grilling` local and `i-have-adhd` reused from global. That directory is gitignored here, so the dogfooding setup is local to this machine and a fresh clone must re-run `./install.sh . --no-input`.
-
-WHAT IS NEXT
+WHAT'S NEXT
 1. Nothing is pending.
-2. The four subagents have never actually been used on this repo. The next non-trivial change should go through `implementer`, then `taste-reviewer` and `spec-reviewer`, and `final-reviewer` before a merge.
-3. Open question the user raised and nobody has answered: `snippets/parallel-agents.md` ends by describing "one whole-branch review with the strongest model available" without naming `final-reviewer`, which is now exactly that. Decide whether to name it there.
+2. On future branches that change documented behavior, public contracts, procedures, architecture, authoritative docs, decisions, or findings, run `docs-reviewer` once before `final-reviewer`.
+3. Existing target repositories receive document governance and the fifth agent by re-running Pandino; no migration is automatic.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-05.
+Nothing as of 2026-08-06.
 
 VERIFY
 `git status -sb` should show clean `main` in sync with `origin/main`.
-`git log --oneline -3` should include `77ccef6` and the later pickup-only commit.
-`ls .pi/agents/` should list four agents, each with a `model:` line.
+`git log --oneline -3` should include `692cc89` and the later pickup-only commit.
+`backlog task view TASK-5 --plain` should show Done with all five acceptance criteria checked.
+`ls agents/` should list five agent definitions including `docs-reviewer.md`.
 `bash tests/test_install.sh` should print `test_install.sh: PASS`.
 <!-- SECTION:DESCRIPTION:END -->
 
