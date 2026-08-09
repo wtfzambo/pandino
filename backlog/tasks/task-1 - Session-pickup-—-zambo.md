@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-06 00:39'
+updated_date: '2026-08-09 17:24'
 labels:
   - continuity
   - handoff
@@ -18,22 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-06. Branch `main` at implementation commit `692cc89`, with a later pickup-only commit recording this snapshot. Both pushed to `origin/main`; tree clean. `TASK-5` is done: Pandino now installs five agents, including the conditional read-only `docs-reviewer`; Backlog-enabled installs append the idempotent `document-governance` section; current specs route to `backlog/docs/specs/`, runbooks and codebase docs under `backlog/docs/`, decisions and tasks keep their Backlog homes, and root `FINDINGS.md` is created only after the first durable evidence-backed falsified hypothesis. No OKF, validator, generated index/log, migration, or empty findings scaffold was added. Spec/final reviewers follow project routing rather than assuming root `docs/`. Taste, spec, docs, and final reviews completed; final-reviewer returned merge and its minor cleanup findings were applied. `bash tests/test_install.sh`, shell syntax, and diff checks pass.
+2026-08-09. Branch `main` at `2cf323e` ("chore: pin reviewers to deepseek-v4-flash:0731"), ahead 1 of `origin/main` (not pushed); tree clean. Completed: Ollama Cloud dropped the bare `deepseek-v4-flash` id (catalog now carries `:0731` and `:preview`), so `models.sh` reviewer preferences list the dated tag first with the bare id behind it for catalogs (opencode) that still carry it; `tests/test_install.sh` pi stub carries the dated tag and a new assertion guards the pi-side pin (verified to fail if the tag is dropped); `bench/review/run_all.sh`, `NOTES.md`, `README.md` aligned. Taste and spec reviews ran on the new pin (zero must-fix; bench harness minor applied, two pre-existing minors left: README example is stylized not literal, install.sh prints a substitution note on opencode for the same model under its bare id). Generated `.pi/agents/` and `.pandino/models.json` carry `:0731` (gitignored, regenerated from `models.sh`). Also this session: investigated dario (`@askalf/dario`, the local proxy at localhost:3456 that routes pi's anthropic provider to the Claude subscription). The "Do not call the AgentTool unless the user requested it" directive in the system prompt comes from dario injecting Claude Code's system prompt (CC wire-shape replay); it is overridden by an explicit user request, so pandino's subagent workflow works on request. Decision: dario stays at default (verbatim prompt, default tool remapping) — no config change.
 
 WHAT'S NEXT
-1. Nothing is pending.
-2. On future branches that change documented behavior, public contracts, procedures, architecture, authoritative docs, decisions, or findings, run `docs-reviewer` once before `final-reviewer`.
-3. Existing target repositories receive document governance and the fifth agent by re-running Pandino; no migration is automatic.
+1. Push `2cf323e` to `origin/main` (`git push`) or decide to leave it unpushed.
+2. Nothing else pending.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-06.
+Push decision as of 2026-08-09 (session closed without pushing).
 
 VERIFY
-`git status -sb` should show clean `main` in sync with `origin/main`.
-`git log --oneline -3` should include `692cc89` and the later pickup-only commit.
-`backlog task view TASK-5 --plain` should show Done with all five acceptance criteria checked.
-`ls agents/` should list five agent definitions including `docs-reviewer.md`.
+`git status -sb` should show clean `main` ahead 1 of `origin/main`.
+`git log --oneline -3` should include `2cf323e`.
 `bash tests/test_install.sh` should print `test_install.sh: PASS`.
+`grep '^model:' .pi/agents/taste-reviewer.md` should show `ollama-cloud/deepseek-v4-flash:0731`.
+`backlog task view TASK-1 --plain` should show this snapshot.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
