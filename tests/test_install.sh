@@ -35,7 +35,7 @@ cat > "$tmp_dir/bin/pi" <<'EOF'
 if [ "$1" = "--list-models" ]; then
     echo 'provider      model'
     echo 'openai-codex  gpt-5.6-terra'
-    echo 'ollama-cloud  deepseek-v4-flash'
+    echo 'ollama-cloud  deepseek-v4-flash:0731'
     echo 'ollama-cloud  glm-5.2'
     echo 'anthropic     claude-opus-5'
     echo 'anthropic     claude-sonnet-5'
@@ -275,6 +275,10 @@ python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:
     "$pin_target"/.codex/agents/*.toml
 
 # Non-final reviewers share one model; the whole-branch pass gets its own.
+# pi's catalogue carries the dated tag and opencode's the bare id, and a
+# preference has to match both spellings or the role silently falls through to
+# the next model down the list.
+grep -qx "model: ollama-cloud/deepseek-v4-flash:0731" "$pin_target/.pi/agents/taste-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/taste-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/spec-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/docs-reviewer.md"

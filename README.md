@@ -73,7 +73,7 @@ It reads the models each editor can actually run, assigns one per role, and prin
 
 ```
 Models each agent will run on:
-  · pi        reviewers deepseek-v4-flash  implementer gpt-5.6-terra  final claude-opus-5
+  · pi        reviewers deepseek-v4-flash:0731  implementer gpt-5.6-terra  final claude-opus-5
 ```
 
 The split follows the [benchmarks](NOTES.md): a cheap, fast model implements and reviews each commit for cents, and the expensive one is saved for the single whole-branch pass, where its thoroughness is the point rather than noise.

@@ -4,10 +4,12 @@
 
 These are tested examples, not requirements. Ask the user which available models to use during setup.
 
+Ollama Cloud publishes deepseek-v4-flash under dated tags: since 2026-08-09 the bare `deepseek-v4-flash` is gone from its catalogue, replaced by `:0731` and `:preview`. Pin the dated tag — the benchmark tables below predate the rename and name the model as it was then.
+
 - Implementer: `openai-codex/gpt-5.6-terra`, thinking `high`. Confirmed by the 2026-07-31 benchmark: 12/12 pass, lowest cost and latency of all tested models, and a clean stop on the adversarial plan.
 - Implementer (Claude alternative): `anthropic/claude-sonnet-5`, thinking `high`. 12/12 pass including the adversarial stop, ~3x terra's cost. Best Claude option; Opus adds cost (~4x Sonnet) without better outcomes on these tasks, Haiku fails the adversarial scenario.
-- Taste reviewer: `ollama-cloud/deepseek-v4-flash` or `ollama-cloud/glm-5.2`, thinking `high`. Both went 12/12 on planted defects with zero false positives in the 2026-07-31 reviewer benchmark; deepseek is the cheapest of the whole field (~$0.004/review), glm the fastest (~12s). `kimi-k2.7-code` remains a fine pick (11–12/12, negligible cost difference).
-- Spec reviewer: `ollama-cloud/deepseek-v4-flash`, thinking `high`. Found all planted spec divergences in all runs with zero false positives, at ~1/50 of Opus's cost. `anthropic/claude-opus-5` also scored perfect on spec but is the most expensive and slowest option; keep it in mind for genuinely hard reviews, where these small benchmarks cannot see a difference.
+- Taste reviewer: `ollama-cloud/deepseek-v4-flash:0731` or `ollama-cloud/glm-5.2`, thinking `high`. Both went 12/12 on planted defects with zero false positives in the 2026-07-31 reviewer benchmark; deepseek is the cheapest of the whole field (~$0.004/review), glm the fastest (~12s). `kimi-k2.7-code` remains a fine pick (11–12/12, negligible cost difference).
+- Spec reviewer: `ollama-cloud/deepseek-v4-flash:0731`, thinking `high`. Found all planted spec divergences in all runs with zero false positives, at ~1/50 of Opus's cost. `anthropic/claude-opus-5` also scored perfect on spec but is the most expensive and slowest option; keep it in mind for genuinely hard reviews, where these small benchmarks cannot see a difference.
 
 ## Benchmark 2026-07-31
 

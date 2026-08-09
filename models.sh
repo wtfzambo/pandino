@@ -8,7 +8,7 @@
 #
 # One preference list per role covers all four harnesses: each catalogue
 # filters it down on its own, and a model is matched on its bare id, so
-# "deepseek-v4-flash" finds it under whichever provider a user has it.
+# "glm-5.2" finds it under whichever provider a user has it.
 #
 # Verified 2026-08-05:
 #   pi        pi --list-models          provider/id
@@ -33,14 +33,20 @@ agent_role() {
 # whole-branch pass, where that thoroughness is the point. Claude's fable is
 # absent everywhere: it is the priciest of that family, and opus already fills
 # the one role worth paying for.
+#
+# A model published under several dated tags is listed tag-first: Ollama Cloud
+# dropped the bare "deepseek-v4-flash" for ":0731" and ":preview", and an
+# unpinned bare id would silently fall through to the next model in the list.
+# The bare id stays behind it for catalogues that still carry it, like
+# opencode's.
 role_preferences() {
     case "$1" in
         implementer)
             printf '%s\n' gpt-5.6-terra claude-sonnet-5 sonnet gpt-5.6-sol gpt-5.6
             ;;
         reviewer)
-            printf '%s\n' deepseek-v4-flash glm-5.2 kimi-k2.6 kimi-k2.7-code \
-                claude-sonnet-5 sonnet gpt-5.6-terra
+            printf '%s\n' deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 \
+                kimi-k2.6 kimi-k2.7-code claude-sonnet-5 sonnet gpt-5.6-terra
             ;;
         final)
             printf '%s\n' claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet

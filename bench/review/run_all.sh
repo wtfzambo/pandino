@@ -14,7 +14,7 @@ models=(
     ollama-cloud/kimi-k2.6
     ollama-cloud/kimi-k2.7-code
     ollama-cloud/glm-5.2
-    ollama-cloud/deepseek-v4-flash
+    ollama-cloud/deepseek-v4-flash:0731
 )
 tasks=(taste-defects taste-clean spec-defects spec-clean)
 runs=3
