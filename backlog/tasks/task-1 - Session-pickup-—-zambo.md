@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-09 17:24'
+updated_date: '2026-08-11 18:41'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-09. Branch `main` at `2cf323e` ("chore: pin reviewers to deepseek-v4-flash:0731"), ahead 1 of `origin/main` (not pushed); tree clean. Completed: Ollama Cloud dropped the bare `deepseek-v4-flash` id (catalog now carries `:0731` and `:preview`), so `models.sh` reviewer preferences list the dated tag first with the bare id behind it for catalogs (opencode) that still carry it; `tests/test_install.sh` pi stub carries the dated tag and a new assertion guards the pi-side pin (verified to fail if the tag is dropped); `bench/review/run_all.sh`, `NOTES.md`, `README.md` aligned. Taste and spec reviews ran on the new pin (zero must-fix; bench harness minor applied, two pre-existing minors left: README example is stylized not literal, install.sh prints a substitution note on opencode for the same model under its bare id). Generated `.pi/agents/` and `.pandino/models.json` carry `:0731` (gitignored, regenerated from `models.sh`). Also this session: investigated dario (`@askalf/dario`, the local proxy at localhost:3456 that routes pi's anthropic provider to the Claude subscription). The "Do not call the AgentTool unless the user requested it" directive in the system prompt comes from dario injecting Claude Code's system prompt (CC wire-shape replay); it is overridden by an explicit user request, so pandino's subagent workflow works on request. Decision: dario stays at default (verbatim prompt, default tool remapping) — no config change.
+2026-08-11. Branch `main` at `80d5fdb` ("chore: document branch-scoped session pickup semantics"), aligned with `origin/main` before the current handoff commit; working tree contains only the follow-up correction in `AGENTS.md`. Completed: investigated Backlog.md 1.50.1 cross-branch behavior and adopted the existing `TASK-1` as one branch-scoped continuity snapshot per branch, merged with that branch rather than synchronized globally. `AGENTS.md` documents that model. Corrected its initial cross-branch lookup advice after verification: when the same task ID exists in the working copy, Backlog browser resolves to that local variant and cannot select another branch version; use `git show <branch>:"backlog/tasks/task-1 - Session-pickup-—-<name>.md"` instead. No Backlog storage, worktree, separate repository, or upstream feature change was introduced.
 
 WHAT'S NEXT
-1. Push `2cf323e` to `origin/main` (`git push`) or decide to leave it unpushed.
-2. Nothing else pending.
+1. Nothing pending. Continue normal work from the current branch-specific snapshot.
 
 WAITING ON / GATED BY
-Push decision as of 2026-08-09 (session closed without pushing).
+Nothing as of 2026-08-11.
 
 VERIFY
-`git status -sb` should show clean `main` ahead 1 of `origin/main`.
-`git log --oneline -3` should include `2cf323e`.
-`bash tests/test_install.sh` should print `test_install.sh: PASS`.
-`grep '^model:' .pi/agents/taste-reviewer.md` should show `ollama-cloud/deepseek-v4-flash:0731`.
+`git status -sb` should show clean `main` aligned with `origin/main`.
+`git log --oneline -3` should include the branch-scoped pickup documentation and its browser-lookup correction.
+`grep -n "snapshot is branch-scoped" AGENTS.md` should show the rule and the `git show` command without recommending `backlog browser`.
 `backlog task view TASK-1 --plain` should show this snapshot.
 <!-- SECTION:DESCRIPTION:END -->
 
