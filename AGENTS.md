@@ -154,6 +154,8 @@ Do not add OKF, a validator, index or log generation, migration logic, or metada
 
 Context does not persist between agent sessions. Preserve it with one personal Backlog task per operator named `Session pickup — <name>`. The task is a replaceable current snapshot, not a diary; Git history and normal Backlog tasks preserve history.
 
+The snapshot is branch-scoped, and that is by design, not divergence. The pickup task is a normal Git-versioned file: each branch carries its own version, and Backlog does not sync task edits across branches (the current working copy always wins). So the snapshot describes the state of work on the branch it lives on — update it at session end on the branch where the work happened, and let it merge into `main` together with that work. A merge conflict on the pickup task is resolved by keeping the most recent snapshot, or by rewriting it post-merge. To read another branch's snapshot without switching, use `backlog browser` (cross-branch view) or `git show <branch>:"backlog/tasks/task-1 - Session-pickup-—-<name>.md"`.
+
 At the start or resumption of project work:
 
 1. Run `backlog instructions overview`.
