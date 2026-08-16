@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-16 23:22'
-updated_date: '2026-08-16 23:41'
+updated_date: '2026-08-16 23:50'
 labels: []
 dependencies: []
 references:
@@ -58,6 +58,8 @@ Reproduce the live override check from Pandino: invoke Agent with `subagent_type
 Docs review follow-up: corrected the task reference to the canonical tracked agent source, removed the stale AGENTS.md line count from README, and updated the Codex writer comment to cover every inspection-only agent. The live override check remains a documented executable verification rather than a portable test because it requires a configured pi provider and an Agent-tool invocation.
 
 Final validation: `bash tests/test_install.sh` passed after all review follow-ups; `bash -n install.sh harnesses.sh models.sh tests/test_install.sh` and `git diff --check` produced no errors. Taste and spec reviewers reported no remaining must-fix or minor implementation findings. Docs-reviewer findings about the canonical reference, stale line count, and inspection-only comment were fixed.
+
+Final-review follow-up: narrowed the documented substitution policy to unavailable reviewers so the inspection-only runner cannot replace the implementer; clarified the installer model recap and README example; kept the runner prompt itself generic for any supplied non-mutating inspection task. Re-ran installer tests, shell syntax, diff check, and dogfood-copy comparison successfully.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

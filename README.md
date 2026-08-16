@@ -64,7 +64,7 @@ The five specialists, and what each one is there to prevent:
 - **spec-reviewer** — reads *what* it does, against what you actually asked for. Catches the missing half of the requirement, and the three features you never requested.
 - **docs-reviewer** — optional, once before the final review when a branch changes documented behavior or authority. Catches drift between the final code and its specifications, decisions, procedures, codebase docs, and findings; it is not part of the per-commit loop.
 - **final-reviewer** — one pass over the whole branch before it merges, on the strongest model you have. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
-- **fallback-runner** — an inspection-only escape hatch, not a sixth specialist. Use it only when a specialist cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Give it that specialist's instructions verbatim, the concrete task context, and an explicit alternate model; report the substitution. It is not a retry for findings you dislike.
+- **fallback-runner** — an inspection-only escape hatch, not a sixth specialist. Use it only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Give it that reviewer's instructions verbatim, the concrete task context, and an explicit alternate model; report the substitution. It is not a retry for findings you dislike.
 
 ### Which model runs each specialist
 
@@ -73,8 +73,10 @@ Left alone, every editor spawns its helpers on whatever model the main agent is 
 It reads the models each editor can actually run, assigns one per role, and prints the result:
 
 ```
-Models each agent will run on:
-  · pi        reviewers deepseek-v4-flash:0731  implementer gpt-5.6-terra  final claude-opus-5
+Models each specialist will run on:
+              implementer    reviewers                    final
+  · pi        gpt-5.6-terra  deepseek-v4-flash:0731       claude-opus-5
+    fallback-runner has no default and requires a call-time model
 ```
 
 The split follows the [benchmarks](NOTES.md): a cheap, fast model implements and reviews each commit for cents, and the expensive one is saved for the single whole-branch pass, where its thoroughness is the point rather than noise.
@@ -119,7 +121,7 @@ Sort out obvious duplication yourself. Past the questions in step 2, only ask me
 
 ## How the workflow runs
 
-One agent plans and coordinates. Five specialists do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan. `fallback-runner` is a sixth, non-specialist escape hatch only for an unavailable specialist, never a way to override a result.
+One agent plans and coordinates. Five specialists do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan. `fallback-runner` is a sixth, non-specialist escape hatch only for an unavailable reviewer, never a way to override a result.
 
 1. Read the repo and the real code first. Most bad changes start as a confident guess about code nobody opened.
 2. Agree on a plan before writing anything non-trivial. The grilling skill exists to attack the plan while it is still cheap to change.

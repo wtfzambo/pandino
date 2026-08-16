@@ -1,7 +1,7 @@
 ---
 description: >-
   Runs a complete orchestrator-supplied inspection task on an explicitly
-  selected model when a specialist cannot run. Never mutates the repository.
+  selected model. Never mutates the repository.
 tools: read, grep, find, ls, bash
 thinking: high
 ---

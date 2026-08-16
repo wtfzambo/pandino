@@ -707,8 +707,9 @@ if [ "$want_backlog" != no ]; then
     recap "backlog/" " — tasks your agents read and update between sessions"
 fi
 
-printf '\n  %sModels each agent will run on:%s\n' "$grey" "$reset"
+printf '\n  %sModels each specialist will run on:%s\n' "$grey" "$reset"
 print_model_matrix
+printf '  %s    fallback-runner has no default and requires a call-time model%s\n' "$grey" "$reset"
 for note in ${model_notes+"${model_notes[@]}"}; do
     printf '  %s    %s%s\n' "$yellow" "$note" "$reset"
 done

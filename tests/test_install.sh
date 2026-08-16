@@ -313,7 +313,8 @@ python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['op
     "$pin_target/.pandino/models.json"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
-grep -F "Models each agent will run on:" "$tmp_dir/pins.out" > /dev/null
+grep -F "Models each specialist will run on:" "$tmp_dir/pins.out" > /dev/null
+grep -F "fallback-runner has no default and requires a call-time model" "$tmp_dir/pins.out" > /dev/null
 
 # A model chosen by hand outranks the recommendation, and rewriting the pin is
 # Pandino updating its own output — not a conflict to stage.
