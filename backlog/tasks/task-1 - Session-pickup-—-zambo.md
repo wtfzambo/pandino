@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-11 18:41'
+updated_date: '2026-08-16 23:52'
 labels:
   - continuity
   - handoff
@@ -18,19 +18,20 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-11. Branch `main` at `80d5fdb` ("chore: document branch-scoped session pickup semantics"), aligned with `origin/main` before the current handoff commit; working tree contains only the follow-up correction in `AGENTS.md`. Completed: investigated Backlog.md 1.50.1 cross-branch behavior and adopted the existing `TASK-1` as one branch-scoped continuity snapshot per branch, merged with that branch rather than synchronized globally. `AGENTS.md` documents that model. Corrected its initial cross-branch lookup advice after verification: when the same task ID exists in the working copy, Backlog browser resolves to that local variant and cannot select another branch version; use `git show <branch>:"backlog/tasks/task-1 - Session-pickup-—-<name>.md"` instead. No Backlog storage, worktree, separate repository, or upstream feature change was introduced.
+2026-08-16. Branch `main` at `6989a0a` before this handoff commit, fast-forwarded from `task-6-fallback-runner`; `main` is three commits ahead of `origin/main`, not pushed, and the tree will be clean after the handoff commit. Completed TASK-6 (`backlog task view TASK-6 --plain`): Pandino now installs an unpinned, inspection-only `fallback-runner` in pi, Claude Code, opencode, and Codex. It may substitute only for an unavailable reviewer, requires an explicit alternate model and the canonical reviewer prompt, cannot replace the implementer, and reports the substitution. Specialist pins and the three persisted model roles remain unchanged. The installer ignores unsupported hand-edited role keys. Primary Opus final review failed with the expected Anthropic 429; `fallback-runner` successfully ran the canonical final-review prompt on `openai-codex/gpt-5.6-sol`, found two issues, and both were fixed. Commits: `c23a6e0`, `448049f`, `6989a0a`.
 
 WHAT'S NEXT
-1. Nothing pending. Continue normal work from the current branch-specific snapshot.
+1. No product work is pending. Push `main` when explicitly desired with `git push origin main`; no push was performed in this session.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-11.
+Remote push is intentionally waiting for operator approval as of 2026-08-16. Nothing else is gated.
 
 VERIFY
-`git status -sb` should show clean `main` aligned with `origin/main`.
-`git log --oneline -3` should include the branch-scoped pickup documentation and its browser-lookup correction.
-`grep -n "snapshot is branch-scoped" AGENTS.md` should show the rule and the `git show` command without recommending `backlog browser`.
-`backlog task view TASK-1 --plain` should show this snapshot.
+`git status -sb` should show clean `main` ahead of `origin/main` by the TASK-6 and handoff commits.
+`git log --oneline -5` should include `6989a0a chore: finalize fallback runner task`, `448049f fix: constrain fallback runner substitutions`, and `c23a6e0 feat: add model-selectable fallback runner`.
+`backlog task view TASK-6 --plain` should show Done with all four acceptance criteria checked.
+`bash tests/test_install.sh` should print `test_install.sh: PASS`.
+`grep -n "fallback-runner" AGENTS.md agents/fallback-runner.md` should show the reviewer-only substitution policy and the generic inspection-only runner.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
