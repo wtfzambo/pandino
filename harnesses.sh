@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Write the five agent definitions in the layout each harness expects.
+# Write the six agent definitions in the layout each harness expects.
 # Sourced by install.sh; the kit's own copies under agents/ stay the source
 # of truth, these are translations of them.
 #
@@ -11,7 +11,8 @@
 #
 # The body is copied verbatim every time; only its wrapper differs. Each writer
 # takes the model this harness resolved for that agent's role and pins it, so
-# the orchestrator cannot spawn a reviewer on its own model.
+# the orchestrator cannot spawn a reviewer on its own model. fallback-runner
+# is deliberately unpinned so the orchestrator must select its model at call time.
 
 # Body of a kit agent file: everything after the closing frontmatter fence.
 agent_body() {
@@ -94,8 +95,8 @@ write_opencode_agent() {
     } > "$dst"
 }
 
-# Codex takes TOML, with the prompt in a multi-line string. Reviewers get
-# sandbox_mode = "read-only", which is the same boundary their prompt states.
+# Codex takes TOML, with the prompt in a multi-line string. Inspection-only
+# agents get sandbox_mode = "read-only", matching the boundary in their prompts.
 write_codex_agent() {
     local src="$1" dst="$2" model="$3" name tools
     name="$(basename "$src" .md)"
@@ -123,11 +124,17 @@ harness_dir() {
 }
 
 # Translate one kit agent into the layout a harness expects, pinning the model
-# that harness resolved for its role. Callers set model_<harness>_<role>.
+# that harness resolved for its role. Callers set model_<harness>_<role>;
+# fallback-runner deliberately has no assignment.
 write_harness_agent() {
-    local src="$1" harness="$2" dst="$3" var model
-    var="model_${harness}_$(agent_role "$src")"
-    model="${!var-}"
+    local src="$1" harness="$2" dst="$3" role var model
+    role="$(agent_role "$src")"
+    if [ "$role" = fallback-runner ]; then
+        model=""
+    else
+        var="model_${harness}_${role}"
+        model="${!var-}"
+    fi
     case "$harness" in
         pi)       write_pi_agent "$src" "$dst" "$model" ;;
         claude)   write_claude_agent "$src" "$dst" "$model" ;;

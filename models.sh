@@ -17,12 +17,14 @@
 #   claude    fixed aliases            fable, opus, sonnet, haiku
 
 # Which role an agent file fills. Non-final reviewers share the reviewer model;
-# docs-reviewer is conditional, not per-commit.
+# docs-reviewer is conditional, not per-commit. fallback-runner is deliberately
+# dynamic, so it has no saved or resolved model assignment.
 agent_role() {
     case "$(basename "$1" .md)" in
-        implementer)    echo implementer ;;
-        final-reviewer) echo final ;;
-        *)              echo reviewer ;;
+        implementer)     echo implementer ;;
+        final-reviewer)  echo final ;;
+        fallback-runner) echo fallback-runner ;;
+        *)               echo reviewer ;;
     esac
 }
 
@@ -71,7 +73,7 @@ if not isinstance(saved, dict):
 for harness, roles in saved.items():
     if isinstance(roles, dict):
         for role, model in roles.items():
-            if isinstance(model, str) and model:
+            if role in ("implementer", "reviewer", "final") and isinstance(model, str) and model:
                 print(f"{harness}_{role}={model}")
 JSON
 }

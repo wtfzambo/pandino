@@ -63,10 +63,11 @@ mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
 
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
-for agent in implementer spec-reviewer taste-reviewer docs-reviewer final-reviewer; do
+for agent in implementer spec-reviewer taste-reviewer docs-reviewer final-reviewer fallback-runner; do
     diff -q <(agent_without_pin "$repo_dir/agents/$agent.md") \
         <(agent_without_pin "$fresh_target/.pi/agents/$agent.md") > /dev/null
 done
+! grep -q '^model: ' "$fresh_target/.pi/agents/fallback-runner.md"
 [ ! -e "$fresh_target/.pandino/merge" ]
 cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
 cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
@@ -233,9 +234,9 @@ grep -F "grilling (global)" "$tmp_dir/global.out" > /dev/null
 grep -F "i-have-adhd (global)" "$tmp_dir/global.out" > /dev/null
 
 
-# Every agent carries a real model pin, in each harness's own format. Without
-# one the orchestrator spawns reviewers on its own model, which is the whole
-# reason the reviewers are separate agents.
+# Each specialist carries a real model pin, in each harness's own format.
+# Without one the orchestrator spawns reviewers on its own model, which is the
+# whole reason the reviewers are separate agents.
 pin_target="$tmp_dir/pins"
 mkdir "$pin_target"
 cat > "$tmp_dir/bin/opencode" <<'STUB'
@@ -259,17 +260,33 @@ cat > "$pin_home/.codex/models_cache.json" <<'JSON'
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
-# The fifth role ships everywhere, and reviewers do not run the implementer's
-# model by accident.
-for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer; do
+# All six agents ship everywhere. The five specialists remain pinned, so
+# reviewers do not run the implementer's model by accident.
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
     [ -f "$pin_target/.pi/agents/$agent.md" ]
     [ -f "$pin_target/.claude/agents/$agent.md" ]
     [ -f "$pin_target/.opencode/agent/$agent.md" ]
     [ -f "$pin_target/.codex/agents/$agent.toml" ]
+done
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer; do
     grep -q "^model: " "$pin_target/.pi/agents/$agent.md"
     grep -q "^model: " "$pin_target/.claude/agents/$agent.md"
     grep -q "^model: " "$pin_target/.opencode/agent/$agent.md"
     grep -q "^model = " "$pin_target/.codex/agents/$agent.toml"
+done
+! grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"
+! grep -q '^model: ' "$pin_target/.claude/agents/fallback-runner.md"
+! grep -q '^model: ' "$pin_target/.opencode/agent/fallback-runner.md"
+! grep -q '^model = ' "$pin_target/.codex/agents/fallback-runner.toml"
+grep -q '^  write: false' "$pin_target/.opencode/agent/fallback-runner.md"
+grep -q '^  edit: false' "$pin_target/.opencode/agent/fallback-runner.md"
+grep -q '^sandbox_mode = "read-only"' "$pin_target/.codex/agents/fallback-runner.toml"
+for file in \
+    "$pin_target/.claude/agents/fallback-runner.md" \
+    "$pin_target/.opencode/agent/fallback-runner.md" \
+    "$pin_target/.codex/agents/fallback-runner.toml"
+do
+    grep -q "Execute the complete role and task specification supplied by the orchestrator exactly." "$file"
 done
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$pin_target"/.codex/agents/*.toml
@@ -294,6 +311,8 @@ grep -qx "model: opus" "$pin_target/.claude/agents/final-reviewer.md"
 [ -f "$pin_target/.pandino/models.json" ]
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'openai/claude-opus-5' else 1)" \
     "$pin_target/.pandino/models.json"
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
+    "$pin_target/.pandino/models.json"
 grep -F "Models each agent will run on:" "$tmp_dir/pins.out" > /dev/null
 
 # A model chosen by hand outranks the recommendation, and rewriting the pin is
@@ -303,11 +322,16 @@ import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
 saved["pi"]["reviewer"] = "ollama-cloud/glm-5.2"
+saved["pi"]["fallback-runner"] = "ollama-cloud/fallback-model"
+saved["pi"]["unknown"] = "ollama-cloud/unknown-model"
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins2.out"
 grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/taste-reviewer.md"
+! grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
+    "$pin_target/.pandino/models.json"
 [ ! -e "$pin_target/.pandino/merge/agents/taste-reviewer.md" ]
 
 # A real local edit still wins over the kit.

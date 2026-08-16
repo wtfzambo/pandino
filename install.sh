@@ -335,7 +335,7 @@ case "$answer_mode" in
     --yes) picked_keys="pi claude opencode codex" ;;
     *)
         if asking; then
-            heading "Editors" "— where to put the three helpers" "" ""
+            heading "Editors" "— where to put the six helpers" "" ""
             body "  Ticked ones are already on your machine."
             body "  @↑↓ move, space select, enter confirm@"
             printf '\n' > /dev/tty
@@ -459,9 +459,9 @@ spinner_stop
 # Show the whole assignment at once: four pickers in a row would be a worse
 # question than the one it answers.
 if asking && [ -n "${picked_keys// /}" ]; then
-    heading "Models" "— which model runs each helper" "" ""
+    heading "Models" "— which model runs each specialist" "" ""
     body "  A reviewer on the writer's own model is not a second opinion,"
-    body "  so each helper gets its own, from what your editors can run."
+    body "  so each specialist gets its own, from what your editors can run."
     printf '\n' > /dev/tty
     print_model_matrix > /dev/tty
     for note in ${model_notes+"${model_notes[@]}"}; do
@@ -681,10 +681,10 @@ printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
 recap "AGENTS.md" " — the coding rules, read by every agent"
 for harness in $picked_keys; do
     case "$harness" in
-        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, docs-reviewer, final-reviewer" ;;
-        claude)   recap ".claude/agents/" " — the same five, for Claude Code" ;;
-        opencode) recap ".opencode/agent/" " — the same five, for opencode" ;;
-        codex)    recap ".codex/agents/" " — the same five, for Codex" ;;
+        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, docs-reviewer, final-reviewer, fallback-runner" ;;
+        claude)   recap ".claude/agents/" " — the same six, for Claude Code" ;;
+        opencode) recap ".opencode/agent/" " — the same six, for opencode" ;;
+        codex)    recap ".codex/agents/" " — the same six, for Codex" ;;
     esac
 done
 
