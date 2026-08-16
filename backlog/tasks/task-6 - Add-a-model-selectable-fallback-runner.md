@@ -41,7 +41,7 @@ Pinned reviewer agents cannot accept a call-time model override in pi. Add a gen
 <!-- SECTION:PLAN:BEGIN -->
 1. Add a generic inspection-only `fallback-runner` agent definition with no model pin, and install the same role in every supported harness.
 2. Teach model assignment that this one role is intentionally dynamic while preserving pins for the five specialist agents.
-3. Update the core workflow and README: retry only provider, quota, session, or model launch failures; pass the failed specialist prompt verbatim; require an explicit alternate model; and disclose the substitution.
+3. Update the core workflow and README: retry unavailable reviewers only after provider, quota, session, or model launch failures; pass the failed reviewer prompt verbatim; require an explicit alternate model; and disclose the substitution.
 4. Extend installer regression coverage for the sixth agent, its read-only boundary, and the absence of a model pin.
 5. Install the updated role into Pandino itself, run the installer suite and shell checks, then make a live pi Agent call proving the override is honored.
 <!-- SECTION:PLAN:END -->
@@ -65,5 +65,5 @@ Final-review follow-up: narrowed the documented substitution policy to unavailab
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Added a sixth product-wide `fallback-runner` that Pandino installs unpinned and inspection-only in pi, Claude Code, opencode, and Codex, allowing an unavailable pinned specialist to be rerun on an explicit alternate model with the same canonical instructions. Preserved all five specialist pins and the three saved model roles, hardened hand-edited model config against unknown role keys, and verified the installer suite, shell syntax, diff hygiene, all harness translations, and a live pi override returning `FALLBACK_OVERRIDE_OK`.
+Added a sixth product-wide `fallback-runner` that Pandino installs unpinned and inspection-only in pi, Claude Code, opencode, and Codex, allowing an unavailable pinned reviewer to be rerun on an explicit alternate model with the same canonical instructions. Preserved all five specialist pins and the three saved model roles, hardened hand-edited model config against unknown role keys, and verified the installer suite, shell syntax, diff hygiene, all harness translations, and a live pi override returning `FALLBACK_OVERRIDE_OK`.
 <!-- SECTION:FINAL_SUMMARY:END -->
