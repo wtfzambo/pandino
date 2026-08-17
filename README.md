@@ -91,6 +91,35 @@ Yours is never overwritten. Anything that clashes goes to `.pandino/merge/` for 
 
 The grilling skill is the exception: its local copy is refetched from upstream every time. If it already exists globally, Pandino leaves it there and adds no project copy.
 
+## Update an existing installation
+
+Pandino has no separate update command. Re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
+```
+
+The installer adds missing files, leaves identical files alone, reuses the specialist assignments in `.pandino/models.json`, and refreshes generated snippets and local skills. Conflicting `AGENTS.md` and Pi agent definitions are staged in a rebuilt `.pandino/merge/`; other selected harness translations are regenerated directly. Review and merge the staging directory, preserve any project-specific rules visible in the final diff, then delete `.pandino/merge/`. An update is a semantic merge, not a package replacement.
+
+For that reason, the safest update interface is an agent working inside a clean target repository:
+
+```txt
+Update Pandino in this repository.
+
+1. Read the latest Pandino README and this repository's current instruction files, agent definitions, `.pandino/models.json`, and enabled optional sections.
+2. Re-run the latest Pandino installer, selecting the editors and options this repository already uses.
+3. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
+4. Delete `.pandino/merge/` after resolving it, but keep `.pandino/snippets/`.
+5. Review the complete diff. Verify that all six agents are available in each selected editor, the five specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
+6. Report what was added, updated, preserved, or left unresolved. Do not commit or push unless I ask.
+```
+
+To test unpublished Pandino changes, run a local checkout's installer instead of the `curl` command:
+
+```bash
+/path/to/pandino/install.sh /path/to/target-repo
+```
+
 ## Install with an AI agent
 
 Dropping this into an existing repo is a merge, not a fresh start, and that is worth handing to an agent. Paste this to one working in the target repo:
