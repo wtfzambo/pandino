@@ -91,6 +91,34 @@ Yours is never overwritten. Anything that clashes goes to `.pandino/merge/` for 
 
 The grilling skill is the exception: its local copy is refetched from upstream every time. If it already exists globally, Pandino leaves it there and adds no project copy.
 
+## Install with an AI agent
+
+Dropping this into an existing repo is a merge, not a fresh start, and that is worth handing to an agent. Paste this to one working in the target repo:
+
+```txt
+Install Pandino into this repository.
+
+1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
+
+2. Ask me up to four questions first, and wait for my answers:
+   - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
+   - Add the notes on running agents in parallel? Only if I plan to. Default no.
+   - Add the i-have-adhd skill, for replies that lead with the next action? It stays off until I type /i-have-adhd. Default no; do not ask or install it locally if pi already has it globally.
+   - Which editors should get the helpers? pi, Claude Code, opencode, Codex — whichever I actually use.
+
+3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
+
+4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Then delete .pandino/merge/, but keep .pandino/snippets/.
+
+5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block plus <!-- pandino:document-governance --> and <!-- pandino:session-continuity -->, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add document governance or session continuity without Backlog.md — they describe workflows this repo could not run.
+
+6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same six roles where your tool looks for them. Copy the instructions as they are, do not reword them: pin the five specialists, but leave `fallback-runner` unpinned. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
+
+7. Verify: your tool can see the six helpers and the grilling skill, the five specialists have model pins, `fallback-runner` has none, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
+
+Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
+```
+
 ## Update an existing installation
 
 Pandino has no separate update command. Re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
@@ -118,34 +146,6 @@ To test unpublished Pandino changes, run a local checkout's installer instead of
 
 ```bash
 /path/to/pandino/install.sh /path/to/target-repo
-```
-
-## Install with an AI agent
-
-Dropping this into an existing repo is a merge, not a fresh start, and that is worth handing to an agent. Paste this to one working in the target repo:
-
-```txt
-Install Pandino into this repository.
-
-1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
-
-2. Ask me up to four questions first, and wait for my answers:
-   - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
-   - Add the notes on running agents in parallel? Only if I plan to. Default no.
-   - Add the i-have-adhd skill, for replies that lead with the next action? It stays off until I type /i-have-adhd. Default no; do not ask or install it locally if pi already has it globally.
-   - Which editors should get the helpers? pi, Claude Code, opencode, Codex — whichever I actually use.
-
-3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
-
-4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Then delete .pandino/merge/, but keep .pandino/snippets/.
-
-5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block plus <!-- pandino:document-governance --> and <!-- pandino:session-continuity -->, plus <!-- pandino:parallel-agents --> if I asked for it. Add anything missing from .pandino/snippets/ yourself. Never add document governance or session continuity without Backlog.md — they describe workflows this repo could not run.
-
-6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same six roles where your tool looks for them. Copy the instructions as they are, do not reword them: pin the five specialists, but leave `fallback-runner` unpinned. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
-
-7. Verify: your tool can see the six helpers and the grilling skill, the five specialists have model pins, `fallback-runner` has none, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
-
-Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
 ```
 
 ## How the workflow runs
