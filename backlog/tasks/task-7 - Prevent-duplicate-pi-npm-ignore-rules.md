@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-17 20:22'
-updated_date: '2026-08-17 20:33'
+updated_date: '2026-08-17 20:54'
 labels: []
 dependencies: []
 modified_files:
@@ -41,10 +41,12 @@ Re-running Pandino can append `.pi/npm/` repeatedly when `.pi/npm/.gitignore` is
 Implemented the ignore probe with `git check-ignore --no-index` so tracked nested files do not suppress applicable ignore-pattern matches. Added regression fixtures for a tracked `.pi/npm/.gitignore`, repeated installs, a broader `.pi/` rule, and the existing no-rule path. Validation: `bash tests/test_install.sh` passed; shell syntax and `git diff --check` were clean.
 
 Reviewer follow-up pinned the regression precondition explicitly: ordinary `git check-ignore` fails for the tracked nested fixture while `--no-index` succeeds. The broader `.pi/` fixture now also runs twice. Final taste and spec reviews reported no findings.
+
+Final-review mutation testing found that the new `!`-prefixed negative assertions did not propagate failures under `set -e`. Replaced the three TASK-7 assertions with explicit failing `if` blocks. A temporary installer copy with `--no-index` removed now fails at the nested-ignore assertion; the fixed installer suite passes.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Made Pi npm ignore setup idempotent by evaluating Git ignore patterns with `--no-index`, so tracked nested ignore files no longer cause duplicate root rules. Added repeated-install regressions for tracked nested ignores, no existing rule, and broader `.pi/` rules; verified with the full installer suite, shell syntax checks, and diff hygiene.
+Made Pi npm ignore setup idempotent by evaluating Git ignore patterns with `--no-index`, so tracked nested ignore files no longer cause duplicate root rules. Added effective repeated-install regressions for tracked nested ignores, no existing rule, and broader `.pi/` rules; mutation testing proves removing `--no-index` now fails the suite, while the fixed installer passes the full suite, shell syntax checks, and diff hygiene.
 <!-- SECTION:FINAL_SUMMARY:END -->

@@ -198,12 +198,19 @@ printf '*\n' > "$nested_ignore_target/.pi/npm/.gitignore"
 git -C "$nested_ignore_target" add -f .pi/npm/.gitignore
 git -C "$nested_ignore_target" -c user.name=test -c user.email=test@example.com \
     commit -qm 'tracked nested ignore fixture'
-! git -C "$nested_ignore_target" check-ignore -q .pi/npm/
+if git -C "$nested_ignore_target" check-ignore -q .pi/npm/; then
+    echo "FAIL: tracked nested ignore fixture unexpectedly ignores .pi/npm/" >&2
+    exit 1
+fi
 git -C "$nested_ignore_target" check-ignore --no-index -q .pi/npm/
 bash "$repo_dir/install.sh" "$nested_ignore_target" --no-input > "$tmp_dir/nested-ignore.out"
 bash "$repo_dir/install.sh" "$nested_ignore_target" --no-input > "$tmp_dir/nested-ignore2.out"
-[ ! -e "$nested_ignore_target/.gitignore" ] \
-    || ! grep -qxF '.pi/npm/' "$nested_ignore_target/.gitignore"
+if [ -e "$nested_ignore_target/.gitignore" ] \
+    && grep -qxF '.pi/npm/' "$nested_ignore_target/.gitignore"
+then
+    echo "FAIL: nested ignore fixture added a root .pi/npm/ rule" >&2
+    exit 1
+fi
 
 # A broader existing rule also applies, so it remains the only ignore rule.
 broader_ignore_target="$tmp_dir/broader-ignore"
@@ -213,7 +220,10 @@ printf '.pi/\n' > "$broader_ignore_target/.gitignore"
 bash "$repo_dir/install.sh" "$broader_ignore_target" --no-input > "$tmp_dir/broader-ignore.out"
 bash "$repo_dir/install.sh" "$broader_ignore_target" --no-input > "$tmp_dir/broader-ignore2.out"
 [ "$(grep -cxF '.pi/' "$broader_ignore_target/.gitignore")" = 1 ]
-! grep -qxF '.pi/npm/' "$broader_ignore_target/.gitignore"
+if grep -qxF '.pi/npm/' "$broader_ignore_target/.gitignore"; then
+    echo "FAIL: broader ignore fixture added a narrower .pi/npm/ rule" >&2
+    exit 1
+fi
 
 # --yes also writes the agents for the other harnesses, from the same source.
 [ -f "$yes_target/.claude/agents/implementer.md" ]
