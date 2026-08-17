@@ -596,10 +596,10 @@ case " $picked_keys " in
     *" pi "*)
         # pi downloads npm packages here. Agents, skills, and settings stay
         # trackable so teammates get the same setup.
-        # Ask git, not the file: a repo that already ignores all of .pi/ needs
-        # no rule of its own, and grepping for the exact line would miss that.
+        # Ask Git's patterns, not the file: a repo that already ignores all of
+        # .pi/ needs no rule of its own, and --no-index includes tracked paths.
         if [ -d "$target/.git" ] \
-            && ! (cd "$target" && git check-ignore -q .pi/npm/ 2> /dev/null); then
+            && ! (cd "$target" && git check-ignore --no-index -q .pi/npm/ 2> /dev/null); then
             printf '\n# pi project-local package installs.\n.pi/npm/\n' >> "$target/.gitignore"
             say appended "$green" ".pi/npm/ ${dim}to${reset} $target/.gitignore"
         fi

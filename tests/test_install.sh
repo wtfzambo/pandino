@@ -189,6 +189,32 @@ git -C "$interactive_target" check-ignore -q .pi/npm/package.json
 bash "$repo_dir/install.sh" "$interactive_target" --no-input > "$tmp_dir/interactive2.out"
 [ "$(grep -cxF '.pi/npm/' "$interactive_target/.gitignore")" = 1 ]
 
+# A tracked nested ignore file can still ignore .pi/npm/. Ask Git to evaluate
+# patterns independently of the index, so neither install adds a root rule.
+nested_ignore_target="$tmp_dir/nested-ignore"
+mkdir -p "$nested_ignore_target/.pi/npm"
+git -C "$nested_ignore_target" init -q
+printf '*\n' > "$nested_ignore_target/.pi/npm/.gitignore"
+git -C "$nested_ignore_target" add -f .pi/npm/.gitignore
+git -C "$nested_ignore_target" -c user.name=test -c user.email=test@example.com \
+    commit -qm 'tracked nested ignore fixture'
+! git -C "$nested_ignore_target" check-ignore -q .pi/npm/
+git -C "$nested_ignore_target" check-ignore --no-index -q .pi/npm/
+bash "$repo_dir/install.sh" "$nested_ignore_target" --no-input > "$tmp_dir/nested-ignore.out"
+bash "$repo_dir/install.sh" "$nested_ignore_target" --no-input > "$tmp_dir/nested-ignore2.out"
+[ ! -e "$nested_ignore_target/.gitignore" ] \
+    || ! grep -qxF '.pi/npm/' "$nested_ignore_target/.gitignore"
+
+# A broader existing rule also applies, so it remains the only ignore rule.
+broader_ignore_target="$tmp_dir/broader-ignore"
+mkdir "$broader_ignore_target"
+git -C "$broader_ignore_target" init -q
+printf '.pi/\n' > "$broader_ignore_target/.gitignore"
+bash "$repo_dir/install.sh" "$broader_ignore_target" --no-input > "$tmp_dir/broader-ignore.out"
+bash "$repo_dir/install.sh" "$broader_ignore_target" --no-input > "$tmp_dir/broader-ignore2.out"
+[ "$(grep -cxF '.pi/' "$broader_ignore_target/.gitignore")" = 1 ]
+! grep -qxF '.pi/npm/' "$broader_ignore_target/.gitignore"
+
 # --yes also writes the agents for the other harnesses, from the same source.
 [ -f "$yes_target/.claude/agents/implementer.md" ]
 [ -f "$yes_target/.opencode/agent/implementer.md" ]
