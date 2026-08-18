@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-16 23:52'
+updated_date: '2026-08-18 14:53'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,20 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-16. Branch `main` at `6989a0a` before this handoff commit, fast-forwarded from `task-6-fallback-runner`; `main` is three commits ahead of `origin/main`, not pushed, and the tree will be clean after the handoff commit. Completed TASK-6 (`backlog task view TASK-6 --plain`): Pandino now installs an unpinned, inspection-only `fallback-runner` in pi, Claude Code, opencode, and Codex. It may substitute only for an unavailable reviewer, requires an explicit alternate model and the canonical reviewer prompt, cannot replace the implementer, and reports the substitution. Specialist pins and the three persisted model roles remain unchanged. The installer ignores unsupported hand-edited role keys. Primary Opus final review failed with the expected Anthropic 429; `fallback-runner` successfully ran the canonical final-review prompt on `openai-codex/gpt-5.6-sol`, found two issues, and both were fixed. Commits: `c23a6e0`, `448049f`, `6989a0a`.
+2026-08-18. Branch `main` at `15e2233` before this handoff commit, aligned with `origin/main`; the handoff commit will be pushed immediately and the tree will be clean. Completed TASK-7 (`backlog task view TASK-7 --plain`): fixed repeated `.pi/npm/` ignore insertion by using `git check-ignore --no-index`, with effective repeated-install regressions for tracked nested ignore files, no prior rule, and broader `.pi/` rules. Completed TASK-8 (`backlog task view TASK-8 --plain`): converted all 13 ineffective shell-negated assertions in `tests/test_install.sh` to explicit failing guards while preserving safe `[ ! ... ]` tests. Representative mutations now fail, the full installer suite passes, and shell syntax is clean. Opus final review was unavailable with Anthropic 429; the documented `fallback-runner` substitution ran the canonical final review on `openai-codex/gpt-5.6-sol` and returned `merge`. Relevant commits: `b777987`, `0d6b5bf`, `15e2233`.
 
 WHAT'S NEXT
-1. No product work is pending. Push `main` when explicitly desired with `git push origin main`; no push was performed in this session.
+1. Nothing pending. Continue normal work from `main`.
 
 WAITING ON / GATED BY
-Remote push is intentionally waiting for operator approval as of 2026-08-16. Nothing else is gated.
+Nothing as of 2026-08-18.
 
 VERIFY
-`git status -sb` should show clean `main` ahead of `origin/main` by the TASK-6 and handoff commits.
-`git log --oneline -5` should include `6989a0a chore: finalize fallback runner task`, `448049f fix: constrain fallback runner substitutions`, and `c23a6e0 feat: add model-selectable fallback runner`.
-`backlog task view TASK-6 --plain` should show Done with all four acceptance criteria checked.
+`git status -sb` should show clean `main` aligned with `origin/main`.
+`git log --oneline -5` should include `15e2233 test: make negative installer assertions effective`, `0d6b5bf test: enforce pi npm ignore regressions`, and `b777987 fix: keep pi npm ignore setup idempotent`.
+`backlog task view TASK-7 --plain` and `backlog task view TASK-8 --plain` should both show Done with every acceptance criterion checked.
 `bash tests/test_install.sh` should print `test_install.sh: PASS`.
-`grep -n "fallback-runner" AGENTS.md agents/fallback-runner.md` should show the reviewer-only substitution policy and the generic inspection-only runner.
+`git ls-files -z -- "*.sh" | xargs -0 -n 1 bash -n` should produce no errors.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
