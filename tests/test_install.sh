@@ -67,7 +67,10 @@ for agent in implementer spec-reviewer taste-reviewer docs-reviewer final-review
     diff -q <(agent_without_pin "$repo_dir/agents/$agent.md") \
         <(agent_without_pin "$fresh_target/.pi/agents/$agent.md") > /dev/null
 done
-! grep -q '^model: ' "$fresh_target/.pi/agents/fallback-runner.md"
+if grep -q '^model: ' "$fresh_target/.pi/agents/fallback-runner.md"; then
+    echo "FAIL: fresh fallback-runner has a model pin" >&2
+    exit 1
+fi
 [ ! -e "$fresh_target/.pandino/merge" ]
 cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
 cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
@@ -108,7 +111,10 @@ grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
 [ ! -e "$fresh_target/.pi/skills/i-have-adhd" ]
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
 [ ! -e "$fresh_target/FINDINGS.md" ]
-! grep -qF "pandino:document-governance" "$fresh_target/AGENTS.md"
+if grep -qF "pandino:document-governance" "$fresh_target/AGENTS.md"; then
+    echo "FAIL: --no-input appended document-governance" >&2
+    exit 1
+fi
 
 # --yes appends each snippet exactly once, and re-running does not duplicate
 # them or mistake Pandino's own additions for a local conflict.
@@ -183,9 +189,18 @@ grep -qxF '.pi/npm/' "$interactive_target/.gitignore"
 mkdir -p "$interactive_target/.pi/npm"
 touch "$interactive_target/.pi/npm/package.json"
 git -C "$interactive_target" check-ignore -q .pi/npm/package.json
-! git -C "$interactive_target" check-ignore -q .pi/agents/implementer.md
-! git -C "$interactive_target" check-ignore -q .pi/skills/grilling/SKILL.md
-! git -C "$interactive_target" check-ignore -q .pi/settings.json
+if git -C "$interactive_target" check-ignore -q .pi/agents/implementer.md; then
+    echo "FAIL: Git ignores Pi agent configuration" >&2
+    exit 1
+fi
+if git -C "$interactive_target" check-ignore -q .pi/skills/grilling/SKILL.md; then
+    echo "FAIL: Git ignores the Pi grilling skill" >&2
+    exit 1
+fi
+if git -C "$interactive_target" check-ignore -q .pi/settings.json; then
+    echo "FAIL: Git ignores Pi settings" >&2
+    exit 1
+fi
 bash "$repo_dir/install.sh" "$interactive_target" --no-input > "$tmp_dir/interactive2.out"
 [ "$(grep -cxF '.pi/npm/' "$interactive_target/.gitignore")" = 1 ]
 
@@ -310,10 +325,22 @@ for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-review
     grep -q "^model: " "$pin_target/.opencode/agent/$agent.md"
     grep -q "^model = " "$pin_target/.codex/agents/$agent.toml"
 done
-! grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"
-! grep -q '^model: ' "$pin_target/.claude/agents/fallback-runner.md"
-! grep -q '^model: ' "$pin_target/.opencode/agent/fallback-runner.md"
-! grep -q '^model = ' "$pin_target/.codex/agents/fallback-runner.toml"
+if grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"; then
+    echo "FAIL: Pi fallback-runner has a model pin" >&2
+    exit 1
+fi
+if grep -q '^model: ' "$pin_target/.claude/agents/fallback-runner.md"; then
+    echo "FAIL: Claude fallback-runner has a model pin" >&2
+    exit 1
+fi
+if grep -q '^model: ' "$pin_target/.opencode/agent/fallback-runner.md"; then
+    echo "FAIL: opencode fallback-runner has a model pin" >&2
+    exit 1
+fi
+if grep -q '^model = ' "$pin_target/.codex/agents/fallback-runner.toml"; then
+    echo "FAIL: Codex fallback-runner has a model pin" >&2
+    exit 1
+fi
 grep -q '^  write: false' "$pin_target/.opencode/agent/fallback-runner.md"
 grep -q '^  edit: false' "$pin_target/.opencode/agent/fallback-runner.md"
 grep -q '^sandbox_mode = "read-only"' "$pin_target/.codex/agents/fallback-runner.toml"
@@ -341,7 +368,10 @@ grep -qx "model: openai/claude-opus-5" "$pin_target/.opencode/agent/final-review
 grep -qx "model: sonnet" "$pin_target/.claude/agents/implementer.md"
 grep -qx "model: opus" "$pin_target/.claude/agents/final-reviewer.md"
 # A hosted review pipeline is not a model to pin.
-! grep -rq "codex-auto-review" "$pin_target/.codex/"
+if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
+    echo "FAIL: Codex output includes codex-auto-review" >&2
+    exit 1
+fi
 
 # The assignment is saved, and the matrix is printed once with everything else.
 [ -f "$pin_target/.pandino/models.json" ]
@@ -366,7 +396,10 @@ with open(sys.argv[1], "w") as f:
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins2.out"
 grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/taste-reviewer.md"
-! grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"
+if grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"; then
+    echo "FAIL: hand-edited fallback-runner has a model pin" >&2
+    exit 1
+fi
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
 [ ! -e "$pin_target/.pandino/merge/agents/taste-reviewer.md" ]
@@ -384,7 +417,12 @@ bare_home="$tmp_dir/bare-home"
 mkdir -p "$bare_home"
 env PATH="$tmp_dir/emptybin:/usr/bin:/bin" HOME="$bare_home" \
     bash "$repo_dir/install.sh" "$bare_target" --no-input > "$tmp_dir/bare.out"
-[ ! -f "$bare_target/.pi/agents/implementer.md" ] || ! grep -q "^model: " "$bare_target/.pi/agents/implementer.md"
+if [ -f "$bare_target/.pi/agents/implementer.md" ] \
+    && grep -q "^model: " "$bare_target/.pi/agents/implementer.md"
+then
+    echo "FAIL: bare Pi implementer has a model pin" >&2
+    exit 1
+fi
 grep -F "main model" "$tmp_dir/bare.out" > /dev/null
 
 
@@ -463,6 +501,9 @@ python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi
 if grep -qF "pandino:session-continuity" "$fresh_target/AGENTS.md"; then
     echo "FAIL: session continuity appended without Backlog.md"; exit 1
 fi
-! find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .
+if find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .; then
+    echo "FAIL: installer generated a FINDINGS.md file" >&2
+    exit 1
+fi
 
 echo "test_install.sh: PASS"
