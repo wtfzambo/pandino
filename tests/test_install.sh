@@ -35,6 +35,7 @@ cat > "$tmp_dir/bin/pi" <<'EOF'
 if [ "$1" = "--list-models" ]; then
     echo 'provider      model'
     echo 'openai-codex  gpt-5.6-terra'
+    echo 'openai-codex  gpt-5.6-sol'
     echo 'ollama-cloud  deepseek-v4-flash:0731'
     echo 'ollama-cloud  glm-5.2'
     echo 'anthropic     claude-opus-5'
@@ -63,7 +64,7 @@ mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
 
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
-for agent in implementer spec-reviewer taste-reviewer docs-reviewer final-reviewer fallback-runner; do
+for agent in implementer spec-reviewer taste-reviewer docs-reviewer test-reviewer final-reviewer fallback-runner; do
     diff -q <(agent_without_pin "$repo_dir/agents/$agent.md") \
         <(agent_without_pin "$fresh_target/.pi/agents/$agent.md") > /dev/null
 done
@@ -251,10 +252,12 @@ grep -F ".pi/skills/i-have-adhd/" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.codex/agents/implementer.toml" ]
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/taste-reviewer.toml"
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/docs-reviewer.toml"
+grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/test-reviewer.toml"
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$yes_target"/.codex/agents/*.toml
 # The body must survive translation unchanged.
 grep -q "You are the taste reviewer" "$yes_target/.claude/agents/taste-reviewer.md"
+grep -q "You are the test reviewer" "$yes_target/.claude/agents/test-reviewer.md"
 
 # Backlog.md comes with task tracking, its own guidelines, and session
 # continuity — the section is meaningless without it.
@@ -293,7 +296,7 @@ mkdir "$pin_target"
 cat > "$tmp_dir/bin/opencode" <<'STUB'
 #!/bin/sh
 [ "$1" = models ] || exit 1
-printf '%s\n' openai/gpt-5.6-terra openai/deepseek-v4-flash openai/claude-opus-5
+printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol openai/deepseek-v4-flash openai/claude-opus-5
 STUB
 cat > "$tmp_dir/bin/codex" <<'STUB'
 #!/bin/sh
@@ -311,15 +314,14 @@ cat > "$pin_home/.codex/models_cache.json" <<'JSON'
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
-# All six agents ship everywhere. The five specialists remain pinned, so
-# reviewers do not run the implementer's model by accident.
-for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
+# All seven agents ship everywhere. The six specialists remain pinned, so reviewers do not run the implementer's model by accident.
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer fallback-runner; do
     [ -f "$pin_target/.pi/agents/$agent.md" ]
     [ -f "$pin_target/.claude/agents/$agent.md" ]
     [ -f "$pin_target/.opencode/agent/$agent.md" ]
     [ -f "$pin_target/.codex/agents/$agent.toml" ]
 done
-for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer; do
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer; do
     grep -q "^model: " "$pin_target/.pi/agents/$agent.md"
     grep -q "^model: " "$pin_target/.claude/agents/$agent.md"
     grep -q "^model: " "$pin_target/.opencode/agent/$agent.md"
@@ -344,6 +346,12 @@ fi
 grep -q '^  write: false' "$pin_target/.opencode/agent/fallback-runner.md"
 grep -q '^  edit: false' "$pin_target/.opencode/agent/fallback-runner.md"
 grep -q '^sandbox_mode = "read-only"' "$pin_target/.codex/agents/fallback-runner.toml"
+# Test review has the same inspection-only boundary in every harness.
+grep -qx 'thinking: high' "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx 'tools: Bash,Glob,Grep,Read' "$pin_target/.claude/agents/test-reviewer.md"
+grep -q '^  write: false' "$pin_target/.opencode/agent/test-reviewer.md"
+grep -q '^  edit: false' "$pin_target/.opencode/agent/test-reviewer.md"
+grep -q '^sandbox_mode = "read-only"' "$pin_target/.codex/agents/test-reviewer.toml"
 for file in \
     "$pin_target/.claude/agents/fallback-runner.md" \
     "$pin_target/.opencode/agent/fallback-runner.md" \
@@ -354,18 +362,19 @@ done
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$pin_target"/.codex/agents/*.toml
 
-# Non-final reviewers share one model; the whole-branch pass gets its own.
-# pi's catalogue carries the dated tag and opencode's the bare id, and a
-# preference has to match both spellings or the role silently falls through to
-# the next model down the list.
+# Shared reviewers use one model; test review gets the separately benchmarked Sol recommendation. pi's catalogue carries the dated tag and opencode's bare id, and a preference has to match both spellings or the role silently falls through to the next model down the list.
 grep -qx "model: ollama-cloud/deepseek-v4-flash:0731" "$pin_target/.pi/agents/taste-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/taste-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/spec-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/docs-reviewer.md"
 grep -qx "model: openai/gpt-5.6-terra" "$pin_target/.opencode/agent/implementer.md"
 grep -qx "model: openai/claude-opus-5" "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx "model: openai-codex/gpt-5.6-sol" "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx "model: openai/gpt-5.6-sol" "$pin_target/.opencode/agent/test-reviewer.md"
+grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
 # Claude Code takes subscription aliases, not provider-qualified ids.
 grep -qx "model: sonnet" "$pin_target/.claude/agents/implementer.md"
+grep -qx "model: sonnet" "$pin_target/.claude/agents/test-reviewer.md"
 grep -qx "model: opus" "$pin_target/.claude/agents/final-reviewer.md"
 # A hosted review pipeline is not a model to pin.
 if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
@@ -377,10 +386,24 @@ fi
 [ -f "$pin_target/.pandino/models.json" ]
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'openai/claude-opus-5' else 1)" \
     "$pin_target/.pandino/models.json"
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
 grep -F "Models each specialist will run on:" "$tmp_dir/pins.out" > /dev/null
 grep -F "fallback-runner has no default and requires a call-time model" "$tmp_dir/pins.out" > /dev/null
+
+# A saved three-role assignment gains the resolved test model on the next run.
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+with open(sys.argv[1]) as f:
+    saved = json.load(f)
+del saved["pi"]["test"]
+with open(sys.argv[1], "w") as f:
+    json.dump(saved, f, indent=2)
+JSON
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-upgrade.out"
+grep -qx "model: openai-codex/gpt-5.6-sol" "$pin_target/.pi/agents/test-reviewer.md"
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if set(d['pi']) == {'implementer', 'reviewer', 'test', 'final'} else 1)" \
+    "$pin_target/.pandino/models.json"
 
 # A model chosen by hand outranks the recommendation, and rewriting the pin is
 # Pandino updating its own output — not a conflict to stage.
@@ -388,21 +411,32 @@ python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
-saved["pi"]["reviewer"] = "ollama-cloud/glm-5.2"
+saved["pi"]["reviewer"] = "anthropic/claude-sonnet-5"
+saved["pi"]["test"] = "ollama-cloud/glm-5.2"
 saved["pi"]["fallback-runner"] = "ollama-cloud/fallback-model"
 saved["pi"]["unknown"] = "ollama-cloud/unknown-model"
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins2.out"
-grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/taste-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/taste-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/spec-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/docs-reviewer.md"
+grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/test-reviewer.md"
+for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
+    if grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/$agent.md"; then
+        echo "FAIL: saved test model pinned $agent" >&2
+        exit 1
+    fi
+done
 if grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"; then
     echo "FAIL: hand-edited fallback-runner has a model pin" >&2
     exit 1
 fi
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'final'} for roles in d.values()) else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
 [ ! -e "$pin_target/.pandino/merge/agents/taste-reviewer.md" ]
+[ ! -e "$pin_target/.pandino/merge/agents/test-reviewer.md" ]
 
 # A real local edit still wins over the kit.
 printf '\nLocal house rule.\n' >> "$pin_target/.pi/agents/implementer.md"
@@ -427,7 +461,7 @@ grep -F "main model" "$tmp_dir/bare.out" > /dev/null
 
 
 # Reassigning models by hand: accept nothing, press "e", and take the second
-# offer for each of the three roles. This is also the only test that sends an
+# offer for each of the four roles. This is also the only test that sends an
 # arrow key, which is its own escape-sequence path through the picker.
 cat > "$tmp_dir/drive_customize.py" <<'PY'
 import os
@@ -451,6 +485,7 @@ steps = [
     (b"Which editor?", b"\r"),
     (b"implementer", b"\x1b[B\r"),
     (b"reviewer", b"\x1b[B\r"),
+    (b"test", b"\x1b[B\r"),
     (b"final", b"\x1b[B\r"),
 ]
 
@@ -489,11 +524,11 @@ custom_home="$tmp_dir/custom-home"
 mkdir -p "$custom_home"
 env PATH="$tmp_dir/bin:/usr/bin:/bin" HOME="$custom_home" \
     "$python_bin" "$tmp_dir/drive_customize.py" "$repo_dir/install.sh" "$custom_target"
-# The stub lists terra, deepseek, glm and opus; second choice per role is the
-# second entry of that role's preference list that the stub actually carries.
+# The stub lists terra, Sol, deepseek, glm and opus; second choice per role is the second entry of that role's preference list that the stub carries.
 grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/taste-reviewer.md"
 grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/spec-reviewer.md"
 grep -qx "model: anthropic/claude-sonnet-5" "$custom_target/.pi/agents/implementer.md"
+grep -qx "model: anthropic/claude-sonnet-5" "$custom_target/.pi/agents/test-reviewer.md"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['reviewer'] == 'ollama-cloud/glm-5.2' else 1)" \
     "$custom_target/.pandino/models.json"
 

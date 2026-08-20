@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Review correctly reports no findings and no test needed for a docs-only change; the spec-reviewer flag is a note, not a finding."
+}

@@ -65,13 +65,14 @@ Prefer a functional core: keep business logic pure and push I/O to the edges, to
 
 ## Tests
 
-Code without meaningful tests is not reliable, but coverage is not the objective. Priority: product behavior visible to a user, then integration boundaries, then unit tests for pure logic and edge cases.
+Tests are maintained evidence for observable product promises, not a coverage quota. During exploration, let tests follow understanding; once a cut point is stable, protect it. Prefer integration tests at stable boundaries, keep end-to-end coverage small and limited to critical user paths, and use unit tests for pure logic, tricky edge cases, and narrow decisions that are hard to reach through an integration boundary.
 
-- Test what the code promises, not how it does it: call the function, assert on the result or the visible effect. Public behavior is the default target; a private function with tricky edge cases is worth testing directly too. A refactor that preserves behavior should never break a test.
-- Expected values come from an independent source of truth. A test that recomputes the expectation the way the code does passes by construction and proves nothing.
-- Avoid mocks that merely assert that mocked methods were called.
-- Add a regression test when fixing a reproducible bug. Skip tests for trivial getters, constants, and framework behavior.
-- Prefer a few representative fixtures over generated boilerplate.
+- A test earns its place only when it protects an observable promise whose breakage is a bug, is not already guaranteed by cheaper tooling or a stronger test, derives its expectation independently, and would fail under a plausible defect.
+- Test what the code promises, not how it does it: call the function and assert on the result or visible effect. A refactor that preserves behavior should not break a test.
+- Expected values come from an independent source of truth: a documented contract, a real boundary fixture, or a simple hand-derived result. A test that recomputes the implementation passes by construction and proves nothing.
+- Use coarse fakes at system boundaries when they make the promise observable. Avoid fine-grained mocks that only confirm internal calls or invent an external provider's shape.
+- Static analysis, type checking, compilation, linting, and existence checks are cheaper guarantees when they already prove the claim; do not duplicate them with a test.
+- For a reproducible bug, write the regression test before fixing it. Skip tests for trivial getters, constants, and framework behavior. Prefer a few representative fixtures over generated boilerplate.
 
 ## Agent behavior
 
@@ -82,7 +83,7 @@ Code without meaningful tests is not reliable, but coverage is not the objective
 
 ## Agent workflow
 
-The main agent plans and orchestrates; five specialist subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `final-reviewer`, defined in `.pi/agents/`. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report. Each specialist carries its own pinned model, so a reviewer is never the same model as the writer; do not override it at spawn time.
+The main agent plans and orchestrates; specialist subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `final-reviewer`, and the conditional `test-reviewer`, defined in the selected harness's agent directories. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report. Each specialist carries its own pinned model, so a reviewer is never the same model as the writer; do not override it at spawn time. Do not save separate test-reviewer model routing unless a benchmark shows a material advantage and the operator explicitly approves it.
 
 Pandino also installs `fallback-runner`, a non-specialist, inspection-only escape hatch. Use it only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable — never because a review found problems or the orchestrator dislikes its result. The orchestrator must supply an explicit alternate model, the failed reviewer's canonical instructions verbatim, and the concrete task context; preserve the review role and tool boundaries. For review work, choose a model different from the writer. Never invoke `fallback-runner` without an explicit model, which would silently inherit the parent, and visibly report every substitution.
 
@@ -90,7 +91,7 @@ Those definitions are written for [pi](https://pi.dev). On another harness, read
 
 1. Plan first. For non-trivial or unclear work, agree on a bounded plan with the user before touching code; load the grilling skill to stress-test it.
 2. Delegate the approved plan to the `implementer` subagent. Give it the full plan, not a summary; it implements without re-litigating, and stops and reports if the plan contradicts the real code — treat that report as a planning bug, not an implementation failure.
-3. Before every non-trivial commit, run `taste-reviewer` and `spec-reviewer` together on the working diff. Taste judges how the code is written, spec judges what it does against what was asked.
+3. Before every non-trivial commit, run `taste-reviewer` and `spec-reviewer` together on the working diff. Taste judges how the code is written; spec judges what it does against what was asked. Also run `test-reviewer` for executable-behavior changes, test or test-infrastructure changes, and bug fixes; skip it for documentation-only and trivial non-behavioral diffs. It judges whether automated evidence is necessary, effective, independent, and proportionate, not requested-behavior correctness.
 4. Fix or explicitly discuss every must-fix finding before committing. Scope-creep findings from the spec reviewer are product decisions: surface them to the user instead of silently keeping or reverting the extra behavior.
 
 5. Verify the integrated result yourself before reporting done. An agent's report describes intent; only the diff describes outcome. Read the diff, re-run the checks rather than trusting reported ones, own the files no mandate covered — docs and cross-cutting comments are nobody's slice by default — and trace one full user path end to end. Slice-level correctness does not imply the path works.

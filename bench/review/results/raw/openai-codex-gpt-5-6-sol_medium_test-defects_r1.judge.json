@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Perfect review: all five must-fix and both minor excess items identified with no false positives."
+}

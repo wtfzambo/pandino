@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Review found GT1-4 (GT3 downgraded to minor but same defect, review item 8); missed GT5 (no independent negative schedule_retry assertion); both minors covered (review 4-7); no false positives."
+}

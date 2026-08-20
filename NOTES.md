@@ -1,6 +1,6 @@
 # Pandino notes
 
-## Provisional model routing
+## Model routing
 
 These are tested examples, not requirements. Ask the user which available models to use during setup.
 
@@ -10,6 +10,7 @@ Ollama Cloud publishes deepseek-v4-flash under dated tags: since 2026-08-09 the 
 - Implementer (Claude alternative): `anthropic/claude-sonnet-5`, thinking `high`. 12/12 pass including the adversarial stop, ~3x terra's cost. Best Claude option; Opus adds cost (~4x Sonnet) without better outcomes on these tasks, Haiku fails the adversarial scenario.
 - Taste reviewer: `ollama-cloud/deepseek-v4-flash:0731` or `ollama-cloud/glm-5.2`, thinking `high`. Both went 12/12 on planted defects with zero false positives in the 2026-07-31 reviewer benchmark; deepseek is the cheapest of the whole field (~$0.004/review), glm the fastest (~12s). `kimi-k2.7-code` remains a fine pick (11–12/12, negligible cost difference).
 - Spec reviewer: `ollama-cloud/deepseek-v4-flash:0731`, thinking `high`. Found all planted spec divergences in all runs with zero false positives, at ~1/50 of Opus's cost. `anthropic/claude-opus-5` also scored perfect on spec but is the most expensive and slowest option; keep it in mind for genuinely hard reviews, where these small benchmarks cannot see a difference.
+- Test reviewer: `openai-codex/gpt-5.6-sol`, thinking `high`, operator approved 2026-08-20. Each harness resolves it through its available catalogue and fallback chain; `.pandino/models.json` stores implementer, reviewer, test, and final choices, user edits win, and `fallback-runner` remains absent.
 
 ## Benchmark 2026-07-31
 
@@ -57,6 +58,25 @@ Takeaways:
 - The GPT 5.6 family shares a taste blind spot: all three missed the "comment explains what convoluted code does" finding in every run.
 - Opus's 4 false positives on the clean taste diff are borderline-legitimate depth (e.g. a test that passes by construction) — spot-check `results/raw/*taste-clean*.review.md` before reading the fp column as pure noise. It found real subtleties nothing else saw, but that thoroughness is noise on routine diffs and costs 10-100x the alternatives.
 - Judge scoring was spot-checked by hand on the clean-diff fp verdicts and the terra/kimi taste misses; verdicts matched the review texts.
+
+## Test-reviewer benchmark 2026-08-20
+
+Test review is conditional evidence review: it asks whether automated protection is necessary, effective, independent, and proportionate, rather than whether the diff meets the requested specification. The [manual audit](bench/review/results/manual-audit.md) is the detailed and final scoring authority.
+
+The final oracle corpus includes the original five-defect task plus integration and no-test cases, and Python and TypeScript defect cases with five must-fix items and two minor groups each plus clean cases. Genuine reviewer findings corrected fixtures, stale contestant artifacts were rerun, and mutation audits preceded paid runs.
+
+Final language r1:
+
+| model | must/10 | minor/4 | defect FP | clean FP |
+|---|---:|---:|---:|---:|
+| Sol high | 9/10 | 4/4 | 0 | 3 |
+| Sol medium | 9/10 | 4/4 | 1 | 2 |
+| Flash | 5/10 | 4/4 | 2 | 3 |
+| Pro | 7/10 | 4/4 | 1 | 2 |
+
+Both Sol finalists reached 40/45 must-fix items overall and 27/30 on their language repeats. High's defect-run floor was 4/5 versus medium's 3/5; language defect false positives were 1 versus 2, while clean false positives were 6 versus 5. High's language medians were 102.5s/$0.233783 on defects and 114s/$0.233742 on clean cases; medium's were 70.5s/$0.162485 and 68s/$0.168769.
+
+High was selected because this quality role values stable recall and fewer defect false positives. Medium is candidly faster, cheaper, and has one fewer clean false positive. Both consistently miss Python's successful save-before-send ordering. Fable language judging repeatedly returned HTTP 429, so no substitute was used; an independent exact manual audit controls the final scores. Pro's zero cost means pricing metadata was missing, not that it was free.
 
 ## Benchmark follow-up
 

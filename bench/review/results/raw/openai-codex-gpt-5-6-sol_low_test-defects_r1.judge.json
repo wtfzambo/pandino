@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed the set -e negation defect (explicitly and wrongly cleared in a Good note); all other must-fix and both minor items identified with no false positives."
+}

@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed the bash `!` under set -e defect (praised it as Good instead); the missing retry_delay(2) assertion finding is not a planted defect and counts as a false positive."
+}

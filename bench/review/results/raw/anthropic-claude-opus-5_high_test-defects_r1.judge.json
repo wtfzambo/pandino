@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed GT5 (no independent negative assertion at schedule_retry boundary); review's extra attempt-2 finding is a real gap subsumed by GT3's fix, not counted as a false positive."
+}

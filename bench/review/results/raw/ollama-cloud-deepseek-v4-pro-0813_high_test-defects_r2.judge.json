@@ -1,0 +1,15 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed the set -e '!' masking defect (explicitly declared the negation correct) and the schedule_retry(400) negative assertion at the scheduling boundary; finding 8's 'needlessly ornate, revert' claim is a false positive that contradicts ground truth 2."
+}

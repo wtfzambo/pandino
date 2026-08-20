@@ -1,0 +1,3 @@
+No must-fix or minor-excess findings.
+
+**Good:** `test_checkout.py:8-21` `test_place_order` is proportionate evidence for the new `place_order` behavior. It exercises the documented contract at the function boundary with coarse fakes, derives expectations independently from the spec (`20.0 + 7.5 = 27.5`, save then receipt), and would fail under concrete mutations such as returning the wrong total, omitting `save`/`send_receipt`, passing a different total to either boundary, or reversing the side-effect order. Sharing one event list between the two fakes is appropriate because the spec explicitly sequences the two effects.

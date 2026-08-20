@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "GT5 not credited: the schedule_retry(400) suggestion appears only as a fix for the shell defect, not as an identified gap in test_notifier's scheduling-boundary coverage."
+}

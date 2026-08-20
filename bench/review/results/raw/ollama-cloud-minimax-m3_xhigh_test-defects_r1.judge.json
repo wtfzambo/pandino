@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Found the invented fake shape (4); missed 1,2,3,5 (even praised 429 coverage and the shell test); found both parts of 6; only the grep half of compound 7; the 'style-only shell rewrite' minor finding contradicts defect 2 and is a false positive."
+}

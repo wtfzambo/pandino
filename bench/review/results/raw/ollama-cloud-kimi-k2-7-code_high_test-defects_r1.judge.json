@@ -1,0 +1,15 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed the FakeMailProvider invented JSON shape (praised the fake instead) and only half of minor 7 (flagged source-text check but praised the exact-wording assertion)."
+}

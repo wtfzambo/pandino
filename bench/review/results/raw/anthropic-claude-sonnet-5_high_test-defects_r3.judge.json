@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed only GT5 (schedule_retry negative-path assertion); GT3 and GT7 items found but miscategorized in severity, which doesn't affect scoring."
+}

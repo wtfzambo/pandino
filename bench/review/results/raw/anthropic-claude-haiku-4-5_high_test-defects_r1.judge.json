@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Found the retry_delay-derived expectation and invented fake shape; missed the 429 regression gap, praised the broken `!` shell assertion, missed the schedule_retry negative case, and only half of item 7 (praised the exact-wording assert); the lines 14-15 'recomputed literal' complaint is a false positive."
+}

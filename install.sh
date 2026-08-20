@@ -335,7 +335,7 @@ case "$answer_mode" in
     --yes) picked_keys="pi claude opencode codex" ;;
     *)
         if asking; then
-            heading "Editors" "— where to put the six helpers" "" ""
+            heading "Editors" "— where to put the seven helpers" "" ""
             body "  Ticked ones are already on your machine."
             body "  @↑↓ move, space select, enter confirm@"
             printf '\n' > /dev/tty
@@ -359,7 +359,7 @@ if [ -f "$models_file" ]; then
     done < <(read_saved_models "$models_file")
 fi
 
-# Fill in whichever of one harness's three roles is still unset.
+# Fill in whichever of one harness's four roles is still unset.
 resolve_harness_models() {
     local harness="$1" catalog role var first resolved
     catalog="$(harness_catalog "$harness")"
@@ -367,7 +367,7 @@ resolve_harness_models() {
         model_notes+=("$harness: could not read its model list, its agents follow the main model")
         return 0
     fi
-    for role in implementer reviewer final; do
+    for role in implementer reviewer test final; do
         var="model_${harness}_${role}"
         if [ -n "${!var-}" ]; then continue; fi
         if ! resolved="$(resolve_role_model "$catalog" "$role")"; then
@@ -393,34 +393,38 @@ resolve_harness_models() {
 # value (implementer x, reviewer y) is unreadable at four harnesses.
 print_model_matrix() {
     local harness role var value
-    local -a widths=(11 9 5)   # the header words are the minimum width
+    local -a roles=(implementer reviewer test final)
+    local -a headers=(implementer reviewers "test review" final)
+    local -a widths=(11 9 11 5)
     local i
 
     for harness in $picked_keys; do
-        i=0
-        for role in implementer reviewer final; do
+        for i in "${!roles[@]}"; do
+            role="${roles[$i]}"
             var="model_${harness}_${role}"
             value="${!var:-main model}"
             [ "${#value}" -gt "${widths[$i]}" ] && widths[$i]="${#value}"
-            i=$((i + 1))
         done
     done
 
-    printf '  %s    %-9s %-*s  %-*s  %s%s\n' \
-        "$grey" "" "${widths[0]}" "implementer" "${widths[1]}" "reviewers" "final" "$reset"
+    printf '  %s    %-9s ' "$grey" ""
+    for i in "${!headers[@]}"; do
+        printf '%-*s  ' "${widths[$i]}" "${headers[$i]}"
+    done
+    printf '%s\n' "$reset"
+
     for harness in $picked_keys; do
-        local impl="model_${harness}_implementer"
-        local rev="model_${harness}_reviewer"
-        local fin="model_${harness}_final"
-        printf '  %s  · %s%-9s %-*s  %-*s  %s\n' \
-            "$grey" "$reset" "$harness" \
-            "${widths[0]}" "${!impl:-main model}" \
-            "${widths[1]}" "${!rev:-main model}" \
-            "${!fin:-main model}"
+        printf '  %s  · %s%-9s ' "$grey" "$reset" "$harness"
+        for i in "${!roles[@]}"; do
+            role="${roles[$i]}"
+            var="model_${harness}_${role}"
+            printf '%-*s  ' "${widths[$i]}" "${!var:-main model}"
+        done
+        printf '\n'
     done
 }
 
-# Reassign one harness's three roles by hand. Each role offers the models
+# Reassign one harness's four roles by hand. Each role offers the models
 # Pandino would consider for it; a role nothing recommended could fill offers
 # the whole catalogue, so an unusual setup is still one prompt, not a restart.
 customize_models() {
@@ -432,7 +436,7 @@ customize_models() {
     [ -n "$harness" ] || return 0
 
     catalog="$(harness_catalog "$harness")"
-    for role in implementer reviewer final; do
+    for role in implementer reviewer test final; do
         opts=()
         while IFS= read -r cand; do
             [ -n "$cand" ] && opts+=("$cand:${cand##*/}")
@@ -681,10 +685,10 @@ printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
 recap "AGENTS.md" " — the coding rules, read by every agent"
 for harness in $picked_keys; do
     case "$harness" in
-        pi)       recap ".pi/agents/" " — implementer, taste-reviewer, spec-reviewer, docs-reviewer, final-reviewer, fallback-runner" ;;
-        claude)   recap ".claude/agents/" " — the same six, for Claude Code" ;;
-        opencode) recap ".opencode/agent/" " — the same six, for opencode" ;;
-        codex)    recap ".codex/agents/" " — the same six, for Codex" ;;
+        pi)       recap ".pi/agents/" " — six pinned specialists: implementer, taste-reviewer, spec-reviewer, docs-reviewer, test-reviewer, final-reviewer; unpinned fallback-runner" ;;
+        claude)   recap ".claude/agents/" " — the same seven, for Claude Code" ;;
+        opencode) recap ".opencode/agent/" " — the same seven, for opencode" ;;
+        codex)    recap ".codex/agents/" " — the same seven, for Codex" ;;
     esac
 done
 

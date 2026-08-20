@@ -16,12 +16,13 @@
 #   codex     ~/.codex/models_cache.json  bare slug
 #   claude    fixed aliases            fable, opus, sonnet, haiku
 
-# Which role an agent file fills. Non-final reviewers share the reviewer model;
-# docs-reviewer is conditional, not per-commit. fallback-runner is deliberately
-# dynamic, so it has no saved or resolved model assignment.
+# Which role an agent file fills. Taste, spec, and docs reviewers share the reviewer model.
+# Test review has its own role.
+# fallback-runner is deliberately dynamic, so it has no saved or resolved model assignment.
 agent_role() {
     case "$(basename "$1" .md)" in
         implementer)     echo implementer ;;
+        test-reviewer)   echo test ;;
         final-reviewer)  echo final ;;
         fallback-runner) echo fallback-runner ;;
         *)               echo reviewer ;;
@@ -35,6 +36,7 @@ agent_role() {
 # whole-branch pass, where that thoroughness is the point. Claude's fable is
 # absent everywhere: it is the priciest of that family, and opus already fills
 # the one role worth paying for.
+# The 2026-08-20 test benchmark recommended Sol at high thinking for test review.
 #
 # A model published under several dated tags is listed tag-first: Ollama Cloud
 # dropped the bare "deepseek-v4-flash" for ":0731" and ":preview", and an
@@ -49,6 +51,11 @@ role_preferences() {
         reviewer)
             printf '%s\n' deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 \
                 kimi-k2.6 kimi-k2.7-code claude-sonnet-5 sonnet gpt-5.6-terra
+            ;;
+        test)
+            printf '%s\n' gpt-5.6-sol claude-sonnet-5 sonnet \
+                deepseek-v4-pro:0813 deepseek-v4-pro gpt-5.6 \
+                deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 gpt-5.6-terra
             ;;
         final)
             printf '%s\n' claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet
@@ -73,7 +80,7 @@ if not isinstance(saved, dict):
 for harness, roles in saved.items():
     if isinstance(roles, dict):
         for role, model in roles.items():
-            if role in ("implementer", "reviewer", "final") and isinstance(model, str) and model:
+            if role in ("implementer", "reviewer", "test", "final") and isinstance(model, str) and model:
                 print(f"{harness}_{role}={model}")
 JSON
 }
@@ -88,7 +95,7 @@ save_models() {
         local first_harness=1
         for harness in "$@"; do
             local pairs=()
-            for role in implementer reviewer final; do
+            for role in implementer reviewer test final; do
                 var="model_${harness}_${role}"
                 [ -n "${!var-}" ] && pairs+=("      \"$role\": \"${!var}\"")
             done

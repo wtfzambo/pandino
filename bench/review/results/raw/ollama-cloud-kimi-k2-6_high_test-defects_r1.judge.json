@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    3
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Found 429 gap and tautological delay; missed set -e '!' trap, invented fake JSON shape, and schedule_retry negative-path gap; #7 only partially identified (praised retry_message literal as good); shell readability complaint is a false positive."
+}

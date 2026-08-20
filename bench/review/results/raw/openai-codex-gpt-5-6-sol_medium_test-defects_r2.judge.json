@@ -1,0 +1,15 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Found 429 gap, self-derived delay, and invented JSON fake; missed the set -e '!' flaw (even praised the script) and the missing negative schedule_retry assertion; both minor items caught."
+}

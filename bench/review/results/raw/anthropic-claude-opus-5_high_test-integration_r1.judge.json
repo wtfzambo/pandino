@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth says clean diff; the review's must-fix about the manual __main__ dispatch is a hypothetical-future-test concern, not a defect in the code as written, so it counts as a false positive."
+}

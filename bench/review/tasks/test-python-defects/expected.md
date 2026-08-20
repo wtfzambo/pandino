@@ -1,0 +1,26 @@
+# Ground truth
+
+## Must-fix
+
+1. **The member discount threshold lacks its boundary test.** Mutate `seats >= MEMBER_DISCOUNT_MINIMUM_SEATS` to `seats > MEMBER_DISCOUNT_MINIMUM_SEATS`; the tests cover member quantities 3, 5, and 8, but not 4, so they remain green.
+2. **Valid total expectations use the production price constant instead of the contract's 2500-cent literal.** Mutate `SEAT_PRICE_CENTS = 2500` to `SEAT_PRICE_CENTS = 3000`; every valid-total assertion follows the changed constant, so the tests remain green.
+3. **The non-positive-seat assertions permit the wrong exception type.** Mutate only `raise ValueError("seat count must be positive")` to `raise RuntimeError("seat count must be positive")`; `pytest.raises(Exception)` still passes for both 0 and -1. Those two broad checks do catch a `<=` to `==` mutation. The fractional-seat assertion is separate and does not exercise this branch.
+4. **The confirmation result never asserts the repository-provided booking ID.** Mutate the returned dictionary to omit `"booking_id"`, hardcode it as `"pending"`, or return a different ID; the test asserts only `total_cents`, so those defects remain green. A reviewer finding the missing returned-ID assertion earns this item.
+5. **The successful-confirmation call order is unobserved.** The separate mocks preserve the individual argument assertions but not their relative order. A mutation that sends the confirmation before save for the successful 5-seat member case while preserving save-before-mail failure behavior remains green.
+
+## Minor excess
+
+1. **Source-file existence and runtime type hints are duplicate low-value checks.** Successful import already guarantees the file exists, while runtime type-hint equality pins internal annotation metadata that the product contract does not promise. Delete both assertions; neither protects booking behavior.
+2. **The fractional-seat test requires non-contractual error wording.** Delete the exact `match="^seat count must be a whole number$"` requirement while retaining the `ValueError` assertion; the contract does not promise exception text.
+
+The parameterized member-total test adds the 8-seat case with `8 * SEAT_PRICE_CENTS - 1000`, so capped-at-5 and repeated-per-batch discounts fail while the planted member threshold gap at 4 remains. The parameterized confirmation test protects confirmation wiring for both member states with distinct customers and repository return IDs: Ada/booking-42 for the member case and Bea/booking-99 for the non-member case. Its separate mocks require each case's customer and total at both boundaries, so hardcoded customer, seat-count, or membership values fail. It now checks that the returned total and the total arguments recorded in each existing mock call are `int`, protecting the documented runtime cents shape without asserting a booking ID or valid-path order. It configures the distinct string repository IDs only to model the boundary; it intentionally never asserts the returned `booking_id`, preserving must-fix item 4. A mutation that hardcodes `calculate_total(seats, True)` in `confirm_booking` fails the non-member case without adding a planted item.
+
+The invalid-confirmation test requires a non-whole-number seat-count `ValueError` and verifies that neither confirmation boundary is called. This is non-planted evidence: a concrete mutation that saves and mails before calling `calculate_total` invokes the mocks and fails the test, killing save/mail-before-validation mutations without altering the five must-fix items or two minor excess groups.
+
+The save-failure test makes `repository.save` raise after its independently appropriate total is observed and requires that the mailer is never called. This is non-planted evidence that kills a `finally`-mail-after-save-failure mutation while leaving the successful-call-order gap calibrated in item 5.
+
+The parameterized regular-default test calls `calculate_total(seats)` without `member` for one and four seats, independently protecting the valid positive lower boundary and the base API's `member=False` compatibility path. Its `SEAT_PRICE_CENTS` expectations intentionally preserve must-fix item 2, so a price mutation survives. This is non-planted evidence: changing the default to `True`, removing the default, rejecting one seat, or charging `max(seats, 2)` seats fails the suite without changing the exact five must-fix items or two minor excess groups. Because both cases omit `member`, the four-seat case does not close the member discount-threshold gap in item 1.
+
+The focused string/boolean cases require `ValueError` without requiring error text, so they kill guard-order and exact-type-to-`isinstance` mutations without adding a new planted item. Runtime `int` cents and a concrete `dict` confirmation result are public contracts not proven by a configured type checker, so the existing behavioral total and confirmation cases assert those shapes. The `isinstance` assertions allow subclasses, and the key-level assertions continue to allow extra dictionary keys; no standalone type-only test is added.
+
+Scoring is exact-match: each numbered must-fix item and minor group must match this ground truth. Compound groups require all named components. Genuine unlisted issues are not false positives.

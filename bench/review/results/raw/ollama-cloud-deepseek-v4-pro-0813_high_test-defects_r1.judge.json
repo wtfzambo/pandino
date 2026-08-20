@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Review finds four must-fix items (retry_delay self-derivation demoted to minor but identified) and both minor items; misses the schedule_retry negative-path defect (GT5); no false positives."
+}

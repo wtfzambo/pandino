@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed GT5 (no independent negative schedule_retry check); GT2 counted since the review pinpoints the same `!`/set -e inversion neutralizing failure detection."
+}
