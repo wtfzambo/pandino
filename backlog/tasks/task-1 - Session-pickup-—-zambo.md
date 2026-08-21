@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-18 14:53'
+updated_date: '2026-08-21 00:20'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-18. Branch `main` at `15e2233` before this handoff commit, aligned with `origin/main`; the handoff commit will be pushed immediately and the tree will be clean. Completed TASK-7 (`backlog task view TASK-7 --plain`): fixed repeated `.pi/npm/` ignore insertion by using `git check-ignore --no-index`, with effective repeated-install regressions for tracked nested ignore files, no prior rule, and broader `.pi/` rules. Completed TASK-8 (`backlog task view TASK-8 --plain`): converted all 13 ineffective shell-negated assertions in `tests/test_install.sh` to explicit failing guards while preserving safe `[ ! ... ]` tests. Representative mutations now fail, the full installer suite passes, and shell syntax is clean. Opus final review was unavailable with Anthropic 429; the documented `fallback-runner` substitution ran the canonical final review on `openai-codex/gpt-5.6-sol` and returned `merge`. Relevant commits: `b777987`, `0d6b5bf`, `15e2233`.
+2026-08-21. Branch `task-9-evidence-based-test-review` at `3dd4fef` before this handoff commit; the branch has not yet been pushed, the handoff commit will be pushed immediately, and the tree will be clean afterward. TASK-9 is Done (`backlog task view TASK-9 --plain`). Commit `9ffe1b5` establishes the evidence-based testing policy, conditional read-only test-reviewer, mutation-audited original/Python/TypeScript benchmark corpus, manual audit, operator-approved Sol-high `test` model role, four-harness installer integration, documentation, `.pytest_cache/` ignore, and regression coverage. Commit `3dd4fef` closes final-review findings with transactional benchmark-screen rollback, all-role prompt parity, stale-artifact cleanup, parallel-agent workflow alignment, score-provenance documentation, and stronger benchmark/installer evidence. Per-commit taste/spec/test reviews, docs review, and final branch review completed; all findings were fixed and targeted follow-ups pass. `tests/test_install.sh`, `tests/test_review_bench.sh`, all final fixture runners, shell/Python syntax, prompt parity, CSV/model integrity, links, ignore behavior, and diff hygiene pass. The detailed benchmark authority is `bench/review/results/manual-audit.md`; the concise recap is in `NOTES.md`.
 
 WHAT'S NEXT
-1. Nothing pending. Continue normal work from `main`.
+1. Merge `task-9-evidence-based-test-review` into `main` after reviewing commits `9ffe1b5` and `3dd4fef`.
+2. After TASK-9 is merged, start dependent `TASK-10 - Prune low-value installer tests` on a fresh branch. First command: `backlog instructions task-execution`, then `backlog task view TASK-10 --plain`. Apply the completed installer-test audit without changing intentional benchmark fixtures.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-18.
+As of 2026-08-21, TASK-9 is complete and only awaits branch merge. TASK-10 depends on TASK-9 and should start after this branch merges. No credentials or external services are blocking.
 
 VERIFY
-`git status -sb` should show clean `main` aligned with `origin/main`.
-`git log --oneline -5` should include `15e2233 test: make negative installer assertions effective`, `0d6b5bf test: enforce pi npm ignore regressions`, and `b777987 fix: keep pi npm ignore setup idempotent`.
-`backlog task view TASK-7 --plain` and `backlog task view TASK-8 --plain` should both show Done with every acceptance criterion checked.
-`bash tests/test_install.sh` should print `test_install.sh: PASS`.
-`git ls-files -z -- "*.sh" | xargs -0 -n 1 bash -n` should produce no errors.
+`git status -sb` should show a clean `task-9-evidence-based-test-review` tracking its origin branch.
+`git log --oneline -4` should include `3dd4fef fix: harden test benchmark workflow` and `9ffe1b5 feat: add evidence-based test review workflow`.
+`backlog task view TASK-9 --plain` should show Done with all seven acceptance criteria checked; `backlog task view TASK-10 --plain` should show To Do with dependency TASK-9.
+`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS.
+`cmp -s <(awk '/^---$/{n++; next} n>=2' agents/test-reviewer.md) bench/review/prompts/test.md` should exit zero, and `python3 bench/review/summarize.py` should print the final grouped benchmark table.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
