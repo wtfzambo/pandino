@@ -23,11 +23,32 @@ tasks=(test-defects test-integration test-no-test)
 
 mkdir -p "$bench_dir/results/raw"
 results="$bench_dir/results/results.csv"
+backup="$(mktemp)"
 preserved_rows="$(mktemp)"
-trap 'rm -f "$preserved_rows"' EXIT
+results_existed=0
+backup_ready=0
+committed=0
+
+cleanup() {
+    status=$?
+    if [[ "$committed" -eq 0 ]]; then
+        if [[ "$backup_ready" -eq 1 ]]; then
+            cp "$backup" "$results"
+        elif [[ "$results_existed" -eq 0 ]]; then
+            rm -f "$results"
+        fi
+    fi
+    rm -f "$backup" "$preserved_rows"
+    return "$status"
+}
+trap cleanup EXIT
+trap 'exit 1' HUP INT TERM
 
 # A fresh test screen replaces prior test rows but retains the historical taste/spec benchmark used for their existing routing evidence.
 if [[ -f "$results" ]]; then
+    results_existed=1
+    cp "$results" "$backup"
+    backup_ready=1
     awk -F, 'NR > 1 && $2 != "test" {
         if (NF == 12) print $0 ",high,0,0"
         else if (NF == 15) print
@@ -37,10 +58,21 @@ echo "model,role,task,run,found,total,false_positives,latency_s,input_tokens,out
     > "$results"
 cat "$preserved_rows" >> "$results"
 
+failed=0
 for model in "${models[@]}"; do
     for task in "${tasks[@]}"; do
         echo "[$(date +%H:%M:%S)] $model $thinking $task run 1"
-        "$bench_dir/run_one.sh" "$model" "$task" 1 "$thinking"
+        if ! "$bench_dir/run_one.sh" "$model" "$task" 1 "$thinking"; then
+            echo "run failed: $model $thinking $task" >&2
+            failed=1
+        fi
     done
 done
+
+if [[ "$failed" -eq 1 ]]; then
+    echo "screen failed; discarding partial results.csv" >&2
+    exit 1
+fi
+
+committed=1
 echo "done"

@@ -16,15 +16,26 @@ if [[ ! -d "$task_dir" ]]; then
     exit 2
 fi
 
-# The test prompt is a checked-in deterministic copy of the canonical agent body; refuse to benchmark it if the copy has drifted.
-if [[ "$role" == "test" ]] && ! cmp -s \
-    <(awk '/^---$/{n++; next} n>=2' "$bench_dir/../../agents/test-reviewer.md") \
-    "$bench_dir/prompts/test.md"; then
-    echo "bench/review/prompts/test.md is stale; regenerate it from agents/test-reviewer.md" >&2
+case "$role" in
+    taste) prompt="Review the uncommitted working diff of this repository." ;;
+    spec)  prompt="Review the uncommitted working diff of this repository against what was asked." ;;
+    test)  prompt="Review the uncommitted working diff for automated test evidence." ;;
+    *)
+        echo "unknown reviewer role: $role" >&2
+        exit 2
+        ;;
+esac
+
+# Prompts are checked-in deterministic copies of the canonical agent bodies; refuse to benchmark a stale copy.
+if ! cmp -s \
+    <(awk '/^---$/{n++; next} n>=2' "$bench_dir/../../agents/${role}-reviewer.md") \
+    "$bench_dir/prompts/$role.md"; then
+    echo "bench/review/prompts/$role.md is stale; regenerate it from agents/${role}-reviewer.md" >&2
     exit 2
 fi
 
 mkdir -p "$raw_dir"
+rm -f "$raw_dir/$slug.review.md" "$raw_dir/$slug.judge.json"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
@@ -38,15 +49,9 @@ git -C "$work" add -A
 git -C "$work" -c user.email=bench@local -c user.name=bench commit -qm base
 cp -R "$task_dir/changed/." "$work/"
 
-case "$role" in
-    taste) prompt="Review the uncommitted working diff of this repository." ;;
-    spec)  prompt="Review the uncommitted working diff of this repository against what was asked." ;;
-    test)  prompt="Review the uncommitted working diff for automated test evidence." ;;
-    *)     echo "unknown reviewer role: $role" >&2; exit 2 ;;
-esac
-
 # --no-extensions also drops the extension that registers the ollama-cloud provider, so load just that one back for its models.
 start=$(date +%s)
+# pi_status is retained for the shared historical CSV schema.
 if [[ "$model" == ollama-cloud/* ]]; then
     if (cd "$work" && timeout 600 pi -p --no-session --no-extensions \
         -e "$HOME/.pi/agent/npm/node_modules/pi-ollama-cloud/index.ts" --no-skills \

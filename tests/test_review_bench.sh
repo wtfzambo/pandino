@@ -10,11 +10,14 @@ mkdir -p "$bench_dir/prompts" "$bench_dir/tasks" "$bench_dir/results/raw" "$tmp_
     "$tmp_dir/agents" "$tmp_dir/bin"
 cp "$repo_dir/bench/review/run_one.sh" "$bench_dir/run_one.sh"
 cp "$repo_dir/bench/review/judge.py" "$bench_dir/judge.py"
-cp "$repo_dir/bench/review/prompts/test.md" "$bench_dir/prompts/test.md"
+for role in taste spec test; do
+    cp "$repo_dir/bench/review/prompts/$role.md" "$bench_dir/prompts/$role.md"
+    cp "$repo_dir/agents/$role-reviewer.md" "$tmp_dir/agents/$role-reviewer.md"
+done
 cp -R "$repo_dir/bench/review/tasks/test-no-test" "$bench_dir/tasks/test-no-test"
+cp -R "$repo_dir/bench/review/tasks/spec-defects" "$bench_dir/tasks/spec-defects"
 cp "$repo_dir/bench/implementer/summarize.py" "$tmp_dir/bench/implementer/summarize.py"
 cp "$repo_dir/AGENTS.md" "$tmp_dir/AGENTS.md"
-cp "$repo_dir/agents/test-reviewer.md" "$tmp_dir/agents/test-reviewer.md"
 printf '%s\n' 'model,role,task,run,found,total,false_positives,latency_s,input_tokens,output_tokens,cost,pi_status,thinking,minor_found,minor_total' \
     > "$bench_dir/results/results.csv"
 
@@ -31,6 +34,10 @@ while [ "$#" -gt 0 ]; do
 done
 case "$mode" in
     json)
+        if [ "${CONTESTANT_MODE:-valid}" = "fail" ]; then
+            echo 'contestant failed' >&2
+            exit 8
+        fi
         printf '%s\n' '{"type":"message_end","message":{"content":[{"type":"text","text":"No new automated test is warranted."}],"usage":{"input":12,"output":5,"cost":{"total":0.001}}}}'
         ;;
     text)
@@ -125,6 +132,27 @@ if contestant[-1] != "Review the uncommitted working diff for automated test evi
 if "-e" in contestant:
     raise SystemExit(f"non-Ollama contestant loaded an extension: {contestant}")
 PY
+
+export PI_ARGS="$tmp_dir/stale-spec-args.txt"
+printf '%s\n' 'stale spec prompt' > "$bench_dir/prompts/spec.md"
+if bash "$bench_dir/run_one.sh" fake/provider spec-defects 98 medium > "$tmp_dir/stale-spec.out" 2> "$tmp_dir/stale-spec.err"; then
+    echo "FAIL: stale spec prompt was accepted" >&2
+    exit 1
+fi
+[ ! -e "$PI_ARGS" ]
+grep -F 'bench/review/prompts/spec.md is stale' "$tmp_dir/stale-spec.err" > /dev/null
+
+export PI_ARGS="$tmp_dir/failed-rerun-args.txt"
+failed_slug="fake-provider_medium_test-no-test_r100"
+printf '%s\n' 'stale review' > "$bench_dir/results/raw/$failed_slug.review.md"
+printf '%s\n' '{}' > "$bench_dir/results/raw/$failed_slug.judge.json"
+if CONTESTANT_MODE=fail bash "$bench_dir/run_one.sh" fake/provider test-no-test 100 medium; then
+    echo "FAIL: failed contestant rerun succeeded" >&2
+    exit 1
+fi
+[ ! -e "$bench_dir/results/raw/$failed_slug.review.md" ]
+[ ! -e "$bench_dir/results/raw/$failed_slug.judge.json" ]
+[ -f "$bench_dir/results/raw/$failed_slug.err" ]
 
 expected="$tmp_dir/expected.md"
 review="$tmp_dir/review.md"
@@ -222,6 +250,55 @@ for model, expected in expected_rows.items():
     if len(row) != 15:
         raise SystemExit(f"expected 15 fields, got {len(row)}")
 PY
+
+rollback_dir="$tmp_dir/rollback/bench/review"
+mkdir -p "$rollback_dir/results/raw"
+cp "$repo_dir/bench/review/run_all.sh" "$rollback_dir/run_all.sh"
+cat > "$rollback_dir/run_one.sh" <<'STUB'
+#!/usr/bin/env bash
+count_file="$(dirname "$0")/calls"
+count=0
+if [[ -f "$count_file" ]]; then
+    count="$(cat "$count_file")"
+fi
+count=$((count + 1))
+printf '%s\n' "$count" > "$count_file"
+printf '%s\n' "partial/model,test,test-defects,$count,0,0,0,0,0,0,0,0,high,0,0" \
+    >> "$(dirname "$0")/results/results.csv"
+if [[ "$count" -eq 2 ]]; then
+    echo "stub failure" >&2
+    exit 7
+fi
+STUB
+chmod +x "$rollback_dir/run_one.sh"
+cat > "$rollback_dir/results/results.csv" <<'CSV'
+model,role,task,run,found,total,false_positives,latency_s,input_tokens,output_tokens,cost,pi_status,thinking,minor_found,minor_total
+original/spec,spec,spec-defects,1,4,4,0,10,100,20,0.010000,0,high,0,0
+original/test,test,test-defects,1,3,5,0,11,110,21,0.020000,0,high,0,0
+CSV
+cp "$rollback_dir/results/results.csv" "$tmp_dir/original-results.csv"
+if bash "$rollback_dir/run_all.sh" high > "$tmp_dir/rollback.out" 2> "$tmp_dir/rollback.err"; then
+    echo "FAIL: failed screen succeeded" >&2
+    exit 1
+fi
+cmp -s "$tmp_dir/original-results.csv" "$rollback_dir/results/results.csv"
+[ "$(cat "$rollback_dir/calls")" = 36 ]
+grep -F 'run failed: anthropic/claude-haiku-4-5 high test-integration' "$tmp_dir/rollback.err" > /dev/null
+grep -F 'screen failed; discarding partial results.csv' "$tmp_dir/rollback.err" > /dev/null
+
+fresh_rollback_dir="$tmp_dir/rollback-without-existing/bench/review"
+mkdir -p "$fresh_rollback_dir/results/raw"
+cp "$repo_dir/bench/review/run_all.sh" "$fresh_rollback_dir/run_all.sh"
+cp "$rollback_dir/run_one.sh" "$fresh_rollback_dir/run_one.sh"
+chmod +x "$fresh_rollback_dir/run_one.sh"
+[ ! -e "$fresh_rollback_dir/results/results.csv" ]
+if bash "$fresh_rollback_dir/run_all.sh" high > "$tmp_dir/fresh-rollback.out" 2> "$tmp_dir/fresh-rollback.err"; then
+    echo "FAIL: failed screen without results.csv succeeded" >&2
+    exit 1
+fi
+[ "$(cat "$fresh_rollback_dir/calls")" = 36 ]
+[ ! -e "$fresh_rollback_dir/results/results.csv" ]
+grep -F 'screen failed; discarding partial results.csv' "$tmp_dir/fresh-rollback.err" > /dev/null
 
 summary_dir="$tmp_dir/summary/bench/review"
 mkdir -p "$summary_dir/results"

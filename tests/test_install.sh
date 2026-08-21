@@ -389,6 +389,35 @@ python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['op
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
 grep -F "Models each specialist will run on:" "$tmp_dir/pins.out" > /dev/null
+python3 - "$tmp_dir/pins.out" <<'PY'
+import re
+import sys
+
+ansi = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+lines = [ansi.sub("", line).rstrip("\n") for line in open(sys.argv[1])]
+start = next(
+    index for index, line in enumerate(lines)
+    if "Models each specialist will run on:" in line
+)
+header = next(line for line in lines[start + 1:] if line.strip())
+headers = re.split(r"\s{2,}", header.strip())
+if headers != ["implementer", "reviewers", "test review", "final"]:
+    raise SystemExit(f"unexpected model matrix header: {headers}")
+
+pi_row = next(
+    line for line in lines[start + 1:]
+    if re.split(r"\s{2,}", line.strip())[0] == "· pi"
+)
+models = re.split(r"\s{2,}", pi_row.strip())[1:]
+expected = [
+    "openai-codex/gpt-5.6-terra",
+    "ollama-cloud/deepseek-v4-flash:0731",
+    "openai-codex/gpt-5.6-sol",
+    "anthropic/claude-opus-5",
+]
+if models != expected:
+    raise SystemExit(f"unexpected Pi model matrix row: {models}")
+PY
 grep -F "fallback-runner has no default and requires a call-time model" "$tmp_dir/pins.out" > /dev/null
 
 # A saved three-role assignment gains the resolved test model on the next run.

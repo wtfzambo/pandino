@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-19 16:01'
-updated_date: '2026-08-20 23:27'
+updated_date: '2026-08-21 00:19'
 labels: []
 dependencies: []
 references:
@@ -100,6 +100,8 @@ Initial high screening used anthropic/claude-fable-5 as judge. Automatic verdict
 2026-08-20 integration: added the persisted `test` model role with Sol-first per-harness resolution, installed test-reviewer across Pi/Claude/opencode/Codex, kept fallback-runner unpinned, expanded installer/model persistence regression coverage, generated the self-hosted Pi agent, documented the seven-helper workflow and benchmark recap, added decision-2, and ignored `.pytest_cache/`. A regression test now protects non-Ollama `run_one.sh` under Bash nounset after the empty-array failure observed during benchmarking. Full installer, launcher, fixture, syntax, prompt, CSV/artifact, link, and diff checks pass.
 
 Final pre-commit reviews: taste, spec, test-evidence, and documentation passes completed. Findings fixed: legacy CSV normalization, benchmark invocation/scoring/retry/grouping evidence, stale approval prose, README matrix drift, and taste/spec/current-row preservation. Final installer, launcher, all benchmark fixtures, shell syntax, prompt parity, CSV/model integrity, documentation links, ignore behavior, and diff hygiene pass.
+
+Final branch review returned merge-after-fixes. Closed both composition findings: parallel-agent instructions now include conditional test review, and the full-screen benchmark transactionally restores or removes results.csv after any failed or interrupted cell. Also synchronized all reviewer prompts, removed stale derived artifacts before reruns, documented score provenance, semantically tested the model matrix, and covered rollback with and without a prior CSV. Follow-up taste, spec, and test-evidence reviews all pass.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

@@ -56,6 +56,8 @@ Scoring is not string matching: `judge.py` sends the review plus the task's `exp
 
 `./run_all.sh` is the prescribed initial original-task screen: all twelve test-review candidates, `test-defects`, `test-integration`, and `test-no-test`, one run each at `high`. It removes previous `role=test` rows before the screen but preserves the historical taste/spec rows. Do not use it as a blind repeated matrix. Run language screens and finalist repeats directly with `./run_one.sh <model> <task> <run> <thinking>` after inspecting verdicts; repeat only configurations whose results can change routing until each finalist task combination has three total runs. The raw filename and CSV include the thinking level, and `python3 summarize.py` groups by model, thinking level, and task. The Python language tasks' `base/run_tests.sh` direct runners use `python3 -m pytest -q`; the TypeScript ones use `node --test orders.test.ts`.
 
+Current `role=test` CSV scores are manually audited; automatic judge output is advisory, and future `run_all.sh` screens may add automatic scores pending audit.
+
 Run the initial screen with `./run_all.sh`, then `python3 summarize.py`. Before paid runs, mutation-audit the oracle. If a reviewer exposes a genuine fixture gap, correct the fixture and rerun stale contestant artifacts rather than scoring the finding as noise.
 
 ## Caveats
