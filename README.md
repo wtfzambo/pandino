@@ -97,7 +97,7 @@ The grilling skill is the exception: its local copy is refetched from upstream e
 Dropping this into an existing repo is a merge, not a fresh start, and that is worth handing to an agent. Paste this to one working in the target repo:
 
 ```txt
-Install Pandino into this repository.
+Install Pandino (https://github.com/wtfzambo/pandino) into this repository.
 
 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
 
@@ -133,7 +133,7 @@ The installer adds missing files, leaves identical files alone, reuses the speci
 For that reason, the safest update interface is an agent working inside a clean target repository:
 
 ```txt
-Update Pandino in this repository.
+Update Pandino (https://github.com/wtfzambo/pandino) in this repository.
 
 1. Read the latest Pandino README and this repository's current instruction files, agent definitions, `.pandino/models.json`, and enabled optional sections.
 2. Re-run the latest Pandino installer, selecting the editors and options this repository already uses.
