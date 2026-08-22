@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-21 03:09'
+updated_date: '2026-08-22 20:22'
 labels:
   - continuity
   - handoff
@@ -18,19 +18,19 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-21. TASK-9 was fast-forward merged and pushed to `main`; before the current documentation commit, main is at `c704cb5` and synchronized with `origin/main`. The install and update copy-paste prompts in `README.md` now identify Pandino with `https://github.com/wtfzambo/pandino`, so an agent receiving either prompt can find the source repository without adding provenance comments to installed `AGENTS.md` files. TASK-9 is Done. Post-merge `bash tests/test_review_bench.sh`, `bash tests/test_install.sh`, and `git diff --check` pass. The detailed benchmark authority is `bench/review/results/manual-audit.md`; the concise recap is `NOTES.md`.
+2026-08-21. `main` is synchronized with `origin/main` at `1f203e8` before the current documentation commit. The README install and update copy-paste prompts now both link to Pandino and explicitly tell the receiving agent to inspect the diff itself rather than invoke `implementer` or any specialist reviewer merely to perform or validate installation/update. This fixes a real over-interpretation where “Review the complete diff” triggered taste, spec, test, docs, and final review despite no requested commit or product implementation. Ordinary repository checks remain required; substantive conflicts affecting behavior, security, or team workflow must be surfaced to the operator. TASK-9 remains Done.
 
 WHAT'S NEXT
-1. No work remains for TASK-9 or the prompt-link adjustment.
-2. If the operator wants the optional follow-up cleanup, start `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. Keep intentional benchmark fixtures unchanged.
+1. No work remains for the install/update prompt correction.
+2. If wanted, start optional `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. Keep intentional benchmark fixtures unchanged.
 
 WAITING ON / GATED BY
 Nothing as of 2026-08-21. TASK-10 is unblocked. No credentials or external services are blocking.
 
 VERIFY
 `git status -sb` should show clean `main` tracking `origin/main` with no divergence.
-`git log --oneline -5` should include `docs: link Pandino in agent prompts`, `3dd4fef fix: harden test benchmark workflow`, and `9ffe1b5 feat: add evidence-based test review workflow`.
-`grep -F 'https://github.com/wtfzambo/pandino' README.md` should show both copy-paste prompt openings.
+`git log --oneline -5` should include `docs: keep Pandino updates lightweight` and `docs: link Pandino in agent prompts`.
+`grep -F 'Do not treat this update as a Pandino implementation slice' README.md` and the equivalent installation line should each match once.
 `backlog task view TASK-9 --plain` should show Done; `backlog task view TASK-10 --plain` should show To Do.
 <!-- SECTION:DESCRIPTION:END -->
 

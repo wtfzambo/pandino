@@ -115,9 +115,9 @@ Install Pandino (https://github.com/wtfzambo/pandino) into this repository.
 
 6. If you are not running on pi: the installer only wires up .pi/ unless you pick the other editors. Re-run it and tick yours in the editor list, or write the same seven helpers where your tool looks for them. Copy the instructions as they are, do not reword them: pin the six specialists, but leave `fallback-runner` unpinned. If your tool has no subagents at all, tell me, and that the workflow will run as one agent taking each role in turn.
 
-7. Verify: your tool can see the seven helpers and the grilling skill, the six specialists have model pins, `fallback-runner` has none, this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
+7. Inspect the complete diff yourself. Verify that your tool can see the seven helpers and the grilling skill, the six specialists have model pins, `fallback-runner` has none, and this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
-Sort out obvious duplication yourself. Past the questions in step 2, only ask me when two rules genuinely contradict each other, or when the call affects how the product behaves, security, or how the team works.
+Do not treat this installation as a Pandino implementation slice, and do not invoke `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` merely to perform or validate it. Use those agents only if I explicitly ask. If resolving an installation conflict would change product behavior, security, or how the team works, stop and ask me first. Otherwise, sort out obvious duplication yourself; past the questions in step 2, do not ask for confirmation.
 ```
 
 ## Update an existing installation
@@ -139,8 +139,9 @@ Update Pandino (https://github.com/wtfzambo/pandino) in this repository.
 2. Re-run the latest Pandino installer, selecting the editors and options this repository already uses.
 3. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
 4. Delete `.pandino/merge/` after resolving it, but keep `.pandino/snippets/`.
-5. Review the complete diff. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
-6. Report what was added, updated, preserved, or left unresolved. Do not commit or push unless I ask.
+5. Inspect the complete diff yourself. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
+6. Do not treat this update as a Pandino implementation slice, and do not invoke `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` merely to perform or validate it. Use those agents only if I explicitly ask. If resolving an update conflict would change product behavior, security, or how the team works, stop and ask me first.
+7. Report what was added, updated, preserved, or left unresolved. Do not commit or push unless I ask.
 ```
 
 To test unpublished Pandino changes, run a local checkout's installer instead of the `curl` command:
