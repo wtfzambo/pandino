@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-22 20:22'
+updated_date: '2026-08-23 09:50'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,20 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-21. `main` is synchronized with `origin/main` at `1f203e8` before the current documentation commit. The README install and update copy-paste prompts now both link to Pandino and explicitly tell the receiving agent to inspect the diff itself rather than invoke `implementer` or any specialist reviewer merely to perform or validate installation/update. This fixes a real over-interpretation where “Review the complete diff” triggered taste, spec, test, docs, and final review despite no requested commit or product implementation. Ordinary repository checks remain required; substantive conflicts affecting behavior, security, or team workflow must be surfaced to the operator. TASK-9 remains Done.
+2026-08-23. TASK-11 was fast-forward merged into local `main` through `468b078`; before this handoff commit, main is three commits ahead of `origin/main`, and the handoff commit will be pushed immediately. The installed workflow now makes reviewer reports advisory evidence: the orchestrator independently fixes, rejects with checkable evidence, or asks once about genuine trade-offs; every must-fix from every reviewer receives a disposition; valid unresolved findings require user acceptance before merge; clean or fully resolved reviews need no ritual approval; standalone and whole-repository audits are report-only unless implementation is separately authorized. `decision-3` records the rationale, README matches, specialist prompts remain adversarial and unchanged, and the testing specification says reviewers judge rather than decide. TASK-11 is Done. Taste, spec, docs, and final reviews passed after all findings were dispositioned. Post-merge `tests/test_install.sh`, `tests/test_review_bench.sh`, and diff hygiene pass.
 
 WHAT'S NEXT
-1. No work remains for the install/update prompt correction.
+1. No work remains for TASK-11.
 2. If wanted, start optional `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. Keep intentional benchmark fixtures unchanged.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-21. TASK-10 is unblocked. No credentials or external services are blocking.
+Nothing as of 2026-08-23. TASK-10 is unblocked. No credentials, external services, or unresolved review findings are blocking.
 
 VERIFY
 `git status -sb` should show clean `main` tracking `origin/main` with no divergence.
-`git log --oneline -5` should include `docs: keep Pandino updates lightweight` and `docs: link Pandino in agent prompts`.
-`grep -F 'Do not treat this update as a Pandino implementation slice' README.md` and the equivalent installation line should each match once.
-`backlog task view TASK-9 --plain` should show Done; `backlog task view TASK-10 --plain` should show To Do.
+`git log --oneline -6` should include this pickup commit, `468b078 chore: record review adjudication outcome`, `1902755 docs: align reviewer authority wording`, and `edea8cc feat: adjudicate reviewer findings before acting`.
+`backlog task view TASK-11 --plain` should show Done with six checked acceptance criteria.
+`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
