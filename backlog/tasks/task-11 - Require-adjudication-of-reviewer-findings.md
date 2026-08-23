@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-23 08:47'
-updated_date: '2026-08-23 08:59'
+updated_date: '2026-08-23 09:49'
 labels: []
 dependencies: []
 references:
@@ -53,6 +53,8 @@ Make the main agent evaluate reviewer findings instead of relaying or applying t
 Implemented the approved fix/reject/ask adjudication policy in the installed AGENTS workflow and its README summary without changing specialist prompts. Recorded accepted decision-3 through Backlog tooling. Independent taste and spec reviews passed after clarifying that valid spec scope-creep is a product decision rather than a dismissible out-of-scope finding. Verification: tests/test_install.sh PASS, specialist prompt diff empty, Markdown fences balanced, and git diff --check clean.
 
 Docs review passed with no blockers. Accepted its minor terminology finding and changed the testing specification from reviewer `decides` to reviewer `judges`, preserving the coordinator as decision owner. This one-line documentation alignment was treated as a trivial follow-up; no new per-commit taste/spec pass was warranted. Installer integration and diff hygiene still pass.
+
+Final-reviewer verdict: merge, with no must-fix findings. Dispositioned both minors without a user checkpoint: rejected duplicating the unresolved-finding merge gate in the later AGENTS paragraph because AGENTS already states it explicitly and README surfaces it at merge time; rejected replacing README's `coordinator` because its opening sentence defines the coordinating agent while AGENTS intentionally uses the operational term `orchestrator`, so neither creates ambiguity. Final verification passed: tests/test_install.sh, tests/test_review_bench.sh, fresh installed-core parity, branch diff hygiene, and full acceptance-criteria trace.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
