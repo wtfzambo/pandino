@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-23 08:47'
-updated_date: '2026-08-23 08:56'
+updated_date: '2026-08-23 08:59'
 labels: []
 dependencies: []
 references:
@@ -14,6 +14,7 @@ references:
 modified_files:
   - AGENTS.md
   - README.md
+  - backlog/docs/specs/doc-1 - Testing-evidence-policy.md
   - backlog/decisions/decision-3 - Adjudicate-reviewer-findings-before-acting.md
 priority: high
 type: feature
@@ -50,10 +51,12 @@ Make the main agent evaluate reviewer findings instead of relaying or applying t
 
 <!-- SECTION:NOTES:BEGIN -->
 Implemented the approved fix/reject/ask adjudication policy in the installed AGENTS workflow and its README summary without changing specialist prompts. Recorded accepted decision-3 through Backlog tooling. Independent taste and spec reviews passed after clarifying that valid spec scope-creep is a product decision rather than a dismissible out-of-scope finding. Verification: tests/test_install.sh PASS, specialist prompt diff empty, Markdown fences balanced, and git diff --check clean.
+
+Docs review passed with no blockers. Accepted its minor terminology finding and changed the testing specification from reviewer `decides` to reviewer `judges`, preserving the coordinator as decision owner. This one-line documentation alignment was treated as a trivial follow-up; no new per-commit taste/spec pass was warranted. Installer integration and diff hygiene still pass.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Made reviewer reports explicitly advisory while requiring the coordinator to verify and disposition every finding, consolidate real trade-offs into one user checkpoint, gate unresolved valid must-fixes before merge, and keep standalone audits report-only. Preserved adversarial reviewer prompts. Verified through installer integration, independent taste/spec review, Markdown structure, prompt immutability, and diff hygiene.
+Made reviewer reports explicitly advisory while requiring the coordinator to verify and disposition every finding, consolidate real trade-offs into one user checkpoint, gate unresolved valid must-fixes before merge, and keep standalone audits report-only. Preserved adversarial reviewer prompts and aligned the testing specification's role wording. Verified through installer integration, independent taste/spec/docs review, Markdown structure, prompt immutability, and diff hygiene.
 <!-- SECTION:FINAL_SUMMARY:END -->

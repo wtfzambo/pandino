@@ -3,7 +3,7 @@ id: doc-1
 title: Testing evidence policy
 type: specification
 created_date: '2026-08-19 18:04'
-updated_date: '2026-08-20 22:48'
+updated_date: '2026-08-23 08:58'
 ---
 # Testing evidence policy
 
@@ -28,7 +28,7 @@ Static analysis, type checking, compilation, linting, and existence checks are c
 
 Run the read-only test review for executable-behavior changes, test changes, test-infrastructure changes, and bug fixes. Skip it for documentation-only changes and trivial non-behavioral diffs. The reviewer challenges missing protection, false protection, and excessive or brittle tests; it may run existing tests and read-only probes, and it may propose mutations, but it never edits files or runs mutations by editing files.
 
-`spec-reviewer` decides whether the requested behavior is correctly implemented. `test-reviewer` decides whether automated evidence is necessary, effective, independent, and proportionate.
+`spec-reviewer` judges whether the requested behavior is correctly implemented. `test-reviewer` judges whether automated evidence is necessary, effective, independent, and proportionate.
 
 ## Model routing
 
