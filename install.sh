@@ -6,18 +6,55 @@
 #   --no-input  skip them all and just print the manual steps
 set -euo pipefail
 
+repository="https://github.com/wtfzambo/pandino"
+main_ref_url="https://api.github.com/repos/wtfzambo/pandino/git/ref/heads/main"
+
+# Keep these helpers in sync with check-update; deployed scripts cannot share code.
+is_valid_revision() {
+    local revision="$1"
+    [ "${#revision}" -eq 40 ] || return 1
+    case "$revision" in
+        *[!0123456789abcdefABCDEF]*) return 1 ;;
+    esac
+}
+
+normalize_revision() {
+    printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+resolve_main_revision() {
+    local response revision
+    command -v curl > /dev/null 2>&1 || return 1
+    response="$(curl -fsSL --connect-timeout 5 --max-time 10 "$main_ref_url" 2> /dev/null || true)"
+    revision="$(printf '%s\n' "$response" | sed -n 's/.*"sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+    is_valid_revision "$revision" || return 1
+    normalize_revision "$revision"
+}
+
 # Piped from curl ($0 is "bash"), there is no script directory to speak of.
 case "$0" in
     */*) kit_dir="$(cd "$(dirname "$0")" && pwd)" ;;
     *)   kit_dir="" ;;
 esac
 target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
+kit_revision="unknown"
 
 # Without the kit beside the script, fetch it.
-if [ ! -f "$kit_dir/agents/implementer.md" ]; then
+if [ -f "$kit_dir/agents/implementer.md" ]; then
+    if revision="$(git -C "$kit_dir" rev-parse HEAD 2> /dev/null)" \
+        && is_valid_revision "$revision"; then
+        kit_revision="$(normalize_revision "$revision")"
+    fi
+else
     kit_dir="$(mktemp -d)"
     downloaded_kit="$kit_dir"
-    if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
+    archive_ref="refs/heads/main"
+    if kit_revision="$(resolve_main_revision)"; then
+        archive_ref="$kit_revision"
+    else
+        kit_revision=unknown
+    fi
+    if ! curl -fsSL "https://codeload.github.com/wtfzambo/pandino/tar.gz/$archive_ref" \
         | tar -xz -C "$kit_dir" --strip-components=1 2> /dev/null; then
         printf 'error: could not download the Pandino kit.\n' >&2
         printf '       Check your connection, or clone the repo and run ./install.sh instead.\n' >&2
@@ -504,6 +541,25 @@ install_or_stage() {
     fi
 }
 
+write_install_provenance() {
+    local manifest="$target/.pandino/install.json"
+    mkdir -p "$target/.pandino"
+    cp "$kit_dir/check-update" "$target/.pandino/check-update"
+    chmod +x "$target/.pandino/check-update"
+
+    if [ "$kit_revision" = unknown ]; then
+        revision_json=null
+    else
+        revision_json="\"$kit_revision\""
+    fi
+    {
+        printf '{\n'
+        printf '  "repository": "%s",\n' "$repository"
+        printf '  "revision": %s\n' "$revision_json"
+        printf '}\n'
+    } > "$manifest"
+}
+
 step "Core files"
 
 # Appended snippets are Pandino's own, so they must not read as a conflict:
@@ -675,6 +731,8 @@ esac
 [ "$want_adhd" = no ] \
     && skipped+=("Short replies: run this again to add the i-have-adhd skill")
 
+write_install_provenance
+
 printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
     "$bold$green" "$reset" "$grey" "$reset" "$cyan" "$target" "$reset"
 
@@ -682,6 +740,13 @@ printf '\n  %s✓ All set%s %s—%s %s%s%s\n' \
 recap() { printf '  %s  · %s%s%s%s%s%s\n' "$grey" "$reset" "$cyan" "$1" "$reset" "$grey$2" "$reset"; }
 
 printf '\n  %sWhat you now have:%s\n' "$grey" "$reset"
+if [ "$kit_revision" = unknown ]; then
+    recap "Pandino kit revision" " — unknown"
+else
+    recap "Pandino kit revision" " — ${kit_revision:0:7}"
+fi
+recap ".pandino/install.json" " — the source revision from this successful install"
+recap ".pandino/check-update" " — manually checks whether upstream main changed"
 recap "AGENTS.md" " — the coding rules, read by every agent"
 for harness in $picked_keys; do
     case "$harness" in

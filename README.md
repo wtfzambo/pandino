@@ -53,6 +53,8 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips the optiona
 | `AGENTS.md` | repo root — the coding rules |
 | the seven helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — six specialists with a model pinned, plus the unpinned fallback-runner |
 | `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
+| `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
+| `check-update` | `.pandino/` — executable manual check of that recorded commit against upstream `main`; it never changes the installation |
 | skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
@@ -122,6 +124,16 @@ Do not treat this installation as a Pandino implementation slice, and do not inv
 
 ## Update an existing installation
 
+### Check for updates
+
+When `.pandino/check-update` exists, run it first:
+
+```bash
+.pandino/check-update
+```
+
+It compares the exact commit in `.pandino/install.json` with upstream `main` and never writes either file. Exit `0` means the recorded kit is current. If `.pandino/merge/` is absent, stop unless you explicitly want to reinstall; if it exists, resolve those candidates without rerunning the installer. Exit `1` means an update is available, so continue below. Exit `2`, or a missing checker, means an older or unidentifiable installation; that is expected, and you can still continue with the normal update flow. The manifest identifies the kit used by the latest successful installer run only; it does not say that files in `.pandino/merge/` have been reconciled.
+
 Pandino has no separate update command. Re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
 
 ```bash
@@ -135,13 +147,14 @@ For that reason, the safest update interface is an agent working inside a clean 
 ```txt
 Update Pandino (https://github.com/wtfzambo/pandino) in this repository.
 
-1. Read the latest Pandino README and this repository's current instruction files, agent definitions, `.pandino/models.json`, and enabled optional sections.
-2. Re-run the latest Pandino installer, selecting the editors and options this repository already uses.
-3. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
-4. Delete `.pandino/merge/` after resolving it, but keep `.pandino/snippets/`.
-5. Inspect the complete diff yourself. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
-6. Do not treat this update as a Pandino implementation slice, and do not invoke `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` merely to perform or validate it. Use those agents only if I explicitly ask. If resolving an update conflict would change product behavior, security, or how the team works, stop and ask me first.
-7. Report what was added, updated, preserved, or left unresolved. Do not commit or push unless I ask.
+1. If `.pandino/check-update` exists, run it first. If it exits 0 and `.pandino/merge/` is absent, stop unless I explicitly ask to reinstall. If it exits 0 and `.pandino/merge/` exists, do not run the installer; skip to step 4 and resolve those candidates. If it exits 1, continue. If it exits 2, or the checker is missing, continue: this installation may be older or have an unknown revision.
+2. Read the latest Pandino README and this repository's current instruction files, agent definitions, `.pandino/models.json`, and enabled optional sections.
+3. Unless step 1 found a current kit with `.pandino/merge/` candidates, re-run the latest Pandino installer, selecting the editors and options this repository already uses.
+4. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
+5. Delete `.pandino/merge/` after resolving it, but keep `.pandino/snippets/`.
+6. Inspect the complete diff yourself. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
+7. Do not treat this update as a Pandino implementation slice, and do not invoke `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` merely to perform or validate it. Use those agents only if I explicitly ask. If resolving an update conflict would change product behavior, security, or how the team works, stop and ask me first.
+8. Report what was added, updated, preserved, or left unresolved. Do not commit or push unless I ask.
 ```
 
 To test unpublished Pandino changes, run a local checkout's installer instead of the `curl` command:

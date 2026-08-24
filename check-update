@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -u
+
+repository="https://github.com/wtfzambo/pandino"
+main_ref_url="https://api.github.com/repos/wtfzambo/pandino/git/ref/heads/main"
+manifest_dir="$(cd "$(dirname "$0")" && pwd)"
+manifest="$manifest_dir/install.json"
+
+# Keep these helpers in sync with install.sh; deployed scripts cannot share code.
+is_valid_revision() {
+    local revision="$1"
+    [ "${#revision}" -eq 40 ] || return 1
+    case "$revision" in
+        *[!0123456789abcdefABCDEF]*) return 1 ;;
+    esac
+}
+
+normalize_revision() {
+    printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+read_installed_revision() {
+    local contents expected revision
+    [ -f "$manifest" ] || return 1
+
+    contents="$(cat "$manifest")"
+    revision="$(printf '%s\n' "$contents" \
+        | sed -n 's/^  "revision": "\([^"]*\)"$/\1/p')"
+    is_valid_revision "$revision" || return 1
+    expected="$(printf '{\n  "repository": "%s",\n  "revision": "%s"\n}' \
+        "$repository" "$revision")"
+    [ "$contents" = "$expected" ] || return 1
+    normalize_revision "$revision"
+}
+
+resolve_main_revision() {
+    local response revision
+    command -v curl > /dev/null 2>&1 || return 1
+    response="$(curl -fsSL --connect-timeout 5 --max-time 10 "$main_ref_url" 2> /dev/null || true)"
+    revision="$(printf '%s\n' "$response" | sed -n 's/.*"sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+    is_valid_revision "$revision" || return 1
+    normalize_revision "$revision"
+}
+
+unknown() {
+    printf 'Pandino update status unknown: %s\n' "$1"
+    exit 2
+}
+
+installed_revision="$(read_installed_revision)" || unknown "installed revision is missing, null, or malformed."
+upstream_revision="$(resolve_main_revision)" || unknown "upstream main revision is unavailable or malformed."
+
+if [ "$installed_revision" = "$upstream_revision" ]; then
+    printf 'Pandino is current: installed %s, upstream %s.\n' \
+        "${installed_revision:0:7}" "${upstream_revision:0:7}"
+    exit 0
+fi
+
+printf 'Pandino update available: installed %s, upstream %s.\n' \
+    "${installed_revision:0:7}" "${upstream_revision:0:7}"
+printf '%s/compare/%s...%s\n' "$repository" "$installed_revision" "$upstream_revision"
+exit 1

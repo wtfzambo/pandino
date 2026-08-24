@@ -14,6 +14,18 @@ core_agents() {
     awk '/<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
         | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
+copy_kit() {
+    local destination="$1"
+    mkdir -p "$destination"
+    cp \
+        "$repo_dir/AGENTS.md" \
+        "$repo_dir/check-update" \
+        "$repo_dir/harnesses.sh" \
+        "$repo_dir/install.sh" \
+        "$repo_dir/models.sh" \
+        "$destination/"
+    cp -R "$repo_dir/agents" "$repo_dir/snippets" "$destination/"
+}
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
@@ -58,6 +70,41 @@ chmod +x "$tmp_dir/bin/curl" "$tmp_dir/bin/pi" "$tmp_dir/bin/backlog"
 mkdir -p "$tmp_dir/emptybin"
 export PATH="$tmp_dir/bin:$PATH"
 python_bin="$(command -v python3)"
+cat > "$tmp_dir/snapshot-tree.py" <<'PY'
+import hashlib
+import json
+import os
+import stat
+import sys
+
+root = sys.argv[1]
+entries = []
+for directory, directories, files in os.walk(root, followlinks=False):
+    for name in sorted(directories + files):
+        path = os.path.join(directory, name)
+        info = os.lstat(path)
+        entry = {
+            "path": os.path.relpath(path, root),
+            "mode": stat.S_IMODE(info.st_mode),
+        }
+        if stat.S_ISLNK(info.st_mode):
+            entry["type"] = "symlink"
+            entry["target"] = os.readlink(path)
+        elif stat.S_ISREG(info.st_mode):
+            entry["type"] = "file"
+            with open(path, "rb") as file:
+                entry["sha256"] = hashlib.sha256(file.read()).hexdigest()
+        elif stat.S_ISDIR(info.st_mode):
+            entry["type"] = "directory"
+        else:
+            entry["type"] = "other"
+        entries.append(entry)
+print(json.dumps(sorted(entries, key=lambda entry: entry["path"]), sort_keys=True))
+PY
+snapshot_tree() {
+    "$python_bin" "$tmp_dir/snapshot-tree.py" "$1"
+}
+kit_revision="$(git -C "$repo_dir" rev-parse HEAD | tr '[:upper:]' '[:lower:]')"
 
 fresh_target="$tmp_dir/fresh"
 mkdir "$fresh_target"
@@ -76,6 +123,233 @@ fi
 cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
 cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
 cmp -s "$repo_dir/snippets/document-governance.md" "$fresh_target/.pandino/snippets/document-governance.md"
+cat > "$tmp_dir/expected-install.json" <<EOF
+{
+  "repository": "https://github.com/wtfzambo/pandino",
+  "revision": "$kit_revision"
+}
+EOF
+cmp -s "$tmp_dir/expected-install.json" "$fresh_target/.pandino/install.json"
+cmp -s "$repo_dir/check-update" "$fresh_target/.pandino/check-update"
+[ -x "$fresh_target/.pandino/check-update" ]
+grep -F "Pandino kit revision — ${kit_revision:0:7}" "$tmp_dir/fresh.out" > /dev/null
+grep -F ".pandino/install.json" "$tmp_dir/fresh.out" > /dev/null
+grep -F ".pandino/check-update" "$tmp_dir/fresh.out" > /dev/null
+
+# A failed run after the core files have begun must not replace prior provenance.
+mkdir "$tmp_dir/failing-bin"
+cat > "$tmp_dir/failing-bin/pi" <<'STUB'
+#!/bin/sh
+if [ "$1" = "--list-models" ]; then
+    printf '%s\n' 'provider      model' 'openai-codex  gpt-5.6-terra'
+    exit 0
+fi
+[ "$1" = install ] && exit 1
+exit 0
+STUB
+chmod +x "$tmp_dir/failing-bin/pi"
+failed_target="$tmp_dir/failed"
+mkdir -p "$failed_target/.pandino"
+printf 'old manifest\n' > "$failed_target/.pandino/install.json"
+printf 'old checker\n' > "$failed_target/.pandino/check-update"
+chmod 640 "$failed_target/.pandino/install.json"
+chmod 700 "$failed_target/.pandino/check-update"
+cp "$failed_target/.pandino/install.json" "$tmp_dir/sentinel-install.json"
+cp "$failed_target/.pandino/check-update" "$tmp_dir/sentinel-check-update"
+if env PATH="$tmp_dir/failing-bin:$tmp_dir/bin:$PATH" \
+    bash "$repo_dir/install.sh" "$failed_target" --no-input > "$tmp_dir/failed.out" 2>&1
+then
+    echo "FAIL: installer unexpectedly succeeded after pi install failure" >&2
+    exit 1
+fi
+[ -f "$failed_target/AGENTS.md" ]
+cmp -s "$tmp_dir/sentinel-install.json" "$failed_target/.pandino/install.json"
+cmp -s "$tmp_dir/sentinel-check-update" "$failed_target/.pandino/check-update"
+"$python_bin" - "$failed_target/.pandino/install.json" "$failed_target/.pandino/check-update" <<'PY'
+import os
+import stat
+import sys
+
+if stat.S_IMODE(os.stat(sys.argv[1]).st_mode) != 0o640:
+    raise SystemExit("install.json mode changed after failed install")
+if stat.S_IMODE(os.stat(sys.argv[2]).st_mode) != 0o700:
+    raise SystemExit("check-update mode changed after failed install")
+PY
+
+# A copied kit is still installable, but it has no checkout HEAD to record.
+non_git_kit="$tmp_dir/non-git-kit"
+copy_kit "$non_git_kit"
+non_git_target="$tmp_dir/non-git"
+mkdir "$non_git_target"
+bash "$non_git_kit/install.sh" "$non_git_target" --no-input > "$tmp_dir/non-git.out"
+cat > "$tmp_dir/unknown-install.json" <<'EOF'
+{
+  "repository": "https://github.com/wtfzambo/pandino",
+  "revision": null
+}
+EOF
+cmp -s "$tmp_dir/unknown-install.json" "$non_git_target/.pandino/install.json"
+grep -F "Pandino kit revision — unknown" "$tmp_dir/non-git.out" > /dev/null
+
+# A curl-piped install records the commit it resolved and fetches that exact
+# archive. When the API is unavailable, it keeps the branch archive fallback.
+remote_sha="1234567890abcdef1234567890abcdef12345678"
+remote_newer_sha="1234567000000000000000000000000000000000"
+archive_source="$tmp_dir/archive-source"
+copy_kit "$archive_source/pandino"
+tar -czf "$tmp_dir/pandino.tar.gz" -C "$archive_source" pandino
+mkdir "$tmp_dir/remote-bin"
+cat > "$tmp_dir/remote-bin/curl" <<'STUB'
+#!/bin/sh
+output=""
+url=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -o)
+            output="$2"
+            shift 2
+            ;;
+        *)
+            url="$1"
+            shift
+            ;;
+    esac
+done
+if [ -n "$output" ]; then
+    printf '%s\n' 'fake skill' > "$output"
+    exit 0
+fi
+printf '%s\n' "$url" >> "$REMOTE_LOG"
+case "$url" in
+    *api.github.com/repos/wtfzambo/pandino/git/ref/heads/main)
+        [ "${REMOTE_API_MODE:-ok}" = fail ] && exit 1
+        if [ -n "${REMOTE_API_RESPONSE:-}" ]; then
+            printf '%s\n' "$REMOTE_API_RESPONSE"
+        else
+            printf '{"object":{"sha":"%s"}}\n' "$REMOTE_SHA"
+        fi
+        ;;
+    *codeload.github.com/wtfzambo/pandino/tar.gz/*)
+        cat "$REMOTE_ARCHIVE"
+        ;;
+    *)
+        exit 1
+        ;;
+esac
+STUB
+chmod +x "$tmp_dir/remote-bin/curl"
+remote_target="$tmp_dir/remote"
+mkdir "$remote_target"
+: > "$tmp_dir/remote.log"
+/bin/cat "$repo_dir/install.sh" | env \
+    PATH="$tmp_dir/remote-bin:$PATH" \
+    REMOTE_ARCHIVE="$tmp_dir/pandino.tar.gz" \
+    REMOTE_LOG="$tmp_dir/remote.log" \
+    REMOTE_SHA="$remote_sha" \
+    bash -s -- "$remote_target" --no-input > "$tmp_dir/remote.out"
+cat > "$tmp_dir/remote-install.json" <<EOF
+{
+  "repository": "https://github.com/wtfzambo/pandino",
+  "revision": "$remote_sha"
+}
+EOF
+cmp -s "$tmp_dir/remote-install.json" "$remote_target/.pandino/install.json"
+grep -F "codeload.github.com/wtfzambo/pandino/tar.gz/$remote_sha" "$tmp_dir/remote.log" > /dev/null
+
+remote_fallback_target="$tmp_dir/remote-fallback"
+mkdir "$remote_fallback_target"
+: > "$tmp_dir/remote-fallback.log"
+/bin/cat "$repo_dir/install.sh" | env \
+    PATH="$tmp_dir/remote-bin:$PATH" \
+    REMOTE_API_MODE=fail \
+    REMOTE_ARCHIVE="$tmp_dir/pandino.tar.gz" \
+    REMOTE_LOG="$tmp_dir/remote-fallback.log" \
+    REMOTE_SHA="$remote_sha" \
+    bash -s -- "$remote_fallback_target" --no-input > "$tmp_dir/remote-fallback.out"
+cmp -s "$tmp_dir/unknown-install.json" "$remote_fallback_target/.pandino/install.json"
+grep -F "codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
+    "$tmp_dir/remote-fallback.log" > /dev/null
+
+remote_malformed_target="$tmp_dir/remote-malformed"
+mkdir "$remote_malformed_target"
+: > "$tmp_dir/remote-malformed.log"
+/bin/cat "$repo_dir/install.sh" | env \
+    PATH="$tmp_dir/remote-bin:$PATH" \
+    REMOTE_API_RESPONSE='{"object":{"sha":"not-a-revision"}}' \
+    REMOTE_ARCHIVE="$tmp_dir/pandino.tar.gz" \
+    REMOTE_LOG="$tmp_dir/remote-malformed.log" \
+    REMOTE_SHA="$remote_sha" \
+    bash -s -- "$remote_malformed_target" --no-input > "$tmp_dir/remote-malformed.out"
+cmp -s "$tmp_dir/unknown-install.json" "$remote_malformed_target/.pandino/install.json"
+grep -F "codeload.github.com/wtfzambo/pandino/tar.gz/refs/heads/main" \
+    "$tmp_dir/remote-malformed.log" > /dev/null
+
+# The installed checker reports its three stable statuses and never changes
+# the target tree, even when the network response is unusable.
+checker="$remote_target/.pandino/check-update"
+cp "$remote_target/.pandino/install.json" "$tmp_dir/checker-manifest-before"
+run_checker() {
+    local api_mode="$1" api_response="$2" expected_exit="$3" output="$4" status
+    if env PATH="$tmp_dir/remote-bin:$PATH" \
+        REMOTE_ARCHIVE="$tmp_dir/pandino.tar.gz" \
+        REMOTE_LOG="$tmp_dir/checker.log" \
+        REMOTE_SHA="$remote_sha" \
+        REMOTE_API_MODE="$api_mode" \
+        REMOTE_API_RESPONSE="$api_response" \
+        "$checker" > "$output"; then
+        status=0
+    else
+        status=$?
+    fi
+    if [ "$status" != "$expected_exit" ]; then
+        echo "FAIL: checker exited $status, expected $expected_exit" >&2
+        exit 1
+    fi
+}
+check_tree_unchanged() {
+    snapshot_tree "$remote_target" > "$tmp_dir/checker-tree-before.json"
+    run_checker "$@"
+    snapshot_tree "$remote_target" > "$tmp_dir/checker-tree-after.json"
+    cmp -s "$tmp_dir/checker-tree-before.json" "$tmp_dir/checker-tree-after.json"
+}
+: > "$tmp_dir/checker.log"
+check_tree_unchanged ok "" 0 "$tmp_dir/checker-current.out"
+grep -F "Pandino is current: installed ${remote_sha:0:7}, upstream ${remote_sha:0:7}." \
+    "$tmp_dir/checker-current.out" > /dev/null
+cmp -s "$tmp_dir/checker-manifest-before" "$remote_target/.pandino/install.json"
+
+check_tree_unchanged ok "{\"object\":{\"sha\":\"$remote_newer_sha\"}}" 1 "$tmp_dir/checker-update.out"
+grep -F "Pandino update available: installed ${remote_sha:0:7}, upstream ${remote_newer_sha:0:7}." \
+    "$tmp_dir/checker-update.out" > /dev/null
+grep -F "https://github.com/wtfzambo/pandino/compare/$remote_sha...$remote_newer_sha" \
+    "$tmp_dir/checker-update.out" > /dev/null
+cmp -s "$tmp_dir/checker-manifest-before" "$remote_target/.pandino/install.json"
+
+check_tree_unchanged fail "" 2 "$tmp_dir/checker-offline.out"
+grep -F "Pandino update status unknown:" "$tmp_dir/checker-offline.out" > /dev/null
+cmp -s "$tmp_dir/checker-manifest-before" "$remote_target/.pandino/install.json"
+
+run_checker ok '{"object":{"sha":"not-a-revision"}}' 2 "$tmp_dir/checker-malformed.out"
+grep -F "Pandino update status unknown:" "$tmp_dir/checker-malformed.out" > /dev/null
+cmp -s "$tmp_dir/checker-manifest-before" "$remote_target/.pandino/install.json"
+
+sed '$d' "$tmp_dir/checker-manifest-before" > "$remote_target/.pandino/install.json"
+run_checker ok "" 2 "$tmp_dir/checker-broken-manifest.out"
+grep -F "Pandino update status unknown:" "$tmp_dir/checker-broken-manifest.out" > /dev/null
+cmp -s <(sed '$d' "$tmp_dir/checker-manifest-before") "$remote_target/.pandino/install.json"
+
+cp "$tmp_dir/unknown-install.json" "$remote_target/.pandino/install.json"
+run_checker ok "" 2 "$tmp_dir/checker-null.out"
+grep -F "Pandino update status unknown:" "$tmp_dir/checker-null.out" > /dev/null
+cmp -s "$tmp_dir/unknown-install.json" "$remote_target/.pandino/install.json"
+
+# A later successful local run replaces Pandino-owned provenance exactly.
+printf 'old checker\n' > "$remote_target/.pandino/check-update"
+chmod -x "$remote_target/.pandino/check-update"
+bash "$repo_dir/install.sh" "$remote_target" --no-input > "$tmp_dir/remote-rerun.out"
+cmp -s "$tmp_dir/expected-install.json" "$remote_target/.pandino/install.json"
+cmp -s "$repo_dir/check-update" "$remote_target/.pandino/check-update"
+[ -x "$remote_target/.pandino/check-update" ]
 
 merge_target="$tmp_dir/merge"
 mkdir -p "$merge_target/.pi/agents"
@@ -86,6 +360,7 @@ cp "$merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/existing-taste-reviewe
 
 bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/merge.out"
 
+cmp -s "$tmp_dir/expected-install.json" "$merge_target/.pandino/install.json"
 cmp -s "$tmp_dir/existing-AGENTS.md" "$merge_target/AGENTS.md"
 cmp -s "$tmp_dir/existing-taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$merge_target/.pandino/merge/AGENTS.md" > /dev/null
@@ -570,4 +845,5 @@ if find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .; then
     exit 1
 fi
 
+bash -n "$repo_dir/install.sh" "$repo_dir/check-update" "$repo_dir/tests/test_install.sh"
 echo "test_install.sh: PASS"
