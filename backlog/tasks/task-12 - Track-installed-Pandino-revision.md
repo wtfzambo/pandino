@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@wtfzambo'
 created_date: '2026-08-24 21:08'
-updated_date: '2026-08-24 21:38'
+updated_date: '2026-08-24 21:42'
 labels: []
 dependencies: []
 references:
@@ -60,10 +60,12 @@ Let humans and agents identify which Pandino kit powered the latest installer ru
 
 <!-- SECTION:NOTES:BEGIN -->
 Implemented exact commit provenance, deterministic install.json, manual check-update, pinned remote bootstrap with branch fallback, recap identity, merge-aware update instructions, and authoritative spec/decision records. Initial taste/spec/test reviews found concrete resolver drift and evidence gaps; all were fixed and targeted follow-ups passed. Verification: Bash syntax and full installer suite pass; real GitHub main resolution equals origin/main; the real pinned codeload archive responds; the real checker reports current; AGENTS and specialist prompts are unchanged; diff hygiene passes.
+
+Docs review passed with no blockers. Accepted both minor wording findings: README now attributes exit 2 to either invalid installed provenance or unavailable/malformed upstream, and explicitly distinguishes the read-only status checker from the installer that applies updates. The follow-up is a trivial README-only clarification, so no second per-commit taste/spec pass was warranted; installer suite and diff hygiene remain green.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Pandino installations now record the exact kit commit when determinable and install a read-only manual update checker. Remote installs pin the resolved archive, gracefully fall back to moving main with unknown provenance when lookup fails, and local installs use HEAD or unknown. README explains checker-first updates without automatic session instructions. Verified through independent local/remote/fallback/failure/idempotence/immutability tests, real GitHub resolution and archive probes, all three pre-commit reviewers, syntax, and diff hygiene.
+Pandino installations now record the exact kit commit when determinable and install a read-only manual update checker. Remote installs pin the resolved archive, gracefully fall back to moving main with unknown provenance when lookup fails, and local installs use HEAD or unknown. README explains checker-first, merge-aware updates and accurate unknown/offline outcomes without automatic session instructions. Verified through independent local/remote/fallback/failure/idempotence/immutability tests, real GitHub resolution and archive probes, taste/spec/test/docs reviews, syntax, and diff hygiene.
 <!-- SECTION:FINAL_SUMMARY:END -->

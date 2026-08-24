@@ -132,9 +132,9 @@ When `.pandino/check-update` exists, run it first:
 .pandino/check-update
 ```
 
-It compares the exact commit in `.pandino/install.json` with upstream `main` and never writes either file. Exit `0` means the recorded kit is current. If `.pandino/merge/` is absent, stop unless you explicitly want to reinstall; if it exists, resolve those candidates without rerunning the installer. Exit `1` means an update is available, so continue below. Exit `2`, or a missing checker, means an older or unidentifiable installation; that is expected, and you can still continue with the normal update flow. The manifest identifies the kit used by the latest successful installer run only; it does not say that files in `.pandino/merge/` have been reconciled.
+It compares the exact commit in `.pandino/install.json` with upstream `main` and never writes either file. Exit `0` means the recorded kit is current. If `.pandino/merge/` is absent, stop unless you explicitly want to reinstall; if it exists, resolve those candidates without rerunning the installer. Exit `1` means an update is available, so continue below. Exit `2` means the installed revision is missing, null, or malformed, or upstream `main` is unavailable or malformed; continue with the normal update flow. A missing checker is expected for older installations and also continues with that flow. The manifest identifies the kit used by the latest successful installer run only; it does not say that files in `.pandino/merge/` have been reconciled.
 
-Pandino has no separate update command. Re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
+`.pandino/check-update` only reports status and does not apply updates. To apply one, re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
