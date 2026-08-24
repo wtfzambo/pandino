@@ -542,7 +542,7 @@ install_or_stage() {
 }
 
 write_install_provenance() {
-    local manifest="$target/.pandino/install.json"
+    local manifest="$target/.pandino/install.json" revision_json
     mkdir -p "$target/.pandino"
     cp "$kit_dir/check-update" "$target/.pandino/check-update"
     chmod +x "$target/.pandino/check-update"

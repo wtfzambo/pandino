@@ -3,7 +3,7 @@ id: doc-2
 title: Installed Pandino provenance
 type: specification
 created_date: '2026-08-24 21:09'
-updated_date: '2026-08-24 21:29'
+updated_date: '2026-08-24 21:56'
 ---
 # Installed Pandino provenance
 
@@ -33,6 +33,8 @@ The installer copies executable `.pandino/check-update`. It reads the adjacent m
 - Current: print both identity and current status; exit `0`.
 - Update available: print installed and upstream short revisions plus their comparison URL; exit `1`.
 - Missing, null, or malformed installed revision, or unavailable/malformed upstream response: print an unknown-status explanation; exit `2`.
+
+When a local checkout commit has not been published in the official repository, the exact revision comparison remains valid but the GitHub comparison URL may not resolve. The checker does not add ancestry, fork, or dirty-worktree analysis.
 
 The checker never changes the manifest or repository. It is manual only: Pandino adds no startup check, hook, background process, or persistent `AGENTS.md` instruction.
 

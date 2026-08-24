@@ -70,6 +70,36 @@ chmod +x "$tmp_dir/bin/curl" "$tmp_dir/bin/pi" "$tmp_dir/bin/backlog"
 mkdir -p "$tmp_dir/emptybin"
 export PATH="$tmp_dir/bin:$PATH"
 python_bin="$(command -v python3)"
+
+# The deployed scripts cannot share these helpers, so their implementations
+# must remain identical. Comment-only changes do not count as drift.
+"$python_bin" - "$repo_dir/install.sh" "$repo_dir/check-update" <<'PY'
+import re
+import sys
+
+
+def function_definition(source, name):
+    pattern = rb"(?ms)^" + re.escape(name.encode()) + rb"\(\) \{\n.*?^\}\n"
+    match = re.search(pattern, source)
+    if match is None:
+        raise SystemExit(f"FAIL: missing {name} definition")
+    return b"".join(
+        line
+        for line in match.group().splitlines(keepends=True)
+        if not line.lstrip().startswith(b"#")
+    )
+
+
+with open(sys.argv[1], "rb") as file:
+    installer = file.read()
+with open(sys.argv[2], "rb") as file:
+    checker = file.read()
+
+for name in ("is_valid_revision", "normalize_revision", "resolve_main_revision"):
+    if function_definition(installer, name) != function_definition(checker, name):
+        raise SystemExit(f"FAIL: {name} differs between install.sh and check-update")
+PY
+
 cat > "$tmp_dir/snapshot-tree.py" <<'PY'
 import hashlib
 import json
