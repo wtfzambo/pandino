@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-23 09:50'
+updated_date: '2026-08-24 22:01'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,20 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-23. TASK-11 was fast-forward merged into local `main` through `468b078`; before this handoff commit, main is three commits ahead of `origin/main`, and the handoff commit will be pushed immediately. The installed workflow now makes reviewer reports advisory evidence: the orchestrator independently fixes, rejects with checkable evidence, or asks once about genuine trade-offs; every must-fix from every reviewer receives a disposition; valid unresolved findings require user acceptance before merge; clean or fully resolved reviews need no ritual approval; standalone and whole-repository audits are report-only unless implementation is separately authorized. `decision-3` records the rationale, README matches, specialist prompts remain adversarial and unchanged, and the testing specification says reviewers judge rather than decide. TASK-11 is Done. Taste, spec, docs, and final reviews passed after all findings were dispositioned. Post-merge `tests/test_install.sh`, `tests/test_review_bench.sh`, and diff hygiene pass.
+2026-08-24. TASK-12 was fast-forward merged into local `main` through `d20a3c4`; before this handoff commit, main is three commits ahead of `origin/main`, and the handoff commit will be pushed immediately. Pandino now writes deterministic `.pandino/install.json` with the official source and exact kit commit when determinable (JSON null otherwise), installs executable read-only `.pandino/check-update`, pins remote archives to the resolved upstream SHA with branch+unknown fallback, records local HEAD without dirty/fork analysis, and prints the short revision in the recap. README uses a checker-first, merge-aware manual update flow and adds no automatic check or persistent AGENTS instruction. `doc-2` is the authoritative contract and `decision-4` records the commit-not-semver/manual-not-automatic rationale. TASK-12 is Done. Taste, spec, test, docs, and final reviews completed; every valid finding was fixed and the one rejected minor was dismissed on checkable evidence. Post-merge installer and review-benchmark suites, Bash syntax, real GitHub ref/pinned archive/checker probes, and diff hygiene pass.
 
 WHAT'S NEXT
-1. No work remains for TASK-11.
-2. If wanted, start optional `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. Keep intentional benchmark fixtures unchanged.
+1. No work remains for TASK-12. Existing repositories gain provenance and the checker the next time they run the current installer; older installs correctly have no checker yet.
+2. If wanted, start optional `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. TASK-12 added substantial but mutation-reviewed installer evidence; classify it against its observable provenance promises before pruning anything.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-23. TASK-10 is unblocked. No credentials, external services, or unresolved review findings are blocking.
+Nothing as of 2026-08-24. TASK-10 is unblocked. No credentials, services, or unresolved review findings are blocking.
 
 VERIFY
 `git status -sb` should show clean `main` tracking `origin/main` with no divergence.
-`git log --oneline -6` should include this pickup commit, `468b078 chore: record review adjudication outcome`, `1902755 docs: align reviewer authority wording`, and `edea8cc feat: adjudicate reviewer findings before acting`.
-`backlog task view TASK-11 --plain` should show Done with six checked acceptance criteria.
-`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS.
+`git log --oneline -6` should include this pickup commit, `d20a3c4 fix: harden Pandino revision provenance`, `2133c65 docs: clarify Pandino update status`, and `cb50507 feat: track installed Pandino revision`.
+`backlog task view TASK-12 --plain` should show Done with seven checked acceptance criteria.
+`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS; `bash -n install.sh check-update tests/test_install.sh` should exit zero.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
