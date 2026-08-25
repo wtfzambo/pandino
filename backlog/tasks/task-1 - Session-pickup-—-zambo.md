@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-24 22:01'
+updated_date: '2026-08-25 19:15'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-24. TASK-12 was fast-forward merged into local `main` through `d20a3c4`; before this handoff commit, main is three commits ahead of `origin/main`, and the handoff commit will be pushed immediately. Pandino now writes deterministic `.pandino/install.json` with the official source and exact kit commit when determinable (JSON null otherwise), installs executable read-only `.pandino/check-update`, pins remote archives to the resolved upstream SHA with branch+unknown fallback, records local HEAD without dirty/fork analysis, and prints the short revision in the recap. README uses a checker-first, merge-aware manual update flow and adds no automatic check or persistent AGENTS instruction. `doc-2` is the authoritative contract and `decision-4` records the commit-not-semver/manual-not-automatic rationale. TASK-12 is Done. Taste, spec, test, docs, and final reviews completed; every valid finding was fixed and the one rejected minor was dismissed on checkable evidence. Post-merge installer and review-benchmark suites, Bash syntax, real GitHub ref/pinned archive/checker probes, and diff hygiene pass.
+2026-08-24. `main` is synchronized with `origin/main` at `9628539` before this continuity-only commit; the new pickup commit will intentionally remain unpushed because the operator requested a commit, not a push. TASK-12 is Done and merged: installed repositories gain deterministic `.pandino/install.json`, executable manual `.pandino/check-update`, exact remote archive pinning with unknown fallback, local HEAD provenance, recap identity, and checker-first merge-aware update instructions without automatic checks or persistent AGENTS context. All installer, benchmark, syntax, real-GitHub, taste/spec/test/docs/final checks passed. After completion, Pi emitted several delayed background-agent notifications for reviewer results that the orchestrator had already retrieved with `get_subagent_result(wait=true)`, adjudicated, and followed up before merge. No repository defect has yet been established; the notification/order behavior is the next discussion topic.
 
 WHAT'S NEXT
-1. No work remains for TASK-12. Existing repositories gain provenance and the checker the next time they run the current installer; older installs correctly have no checker yet.
-2. If wanted, start optional `TASK-10 - Prune low-value installer tests` on a fresh branch from updated main. First commands: `backlog instructions task-execution`, `backlog task view TASK-10 --plain`, then create the branch. TASK-12 added substantial but mutation-reviewed installer evidence; classify it against its observable provenance promises before pruning anything.
+1. After chat compaction, discuss the delayed reviewer notifications. Start by distinguishing execution ordering from UI delivery: inspect the session evidence showing each gated result was explicitly awaited before edits/merge, then inspect Pi subagent-group notification semantics to learn why completion events were delivered later or duplicated.
+2. Decide whether gated reviewer batches should be launched in parallel with foreground results, or whether Pi/the subagent extension should drain queued completion notifications after `get_subagent_result(wait=true)`. Do not change Pandino workflow until the mechanism and trade-off are understood.
+3. Optional unrelated follow-up remains `TASK-10 - Prune low-value installer tests`; do not start it until the delayed-review discussion is resolved or explicitly deferred.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-24. TASK-10 is unblocked. No credentials, services, or unresolved review findings are blocking.
+As of 2026-08-24, no implementation is blocked. The next decision is whether the late messages represent only delayed UI notifications or a real orchestration race. The operator wants to discuss that after compaction. No new task has been created for it yet.
 
 VERIFY
-`git status -sb` should show clean `main` tracking `origin/main` with no divergence.
-`git log --oneline -6` should include this pickup commit, `d20a3c4 fix: harden Pandino revision provenance`, `2133c65 docs: clarify Pandino update status`, and `cb50507 feat: track installed Pandino revision`.
-`backlog task view TASK-12 --plain` should show Done with seven checked acceptance criteria.
-`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS; `bash -n install.sh check-update tests/test_install.sh` should exit zero.
+`git status -sb` should show clean `main` one commit ahead of `origin/main` after the continuity commit.
+`git log --oneline -6` should include the continuity commit above `9628539 chore: record Pandino provenance merge`.
+`backlog task view TASK-12 --plain` should show Done with seven checked criteria.
+Session evidence should show that original and targeted reviewer results were retrieved with `get_subagent_result(wait=true)` before their findings were fixed, committed, and merged, even though completion notifications appeared in later turns.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
