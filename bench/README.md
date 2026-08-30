@@ -12,7 +12,7 @@ pi -p --no-session --no-extensions --no-skills --mode json \
    --append-system-prompt <role-prompt> "<task prompt>"
 ```
 
-- The role prompt is the agent's markdown from `agents/`, frontmatter stripped. `bench/review/prompts/test.md` is the deterministic copy of `agents/test-reviewer.md`; regenerate it with `awk '/^---$/{n++; next} n>=2' agents/test-reviewer.md > bench/review/prompts/test.md`. `run_one.sh` refuses a test run when the copy differs.
+- The role prompt is the agent's markdown from `agents/`, frontmatter stripped. Each `bench/review/prompts/<role>.md` is a deterministic copy of `agents/<role>-reviewer.md`; regenerate it with `awk '/^---$/{n++; next} n>=2' agents/<role>-reviewer.md > bench/review/prompts/<role>.md`. `run_one.sh` refuses a review run when the copy differs.
 - The task runs in a temp workdir seeded with the task's files plus the kit `AGENTS.md`, so the model sees the same context a real Pandino repo gives it.
 - `--no-extensions` keeps the environment clean but also unloads the ollama-cloud provider; the harness re-adds only that extension for `ollama-cloud/*` models.
 - The JSON transcript is stored under `results/raw/` and mined for token counts and cost (`summarize.py --one`).
@@ -42,6 +42,7 @@ Each task is a git repo built on the fly: `base/` is committed, `changed/` is co
 |---|---|
 | `taste-defects` | 4 planted style defects (clever reduce-fold, speculative parameters, what-not-why comment, nested conditionals); all tests pass, so green tests must not silence the review |
 | `taste-clean` | a genuinely clean diff; pass = no invented must-fix findings |
+| `taste-negations` | 3 unmotivated contrastive negations in a docstring, comment, and identifier, plus 2 motivated controls that warn about plausible mistakes |
 | `spec-defects` | 4 planted spec divergences against `docs/discount-spec.md` (wrong boundary, discount applied to shipping, missing ValueError, unrequested coupon feature); the test suite agrees with the wrong code |
 | `spec-clean` | every spec line traces to code and test; pass = says so |
 | `test-defects` | all five must-fix gaps: missing 429 coverage, a Bash `!` assertion neutralized by `set -e`, an implementation-derived oracle, an invented provider fixture, and missing negative `schedule_retry` coverage; plus two minor excess groups |

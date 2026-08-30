@@ -1,4 +1,4 @@
-# TASK-9 manual audit
+# Review benchmark manual audit
 
 Raw `*.judge.json` files are automatic output for the original test benchmark. This manual audit is the current authority and controls the final scores.
 
@@ -62,3 +62,17 @@ Combined with the earlier test-defects repeats, both Sol levels reach 40/45 must
 ## Routing gate
 
 Recommend a separate `openai-codex/gpt-5.6-sol` high test-reviewer over shared Flash: comparable r1 across the original and language tasks is Sol 13/15 versus Flash 8/15. Prefer high over medium because recall is equal but high has a stronger floor and one fewer defect FP, while medium is materially faster and cheaper and has one fewer clean FP. Operator approved the separate Sol high test-reviewer on 2026-08-20.
+
+## TASK-14 reflexive-negation rule
+
+The frozen `taste-negations` fixture plants three unmotivated contrasts in a docstring, comment, and identifier, plus two motivated controls that warn about plausible billing mistakes and state their reasons. Legitimate findings during fixture construction removed bytecode drift, pass-through and dead helpers, and a generic return type. They also removed an unpinned precedence case, stale module prose, and ambiguous comment placement before the scored runs.
+
+| Run | planted recall | motivated-control findings | other false positives |
+| --- | ---: | ---: | ---: |
+| Flash high r1 | 3/3 | 0/2 | 0 |
+| Flash high r2 | 3/3 | 0/2 | 1 |
+| Flash high r3 | 3/3 | 0/2 | 0 |
+
+Production taste routing therefore reached 9/9 planted findings and preserved all six motivated-control appearances. Scoring requires the affected text or symbol plus the correct failure mode; some numeric line references drifted, while every quoted clause and identifier remained unambiguous. Run 2 proposed inlining the single-use `CollectionAction` alias; this is a false positive because the alias names the domain and constrains the public return contract to three valid values, satisfying the repository's type rule.
+
+Fable returned HTTP 429 on both judge attempts for all three runs. The raw reviews and this manual audit are tracked; no judge JSON or CSV rows were produced.
