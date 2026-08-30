@@ -25,6 +25,7 @@ Apply YAGNI and KISS throughout. Optimize what is measured to need it; where a s
 - One nesting level is normal, two should prompt consideration, three is the practical maximum.
 - Do not compress straightforward behavior into clever expressions.
 - A comment that explains what convoluted code does is a refactoring signal. Comments explain intent, constraints, and trade-offs — never restate the code.
+- Say what a thing is or does; add a negation ("X, not Y") — in comments, docs, commit messages, or identifiers — only when Y is a plausible misreading the contrast rules out for a stated reason. Reread the sentence without the negated clause: if nothing is lost, delete it.
 
 ## Modules and ordering
 

@@ -13,4 +13,6 @@ Run once before `final-reviewer` only when a branch changes documented behavior,
 
 Read the project's documented routing before reviewing. For Pandino with Backlog.md, current specifications default to `backlog/docs/specs/`; another repository may name `spec/`, `docs/`, or another authoritative location. Compare the final code, configuration, and public behavior with the current specifications, decisions, runbooks, codebase documentation, and findings.
 
+Flag unmotivated contrastive negations in documentation prose: "X, not Y" where no plausible reader would have assumed Y, so removing the negated clause loses nothing.
+
 Report semantic drift, missing required documentation updates, duplicate or contradictory authority, stale or non-executable procedures, decisions not reflected in current specifications, and invalid or noisy findings. Output only severity-ordered findings (`must-fix`, then `minor`, then `good`), each with exact locations and evidence.
