@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-25 19:15'
+updated_date: '2026-08-30 11:42'
 labels:
   - continuity
   - handoff
@@ -18,21 +18,22 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-24. `main` is synchronized with `origin/main` at `9628539` before this continuity-only commit; the new pickup commit will intentionally remain unpushed because the operator requested a commit, not a push. TASK-12 is Done and merged: installed repositories gain deterministic `.pandino/install.json`, executable manual `.pandino/check-update`, exact remote archive pinning with unknown fallback, local HEAD provenance, recap identity, and checker-first merge-aware update instructions without automatic checks or persistent AGENTS context. All installer, benchmark, syntax, real-GitHub, taste/spec/test/docs/final checks passed. After completion, Pi emitted several delayed background-agent notifications for reviewer results that the orchestrator had already retrieved with `get_subagent_result(wait=true)`, adjudicated, and followed up before merge. No repository defect has yet been established; the notification/order behavior is the next discussion topic.
+2026-08-30. TASK-14 is Done and fast-forward merged into local `main` through `7958c0a` before this continuity commit; after the continuity commit, `main` will be pushed and synchronized with `origin/main`. The minimal `taste-negations` benchmark contains three unmotivated negations (docstring, comment, parameter identifier) and two motivated controls (calendar/business days and calls/retries), cross-checked against TASK-13 and zambo's independent "speak like you eat" wording. Three frozen production runs of `ollama-cloud/deepseek-v4-flash:0731` high reached 9/9 planted recall, preserved all six motivated-control appearances, and produced one unrelated false positive. Fable returned HTTP 429, so raw reviews plus `bench/review/results/manual-audit.md` are authoritative; no judge JSON or CSV rows were fabricated. Fixture-local `.gitignore` files isolate Python bytecode. TASK-13 and TASK-14 are both Done. Post-merge fixture, installer, review-benchmark, prompt-parity, cache-cleanliness, and diff checks pass. Per-commit taste/spec/test/docs batches were run foreground and all reports returned inline; no delayed reviewer notifications appeared during TASK-14. The canonical final-reviewer failed to launch with a provider 429, so the policy-compliant explicit fallback used `openai-codex/gpt-5.6-sol` high with the canonical instructions verbatim; verdict merge with no findings.
 
 WHAT'S NEXT
-1. After chat compaction, discuss the delayed reviewer notifications. Start by distinguishing execution ordering from UI delivery: inspect the session evidence showing each gated result was explicitly awaited before edits/merge, then inspect Pi subagent-group notification semantics to learn why completion events were delivered later or duplicated.
-2. Decide whether gated reviewer batches should be launched in parallel with foreground results, or whether Pi/the subagent extension should drain queued completion notifications after `get_subagent_result(wait=true)`. Do not change Pandino workflow until the mechanism and trade-off are understood.
-3. Optional unrelated follow-up remains `TASK-10 - Prune low-value installer tests`; do not start it until the delayed-review discussion is resolved or explicitly deferred.
+1. No work remains for TASK-14. The production taste reviewer has direct evidence for the new negation rule.
+2. If desired, discuss whether Pandino should codify foreground parallel execution for gated reviewer batches. TASK-14 supplied one successful session-level experiment: `run_in_background=false` returned every review inline and avoided the prior late-notification UX. Create a dedicated task before changing AGENTS.md or agent orchestration guidance.
+3. Optional unrelated work remains `TASK-10 - Prune low-value installer tests`.
 
 WAITING ON / GATED BY
-As of 2026-08-24, no implementation is blocked. The next decision is whether the late messages represent only delayed UI notifications or a real orchestration race. The operator wants to discuss that after compaction. No new task has been created for it yet.
+Nothing as of 2026-08-30. No review finding, credential, provider, or external service blocks the merged work. Anthropic/Fable quota affected automatic judging and the canonical final-review launch; the recorded manual audit and policy-compliant final fallback completed the task.
 
 VERIFY
-`git status -sb` should show clean `main` one commit ahead of `origin/main` after the continuity commit.
-`git log --oneline -6` should include the continuity commit above `9628539 chore: record Pandino provenance merge`.
-`backlog task view TASK-12 --plain` should show Done with seven checked criteria.
-Session evidence should show that original and targeted reviewer results were retrieved with `get_subagent_result(wait=true)` before their findings were fixed, committed, and merged, even though completion notifications appeared in later turns.
+`git status -sb` should show clean `main` synchronized with `origin/main` after push.
+`git log --oneline -5` should include this pickup commit, `7958c0a bench: verify reflexive-negation review rule`, and `2035e39 docs: curb unmotivated contrastive negations`.
+`backlog task view TASK-14 --plain` should show Done with five checked criteria and the explicit final-review fallback note.
+`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS; both `bench/review/tasks/taste-negations/{base,changed}/test_billing.py` scripts should print PASS with `PYTHONDONTWRITEBYTECODE=1`.
+`cmp -s <(awk '/^---$/{n++; next} n>=2' agents/taste-reviewer.md) bench/review/prompts/taste.md` should exit zero in Bash.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF

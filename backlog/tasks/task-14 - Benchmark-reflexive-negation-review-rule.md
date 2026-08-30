@@ -5,7 +5,7 @@ status: Done
 assignee:
   - zambo
 created_date: '2026-08-30 10:44'
-updated_date: '2026-08-30 11:36'
+updated_date: '2026-08-30 11:42'
 labels: []
 dependencies: []
 ordinal: 14000
@@ -42,6 +42,8 @@ Add one minimal taste-review benchmark fixture that tests whether the production
 Implemented the taste-negations base and changed billing fixture, oracle, and canonical taste prompt copy. Verified both direct fixture tests, prompt parity, git diff --check, and tests/test_review_bench.sh. Production-model runs and manual audit remain for the orchestrator.
 
 Built and froze one minimal taste-negations fixture with three planted unmotivated contrasts (docstring, comment, parameter identifier) and two motivated controls (calendar/business days and calls/retries). Genuine findings during exploratory runs repaired the fixture before scoring: removed bytecode drift, pass-through/dead helpers, a generic return type, missing precedence evidence, stale prose, comment placement ambiguity, and other confounders; stale raw outputs were overwritten. Three frozen production runs of ollama-cloud/deepseek-v4-flash:0731 high each found 3/3 planted defects and criticized 0/2 motivated controls. Run 2 produced one unrelated false positive about the CollectionAction type alias; rejected on checkable AGENTS.md evidence because the alias names the domain and constrains the public return contract. Fable returned HTTP 429 on both judge attempts for each run, so manual-audit.md is authoritative and no judge JSON or CSV rows were fabricated. Pre-commit taste/spec/test/docs reviews completed foreground. Accepted findings were fixed: scoring now keys on exact affected text/symbol with advisory line numbers, fixture-local .gitignore files isolate bytecode, and audit prose was simplified. The generic README prompt-sync wording was retained because run_one checks every supported role and TASK-13 had made the taste copy stale. Direct fixture tests, prompt parity, test_review_bench.sh, cache cleanup, and diff hygiene pass.
+
+Canonical final-reviewer could not launch on 2026-08-30 because its pinned provider returned HTTP 429 quota exceeded. Per fallback policy, fallback-runner was invoked explicitly with openai-codex/gpt-5.6-sol high, preserving the final-reviewer instructions verbatim and using a model different from writer Terra. Verdict: merge; no must-fix or minor findings. Post-merge fixture tests, installer tests, review-benchmark tests, prompt parity, cache cleanup, and diff hygiene passed.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
