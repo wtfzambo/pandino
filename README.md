@@ -10,7 +10,7 @@ The Fiat Panda is not fast and not clever. It is simple enough that a mechanic i
 
 Coding agents pull the other way. Ask for a function and you get a class hierarchy; ask for a fix and you get a refactor; ask for a feature and you get configuration for five you never wanted. It all works on the day it is written. Then you come back in six months, and nobody — you or the next agent — can tell what any of it is for.
 
-Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that keeps them honest: plan before writing, one writer, two routine per-commit reviewers who did not write it, a conditional test-evidence review, a conditional documentation review, a final whole-branch review, and you reading the diff at the end. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
+Pandino is the counterweight. It gives your agents one set of rules about what good code looks like, and a workflow that starts with the smallest slice, keeps evidence proportionate, and brings in independent reviewers when they add value. Nothing here is novel. It is the boring stuff that survives contact with a real codebase.
 
 ## What you get
 
@@ -22,7 +22,7 @@ Pandino is the counterweight. It gives your agents one set of rules about what g
 ## What it costs
 
 - Your agent will argue for the simpler version when you were expecting the clever one.
-- Reviews before commits take an extra minute.
+- Reviews take an extra minute when the slice warrants them.
 - Some of your existing code will look worse once something is checking.
 
 If you want the intergalactic rocket, this is the wrong kit. Build the Panda that gets you there.
@@ -55,18 +55,18 @@ No terminal, like inside an agent or CI? Then it asks nothing, skips the optiona
 | `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
 | `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
 | `check-update` | `.pandino/` — executable manual check of that recorded commit against upstream `main`; it never changes the installation |
-| skills | `.pi/skills/` if you picked pi — `grilling` grills you on a plan until it holds ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
+| skills | `.pi/skills/` if you picked pi — `grilling` challenges a plan when you ask or an unresolved product choice blocks the current slice ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
 | optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
 The six specialists, and what each one is there to prevent:
 
 - **implementer** — writes the code from an approved plan, one slice at a time. Stops and reports instead of improvising when the plan does not survive contact with the code.
-- **taste-reviewer** — reads *how* it is written. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
-- **spec-reviewer** — reads *what* it does, against what you actually asked for. Catches the missing half of the requirement, and the three features you never requested.
-- **test-reviewer** — runs only for executable-behavior, test, test-infrastructure, and bug-fix diffs. Judges whether automated evidence is necessary, effective, independent, and proportionate; it does not judge specification correctness.
-- **docs-reviewer** — optional, once before the final review when a branch changes documented behavior or authority. Catches drift between the final code and its specifications, decisions, procedures, codebase docs, and findings; it is not part of the per-commit loop.
-- **final-reviewer** — one pass over the whole branch before it merges, on the strongest model you have. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
+- **taste-reviewer** — reviews *how* it is written when a substantial diff benefits from independent taste review. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
+- **spec-reviewer** — reviews *what* it does against what you actually asked for when a substantial diff benefits from independent scope review. Catches the missing half of the requirement and the three features you never requested.
+- **test-reviewer** — runs when a substantial relevant change benefits from evidence review. Judges whether automated evidence is necessary, effective, independent, and proportionate; it does not judge specification correctness.
+- **docs-reviewer** — runs for substantial documented behavior or authority changes, before final review when both run. Catches drift between the final code and its specifications, decisions, procedures, codebase docs, and findings.
+- **final-reviewer** — runs for a substantial branch when composition or end-to-end value could change the merge decision. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
 - **fallback-runner** — an inspection-only escape hatch, not a seventh specialist. Use it only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Give it that reviewer's instructions verbatim, the concrete task context, and an explicit alternate model; report the substitution. It is not a retry for findings you dislike.
 
 ### Which model runs each specialist
@@ -82,7 +82,7 @@ Models each specialist will run on:
     fallback-runner has no default and requires a call-time model
 ```
 
-The split follows the [benchmarks](NOTES.md) and [full benchmark](bench/README.md): Flash remains the cheap, fast choice for routine taste, spec, and docs review, while Sol high is a separate test reviewer because comparable original-plus-language r1 found 13/15 defects versus Flash's 8/15. High won over medium for its stronger recall floor and fewer defect false positives; the expensive final model is still saved for the single whole-branch pass.
+The split follows the [benchmarks](NOTES.md) and [full benchmark](bench/README.md): Flash remains the cheap, fast choice for routine taste, spec, and docs review, while Sol high is a separate test reviewer because comparable original-plus-language r1 found 13/15 defects versus Flash's 8/15. High won over medium for its stronger recall floor and fewer defect false positives; the expensive final model is saved for a whole-branch pass when one runs.
 
 A model that is not available falls back to the next one down the list, and the substitution is printed. If nothing suitable exists, that helper follows the main model and the installer says so — it never pretends to have pinned something.
 
@@ -165,18 +165,17 @@ To test unpublished Pandino changes, run a local checkout's installer instead of
 
 ## How the workflow runs
 
-One agent plans and coordinates. Six specialists do the specialised work, and the split is the point: the one who wrote the code is the worst judge of it, and the one who wrote the plan is the worst judge of the plan. `fallback-runner` is a seventh, non-specialist escape hatch only for an unavailable reviewer, never a way to override a result.
+One agent plans and coordinates. Start with the smallest observable slice and apply one necessity test to every action: omit it when the slice can still be completed correctly and verified proportionately. Match evidence to the actual consequences of shipped behavior; subject vocabulary alone does not raise risk. `fallback-runner` remains an inspection-only escape hatch for an unavailable reviewer.
 
-1. Read the repo and the real code first. Most bad changes start as a confident guess about code nobody opened.
-2. Agree on a plan before writing anything non-trivial. The grilling skill exists to attack the plan while it is still cheap to change.
-3. Hand the agreed plan to the implementer. If it turns out the plan contradicts the actual code, the implementer stops and says so rather than inventing a way through — that report is a planning bug, not a failure.
-4. Before a non-trivial commit, taste-reviewer and spec-reviewer read the diff: one asks whether it is written well, the other whether it does what you asked and nothing more. Also run test-reviewer when executable behavior, tests or test infrastructure, or a bug fix is relevant; skip it for docs-only and trivial non-behavioral diffs. Review reports are evidence, not orders: the coordinator verifies each finding, fixes clear in-scope issues, rejects a finding only for a checkable reason, and bundles genuine trade-offs into one question rather than forwarding a report untouched.
-5. Read the diff yourself. Every agent's report describes what it meant to do; only the diff describes what happened. This step is where the bugs nobody was assigned to catch turn up.
-6. Before the branch merges, run the optional docs-reviewer once when the branch changes documented behavior, public contracts, procedures, architecture/codebase structure, authoritative docs, decisions, or findings. Then run the final-reviewer once over the whole thing. It reads what the commits add up to, which per-commit review structurally cannot see. Every must-fix from any reviewer needs an explicit outcome; a valid finding that remains disputed, deferred, or intentionally unfixed requires user approval, while clean or fully resolved reviews do not need ritual approval.
+1. Read the real code and research only the current slice. When uncertain external behavior blocks it, use the cheapest authoritative source or direct probe. Ask before expanding the plan or starting future-slice work.
+2. The main agent implements small, short fixes directly. Substantial work gets a bounded approved plan and the implementer. Use grilling on request or when an unresolved user-owned product choice blocks the slice.
+3. For substantial changes, run relevant reviewers near the end of a logical slice: taste and spec when independent implementation or scope review helps; test when relevant behavior or evidence changes warrant it; docs for substantial documented behavior or authority changes; final when whole-branch composition or end-to-end risk could change the merge decision. Docs runs before final when both run.
+4. Treat findings as evidence. Fix valid in-scope proportionate findings. Reject incorrect, duplicate, out-of-scope, or disproportionate findings with a checkable reason tied to shipped behavior, contracts, repository risk, or proportionate evidence. Findings cannot create research, a deliverable, or a maintenance artifact; ask the user only for a real remaining product, scope, or risk choice. Every must-fix gets an explicit outcome, and a valid unresolved must-fix requires user acceptance before merge.
+5. Read the diff, run proportionate checks, and trace the affected path when needed. Once the current criteria pass, remove dispensable work and stop.
 
-Standalone or whole-repository audits are report-only unless implementation is requested. Before changing anything, the coordinator synthesizes the worthwhile findings, flags anything disproportionate or decision-required, and waits for the user before editing or creating tasks.
+Standalone or whole-repository audits are report-only unless implementation is requested. The coordinator synthesizes useful findings and waits for the user before changing scope or creating work.
 
-The installer assigns the specialist models, so no specialist reviewer runs on the model that spawned it — see [which model runs each specialist](#which-model-runs-each-specialist). The [benchmarks](NOTES.md) found Flash competitive for routine taste, spec, and docs review, while Sol's stronger test-evidence recall earns its conditional separate role. The expensive model is spent once, on `final-reviewer`.
+The installer assigns separate writer and reviewer models when reviews run — see [which model runs each specialist](#which-model-runs-each-specialist). The [benchmarks](NOTES.md) found Flash competitive for routine taste, spec, and docs review, while Sol's stronger test-evidence recall earns its conditional separate role. The expensive model is reserved for `final-reviewer` when that whole-branch pass adds value.
 
 ## When Pandino meets your existing rules
 

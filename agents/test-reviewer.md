@@ -1,8 +1,8 @@
 ---
 description: >-
-  Adversarial review of whether a diff has the necessary, effective, independent,
-  and proportionate automated evidence. Never edits code. Runs conditionally for
-  behavior, test, test-infrastructure, and bug-fix diffs.
+  Adversarial review of automated evidence for a substantial relevant change:
+  is it necessary, effective, independent, and proportionate? Runs
+  conditionally and never edits code.
 tools: read, grep, find, ls, bash
 thinking: high
 ---
