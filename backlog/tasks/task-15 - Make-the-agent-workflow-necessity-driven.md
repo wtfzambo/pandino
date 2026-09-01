@@ -5,7 +5,7 @@ status: Done
 assignee:
   - zambo
 created_date: '2026-09-01 09:11'
-updated_date: '2026-09-01 09:26'
+updated_date: '2026-09-01 10:19'
 labels: []
 dependencies: []
 ordinal: 15000
@@ -43,6 +43,8 @@ Pandino's general KISS principles are overridden in practice by an assurance-fir
 
 <!-- SECTION:NOTES:BEGIN -->
 Rewrote the installed workflow by subtraction around the smallest current slice and one necessity test. Main now implements small short fixes directly for token cost; substantial implementation uses a bounded plan and the implementer. Grilling, research, extra agents, and relevant reviewers are conditional; reviewer routing is independent of writer routing. Findings cannot create scope, disproportionate findings are rejectable with checkable evidence, valid unresolved must-fixes retain the user merge gate, optional artifacts default to deletion when current behavior does not need them, and user direction challenges interrupt active work. README, five reviewer definitions, parallel-agent guidance, Pi mirrors, and taste/spec benchmark prompts are synchronized. Decision-5 records the meaningful choice and supersedes only decision-3's narrow rejection rule; docs review found a duplicate workflow specification unnecessary because the executable instruction files are current authority. One foreground taste/spec/test/docs pass completed. Fixed valid findings: removed the stale claim that only test-reviewer is conditional, removed the ritualized phrase "reduction pass", simplified spec-reviewer scope wording, improved test-reviewer frontmatter, and restored explicit user acceptance for valid unresolved must-fixes. Rejected one taste minor on checkable incident evidence: "subject vocabulary alone does not raise risk" guards the exact GOOD-13 failure where dog-behavior vocabulary triggered unnecessary medical research, so the contrast is motivated and carries information. Test review found existing installer and prompt-parity evidence sufficient and recommended no new orchestrator benchmark. Canonical/Pi mirror parity, taste/spec/test prompt parity, installer tests, review-benchmark tests, and diff hygiene pass. The Backlog CLI created decision-5 and its metadata; because this CLI version exposes no decision-edit command, only the generated Context/Decision/Consequences bodies were filled directly.
+
+Final-reviewer verdict: merge after fixes. Accepted all three findings and fixed them directly: restored `Never present a guess as fact` without reintroducing broad research, restored the fallback-runner abuse guard in the shipped AGENTS.md, and added the missing trailing newline to canonical and Pi test-reviewer files. These targeted fixes did not change routing behavior, so no reviewer rerun was warranted under the new necessity policy. Canonical/Pi mirror parity, taste/spec/test prompt parity, installer tests, review-benchmark tests, newline checks, and diff hygiene pass.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
