@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-08-30 11:42'
+updated_date: '2026-09-01 10:19'
 labels:
   - continuity
   - handoff
@@ -18,22 +18,22 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-08-30. TASK-14 is Done and fast-forward merged into local `main` through `7958c0a` before this continuity commit; after the continuity commit, `main` will be pushed and synchronized with `origin/main`. The minimal `taste-negations` benchmark contains three unmotivated negations (docstring, comment, parameter identifier) and two motivated controls (calendar/business days and calls/retries), cross-checked against TASK-13 and zambo's independent "speak like you eat" wording. Three frozen production runs of `ollama-cloud/deepseek-v4-flash:0731` high reached 9/9 planted recall, preserved all six motivated-control appearances, and produced one unrelated false positive. Fable returned HTTP 429, so raw reviews plus `bench/review/results/manual-audit.md` are authoritative; no judge JSON or CSV rows were fabricated. Fixture-local `.gitignore` files isolate Python bytecode. TASK-13 and TASK-14 are both Done. Post-merge fixture, installer, review-benchmark, prompt-parity, cache-cleanliness, and diff checks pass. Per-commit taste/spec/test/docs batches were run foreground and all reports returned inline; no delayed reviewer notifications appeared during TASK-14. The canonical final-reviewer failed to launch with a provider 429, so the policy-compliant explicit fallback used `openai-codex/gpt-5.6-sol` high with the canonical instructions verbatim; verdict merge with no findings.
+2026-09-01. TASK-15 is Done and fast-forward merged into local `main` through `734bd84` before this continuity commit; after the continuity commit, `main` will be pushed and synchronized with `origin/main`. Pandino's installed workflow is now necessity-driven: start from the smallest current slice, omit research/agents/artifacts/reviewer fixes/optional work that the slice can proceed correctly without, match evidence to shipped consequences, keep research and delegation inside the current slice, ask before scope expansion, delete dispensable optional artifacts, and treat user direction challenges as interrupts. The main agent directly writes small short fixes to save delegation tokens; substantial implementation uses a bounded plan and implementer. Grilling is user-invoked or reserved for blocking user-owned choices. Relevant reviewers run for substantial changes, normally once near slice end; docs and final are conditional. Findings cannot create scope, disproportionate findings are rejectable with checkable reasons, and valid unresolved must-fixes retain the user merge gate. Decision-5 records the choice and narrowly supersedes decision-3's rejection limitation. README, canonical agents, Pi mirrors, benchmark prompts, and parallel-agent guidance are synchronized. TASK-15 taste/spec/test/docs reviews completed foreground. The first final-review run was interrupted when the laptop closed; the restarted final review returned `merge after fixes`. All three findings were fixed directly and verified without a ritual reviewer rerun. Installer tests, review-benchmark tests, mirror parity, prompt parity, newline checks, and diff hygiene pass on `734bd84`.
 
 WHAT'S NEXT
-1. No work remains for TASK-14. The production taste reviewer has direct evidence for the new negation rule.
-2. If desired, discuss whether Pandino should codify foreground parallel execution for gated reviewer batches. TASK-14 supplied one successful session-level experiment: `run_in_background=false` returned every review inline and avoided the prior late-notification UX. Create a dedicated task before changing AGENTS.md or agent orchestration guidance.
+1. No work remains for TASK-15. The most useful real-world validation is updating the GOODBOY dog-horoscope repository to this Pandino revision and retrying the kind of low-risk editorial slice that triggered GOOD-13. Observe whether the agent produces the brief guardrail and continues without research fan-out.
+2. If that real session still over-escalates, preserve the exact tool/reasoning trace and create a focused regression task in Pandino; avoid adding speculative rules before evidence identifies the surviving trigger.
 3. Optional unrelated work remains `TASK-10 - Prune low-value installer tests`.
 
 WAITING ON / GATED BY
-Nothing as of 2026-08-30. No review finding, credential, provider, or external service blocks the merged work. Anthropic/Fable quota affected automatic judging and the canonical final-review launch; the recorded manual audit and policy-compliant final fallback completed the task.
+Nothing as of 2026-09-01. GOODBOY validation occurs in its own repository when the operator chooses to update it.
 
 VERIFY
 `git status -sb` should show clean `main` synchronized with `origin/main` after push.
-`git log --oneline -5` should include this pickup commit, `7958c0a bench: verify reflexive-negation review rule`, and `2035e39 docs: curb unmotivated contrastive negations`.
-`backlog task view TASK-14 --plain` should show Done with five checked criteria and the explicit final-review fallback note.
-`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS; both `bench/review/tasks/taste-negations/{base,changed}/test_billing.py` scripts should print PASS with `PYTHONDONTWRITEBYTECODE=1`.
-`cmp -s <(awk '/^---$/{n++; next} n>=2' agents/taste-reviewer.md) bench/review/prompts/taste.md` should exit zero in Bash.
+`git log --oneline -6` should include this pickup commit, `734bd84 fix: preserve lean workflow safeguards`, `29a7409 docs: make agent workflow necessity-driven`, and `c226869 chore: record negation benchmark merge`.
+`backlog task view TASK-15 --plain` should show Done with seven checked criteria and the final-review disposition.
+`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS.
+For each changed reviewer, canonical and `.pi/agents/` bodies should differ only by the injected model line; stripped taste/spec/test bodies should match `bench/review/prompts/`.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
