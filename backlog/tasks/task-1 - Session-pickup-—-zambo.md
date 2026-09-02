@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-01 10:19'
+updated_date: '2026-09-02 21:36'
 labels:
   - continuity
   - handoff
@@ -18,22 +18,19 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-01. TASK-15 is Done and fast-forward merged into local `main` through `734bd84` before this continuity commit; after the continuity commit, `main` will be pushed and synchronized with `origin/main`. Pandino's installed workflow is now necessity-driven: start from the smallest current slice, omit research/agents/artifacts/reviewer fixes/optional work that the slice can proceed correctly without, match evidence to shipped consequences, keep research and delegation inside the current slice, ask before scope expansion, delete dispensable optional artifacts, and treat user direction challenges as interrupts. The main agent directly writes small short fixes to save delegation tokens; substantial implementation uses a bounded plan and implementer. Grilling is user-invoked or reserved for blocking user-owned choices. Relevant reviewers run for substantial changes, normally once near slice end; docs and final are conditional. Findings cannot create scope, disproportionate findings are rejectable with checkable reasons, and valid unresolved must-fixes retain the user merge gate. Decision-5 records the choice and narrowly supersedes decision-3's rejection limitation. README, canonical agents, Pi mirrors, benchmark prompts, and parallel-agent guidance are synchronized. TASK-15 taste/spec/test/docs reviews completed foreground. The first final-review run was interrupted when the laptop closed; the restarted final review returned `merge after fixes`. All three findings were fixed directly and verified without a ritual reviewer rerun. Installer tests, review-benchmark tests, mirror parity, prompt parity, newline checks, and diff hygiene pass on `734bd84`.
+2026-09-02. Local `main` is two commits ahead of `origin/main` before this continuity commit and will be pushed with it, along with the annotated tags `agents-v1` (on `a08e597`, the last long-form AGENTS.md) and `agents-v2` (on `92e7b34`, the rewrite). Tree clean. Two things shipped. First, `a08e597` changes the implementer handoff: for substantial work the main agent makes and verifies the first edit that proves the approach, then hands the implementer a map of relevant files, rejected approaches with reasons, that landed edit, and the remaining steps with checks; the implementer continues from the edit and reads the mapped files instead of exploring. Inspired by the Prewalk article; a true same-context model switch is impossible with subagents (pi-subagents' `inherit_context` drops tool results by design, `resumeSessionFile` is internal-only), so this is the subagent-shaped version and the main agent stays alive to adjudicate. Second, `92e7b34` compresses `AGENTS.md` from 2,734 to 2,270 words using the GLM 5.3 Flash rewrite as core with four hand-repaired regressions and two reverted cuts, plus both appended snippets compressed the same way; decision-6 records the evidence. Evidence lives in `bench/agents-variants/` (45 runs, three variants x five tasks x three runs on the production models): identical recall across variants on every task, rewrite cheaper on input tokens. The only spread was `taste-clean`, where every variant sometimes flags a real slug-length quirk the fixture calls clean; that is a fixture question, untouched. `tests/test_install.sh` needed one assertion updated to the new governance wording.
 
 WHAT'S NEXT
-1. No work remains for TASK-15. The most useful real-world validation is updating the GOODBOY dog-horoscope repository to this Pandino revision and retrying the kind of low-risk editorial slice that triggered GOOD-13. Observe whether the agent produces the brief guardrail and continues without research fan-out.
-2. If that real session still over-escalates, preserve the exact tool/reasoning trace and create a focused regression task in Pandino; avoid adding speculative rules before evidence identifies the surviving trigger.
-3. Optional unrelated work remains `TASK-10 - Prune low-value installer tests`.
+1. Push: `git push origin main --tags`. Then downstream repositories pick the new core up on their next Pandino update (their own `AGENTS.md` goes to `.pandino/merge/` where it differs).
+2. Real-world validation is still the GOODBOY dog-horoscope repository: update it to this revision, retry a low-risk editorial slice like GOOD-13, and now also watch the implementer handoff on a substantial slice. Observe whether the main agent makes the first edit itself and whether Terra explores beyond the mapped files.
+3. If the `taste-clean` fixture should stop calling the slug overflow clean, that is a small `bench/review/tasks/taste-clean/expected.md` change; decide only if the benchmark is rerun.
+4. Optional unrelated work remains `TASK-10 - Prune low-value installer tests`.
 
 WAITING ON / GATED BY
-Nothing as of 2026-09-01. GOODBOY validation occurs in its own repository when the operator chooses to update it.
+Nothing as of 2026-09-02. GOODBOY validation happens in its own repository when the operator chooses.
 
 VERIFY
-`git status -sb` should show clean `main` synchronized with `origin/main` after push.
-`git log --oneline -6` should include this pickup commit, `734bd84 fix: preserve lean workflow safeguards`, `29a7409 docs: make agent workflow necessity-driven`, and `c226869 chore: record negation benchmark merge`.
-`backlog task view TASK-15 --plain` should show Done with seven checked criteria and the final-review disposition.
-`bash tests/test_install.sh` and `bash tests/test_review_bench.sh` should print PASS.
-For each changed reviewer, canonical and `.pi/agents/` bodies should differ only by the injected model line; stripped taste/spec/test bodies should match `bench/review/prompts/`.
+`git status -sb` clean and synchronized after the push; `git tag -n1` shows `agents-v1` and `agents-v2`; `git diff agents-v1 agents-v2 --stat -- AGENTS.md` shows the rewrite; `wc -w AGENTS.md` prints 2270; `bash tests/test_install.sh` and `bash tests/test_review_bench.sh` print PASS; `bench/agents-variants/results/results.csv` has 45 data rows.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
