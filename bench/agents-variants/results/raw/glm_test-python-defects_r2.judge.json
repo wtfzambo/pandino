@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Found threshold gap, price constant coupling, broad exception check, missing booking-id assertion, and both minor groups; missed the confirmation call-order gap (item 5)."
+}

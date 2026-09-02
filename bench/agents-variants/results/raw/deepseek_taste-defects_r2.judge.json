@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Finding 1 covers planted defects 1-3, finding 2 covers defect 4; the minor 'limit' note describes a real unused-abstraction issue, not a false positive."
+}

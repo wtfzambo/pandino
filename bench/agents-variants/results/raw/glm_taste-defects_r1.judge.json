@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects identified precisely; extra findings (inline top_categories, ordering, limit=len(totals)) are real/defensible extensions, not false positives."
+}

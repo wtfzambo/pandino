@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed call-order gap (item 5, even praised ordering); flagging the 8-seat member row for removal is a false positive since it kills discount-cap mutations."
+}

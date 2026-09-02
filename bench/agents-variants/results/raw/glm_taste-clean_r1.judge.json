@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Review correctly passes the clean diff with zero must-fix; the lone minor (suffix appended after truncation can exceed 60) describes real behavior, so it is not a false positive."
+}

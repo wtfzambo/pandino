@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found with correct locations and full components; minor notes are legitimate follow-ons of the rewrites, not false positives."
+}

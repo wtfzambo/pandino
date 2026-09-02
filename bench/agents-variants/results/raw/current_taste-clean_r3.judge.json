@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is a clean diff with zero planted defects; review correctly reports no must-fixes, and its two minors describe verified real quirks in the described code (suffix appended post-truncation, test restating the constant), so they are not false positives."
+}

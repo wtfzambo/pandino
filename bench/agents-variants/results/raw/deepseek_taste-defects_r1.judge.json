@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found (review items 1-3 cover GT 1-4); minor items are real observations or self-dismissed, so no false positives."
+}

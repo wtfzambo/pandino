@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found (item 4 reported as Minor but fully identified, including the dead guard); the extra re-lookup note is a real redundancy and partly self-dismissed, not counted as a false positive."
+}

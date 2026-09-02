@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Clean diff correctly called clean with zero must-fix; the single minor describes real behavior (suffix can exceed cap) and is self-qualified as a borderline spec call, so not counted as a false positive."
+}

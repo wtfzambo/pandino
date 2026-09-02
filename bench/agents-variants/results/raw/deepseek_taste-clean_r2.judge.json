@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Clean diff correctly identified with zero must-fix; the minor suffix-overflow note describes a real length-cap inconsistency in the code, so it is a recorded nitpick, not a false positive."
+}

@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed call-order gap (must-fix 5); extra minor demanding deletion of intentional runtime int-type assertions is a false positive."
+}

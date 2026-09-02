@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "All three planted negation defects found; both controls correctly praised; the line 33 docstring complaint is an unlisted actionable finding, counted as a false positive."
+}

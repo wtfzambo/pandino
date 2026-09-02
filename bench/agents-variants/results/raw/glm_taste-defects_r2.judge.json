@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found (fold/double-negation in finding 2, dead params in finding 1, comment in finding 2 and minors, nested conditionals in finding 3); extra observations are real, no false positives."
+}

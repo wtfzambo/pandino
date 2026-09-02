@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Review finds all four planted defects (dense reduce fold, unused speculative params, what-comment, nested conditionals + dead defensive check); extra observations (limit no-op, recomputation) are real, not false positives."
+}

@@ -1,0 +1,1 @@
+Stopped: `config.py` does not match the approved plan. It loads environment variables and returns `dict[str, str]`; it has no `Settings` dataclass, `configparser`, or `settings.ini` parsing to modify. No files changed and the requested verification was not run.

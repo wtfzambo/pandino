@@ -61,6 +61,12 @@ Current `role=test` CSV scores are manually audited; automatic judge output is a
 
 Run the initial screen with `./run_all.sh`, then `python3 summarize.py`. Before paid runs, mutation-audit the oracle. If a reviewer exposes a genuine fixture gap, correct the fixture and rerun stale contestant artifacts rather than scoring the finding as noise.
 
+## AGENTS.md variant benchmark (`bench/agents-variants/`)
+
+Holds one candidate `AGENTS.md` per file under `variants/` and runs an existing review or implementer task with that file in place of the kit's, on the production model for the task's role (pinned in `run_one.sh`). Scoring reuses `bench/review/judge.py` and the implementer `check.sh`, so a variant is compared on the same ground truth as the models were.
+
+Run: `./run_one.sh <variant> <task> <run> [thinking]`, e.g. `./run_one.sh glm taste-defects 1`. Rows land in `results/results.csv` with the variant, task, role, and model; raw transcripts, reviews, and judge verdicts in `results/raw/`. Same caveats as below: the tasks are small, so identical recall across variants means no rule was lost that these tasks exercise, and says little about long-session behavior.
+
 ## Caveats
 
 - Small tasks: differences in code quality between passing runs are near zero here; these benchmarks discriminate on behavior (stopping on a bad plan, not inventing findings), cost, and latency, not on deep code quality.
