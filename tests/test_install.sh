@@ -431,7 +431,7 @@ grep -E "appended +document-governance" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
 grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
 [ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "3" ]
-grep -F "Current product truth belongs in \`backlog/docs/specs/\`" "$yes_target/AGENTS.md" > /dev/null
+grep -F "Current product truth: \`backlog/docs/specs/\`" "$yes_target/AGENTS.md" > /dev/null
 [ ! -e "$yes_target/FINDINGS.md" ]
 
 # Without a terminal, the installed editors are preselected. If only pi is

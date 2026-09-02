@@ -1,12 +1,8 @@
 # AGENTS.md
 
-How humans and AI agents work in this repository. Perfection is reached not when there is nothing left to add, but when there is nothing left to take away.
-
 ## Core standard
 
-Optimize for code that is correct, readable, and easy to maintain by a human. Prefer the simplest design that satisfies the current requirements: build the Fiat Panda that is needed, not an intergalactic rocket.
-
-When principles conflict, use this order:
+Build the simplest design that satisfies current requirements. When principles conflict, use this order:
 
 1. Correctness and explicit behavior.
 2. Human readability.
@@ -14,92 +10,84 @@ When principles conflict, use this order:
 4. Consistency with the existing codebase.
 5. Reuse and optimization.
 
-Apply YAGNI and KISS throughout. Optimize what is measured to need it; where a simple implementation may scale badly with real growth, flag it with a comment and move on.
+Apply YAGNI and KISS; optimize what is measured to need it. Where a simple implementation may scale badly with real growth, flag it with a comment and move on.
 
 ## Plain code
 
-"Scrivi codice come mangi" — write the plain version you would explain aloud. Complexity is the enemy; when in doubt, be the grug-brained developer who says no to it.
+Write the plain version you would explain aloud; rewrite code smarter than its problem.
 
-- Linear, named steps and boring control flow. If code looks smarter than the problem, rewrite it.
-- Guard clauses and early returns over nested conditionals. Keep the happy path visually obvious.
-- One nesting level is normal, two should prompt consideration, three is the practical maximum.
-- Do not compress straightforward behavior into clever expressions.
-- A comment that explains what convoluted code does is a refactoring signal. Comments explain intent, constraints, and trade-offs — never restate the code.
-- Say what a thing is or does; add a negation ("X, not Y") — in comments, docs, commit messages, or identifiers — only when Y is a plausible misreading the contrast rules out for a stated reason. Reread the sentence without the negated clause: if nothing is lost, delete it.
+- Linear, named steps, boring control flow; never compress straightforward behavior into clever expressions. Guard clauses and early returns keep the happy path visually obvious. One nesting level is normal, two prompt consideration, three is the maximum.
+- Comments explain intent, constraints, and trade-offs; a comment explaining convoluted code is a refactoring signal.
+- Add a negation ("X, not Y") — in comments, docs, commit messages, or identifiers — only when it rules out a stated plausible misreading; delete it if nothing is lost without it.
 
 ## Modules and ordering
 
-- Each module has one coherent purpose. Keep related behavior close together; avoid designs that need many trivial indirections to understand one operation.
-- Mark implementation-only objects as private (language convention permitting); leave only the intentional public interface exposed.
-- Extract a function when it names a meaningful operation, isolates a side effect, enables valuable testing, or removes proven duplication — not to shorten line counts.
-- A module reads top to bottom: constants and types first, public interface in workflow order, private helpers in one block mirroring their callers, entrypoint glue last. Within each block, caller before callee.
+- Each module has one coherent purpose; keep related behavior together, avoiding designs needing many trivial indirections to follow one operation.
+- Mark implementation-only objects private (language convention permitting); expose only the intentional public interface.
+- Extract a function when it names a meaningful operation, isolates a side effect, enables valuable testing, or removes proven duplication — never just to shorten line counts.
+- A module reads top to bottom: constants and types, public interface in workflow order, private helpers in one block mirroring callers, entrypoint glue last; caller before callee.
 - Remove dead code, speculative extension points, and abstractions with only one trivial use.
 
 ## Types and contracts
 
-- Type function signatures and known payloads with types that carry their specific meaning, not a generic shape: a named domain type says more than the primitive underneath it, because it tells the reader what can arrive there.
-- When the type checker complains, prefer fixing the type over suppressing the error. Suppressions are fine at library edges that are genuinely badly typed; when a whole area needs them, one explanatory note for the area beats a comment on every line.
-- Convert untyped library data to typed shapes where it is cheap and useful; use judgment, not dogma — typing half a library is not the goal.
-- A new domain type must earn its place by adding meaning or preventing invalid states. Do not create a type or class that merely repackages existing constants for a single caller.
+- Type signatures and known payloads with named domain types that say what can arrive, not generic shapes.
+- Prefer fixing types over suppressing checker errors; suppress only at badly typed library edges, and when a whole area needs it, one explanatory note beats per-line comments.
+- Convert untyped library data to typed shapes where cheap and useful; typing half a library is not the goal.
+- A new type or class must add meaning or prevent invalid states; one merely repackaging constants for a single caller fails that test.
 
 ## State and side effects
 
-Prefer a functional core: keep business logic pure and push I/O to the edges, to the degree the app allows.
+Prefer a functional core: pure business logic, I/O at the edges.
 
-- Keep transformation and business-rule code free of side effects. Never hide I/O, clock, randomness, or mutation inside code that looks like pure computation.
-- Where the app talks to the outside world, keep that layer thin and explicit; pass dependencies in where it aids understanding and testing.
-- No hidden global mutable state. When mutable state is necessary, centralize its ownership.
-- Do not introduce classes when a pure function or immutable value is clearer.
+- Keep transformation and business-rule code free of side effects; never hide I/O, clock, randomness, or mutation inside code that looks pure.
+- Keep the outside-world layer thin and explicit; pass dependencies in when it aids understanding or testing.
+- Centralize ownership of any necessary mutable state; no hidden global mutable state.
+- Use a class only when a pure function or immutable value is not clearer.
 
 ## Constants, duplication, abstraction
 
-- Name domain thresholds and operational values; keep them close to the behavior they govern. Purely structural literals — a zero start index, a `+ 1` on a loop bound — need no named constant.
-- Remove duplication when the repeated code is the same stable concept. Prefer readable duplication over premature abstraction.
-- The deletion test: imagine deleting the abstraction. If complexity vanishes, it was a pass-through — delete it. If complexity reappears at every call site, it earns its keep.
-- Do not build generic frameworks for hypothetical future use. Wait until an abstraction has a clear name, contract, and reason to change.
+- Name domain thresholds and operational values near the behavior they govern; structural literals (a zero index, a `+ 1` loop bound) need no name.
+- Remove duplication of the same stable concept; prefer readable duplication over premature abstraction.
+- Deletion test: if deleting an abstraction removes complexity, it was a pass-through — delete it; if complexity reappears at every call site, it earns its keep.
+- Build no generic frameworks for hypothetical future use; wait for a clear name, contract, and reason to change.
 
 ## Errors and logging
 
-- Log meaningful lifecycle events with the identifiers that diagnose them. No per-row logging, no "entered function" noise, never credentials or sensitive payloads.
-- Catch exceptions only where recovery, cleanup, translation, or useful context is possible. Fail fast over defensive layers for impossible states.
+- Log meaningful lifecycle events with the identifiers that diagnose them; no per-row logging, "entered function" noise, or credentials and sensitive payloads.
+- Catch exceptions only where recovery, cleanup, translation, or useful context is possible; fail fast over defensive layers for impossible states.
 - Preserve the original exception as the cause when translating errors.
 
 ## Tests
 
-Tests are maintained evidence for observable product promises, not a coverage quota. During exploration, let tests follow understanding; once a cut point is stable, protect it. Prefer integration tests at stable boundaries, keep end-to-end coverage small and limited to critical user paths, and use unit tests for pure logic, tricky edge cases, and narrow decisions that are hard to reach through an integration boundary.
+Tests are maintained evidence for observable product promises, not a coverage quota. During exploration, let tests follow understanding; once a cut point is stable, protect it. Prefer integration tests at stable boundaries, keep end-to-end coverage to critical user paths, and unit-test pure logic, tricky edge cases, and narrow decisions hard to reach via integration boundaries.
 
-- A test earns its place only when it protects an observable promise whose breakage is a bug, is not already guaranteed by cheaper tooling or a stronger test, derives its expectation independently, and would fail under a plausible defect.
-- Test what the code promises, not how it does it: call the function and assert on the result or visible effect. A refactor that preserves behavior should not break a test.
-- Expected values come from an independent source of truth: a documented contract, a real boundary fixture, or a simple hand-derived result. A test that recomputes the implementation passes by construction and proves nothing.
-- Use coarse fakes at system boundaries when they make the promise observable. Avoid fine-grained mocks that only confirm internal calls or invent an external provider's shape.
-- Static analysis, type checking, compilation, linting, and existence checks are cheaper guarantees when they already prove the claim; do not duplicate them with a test.
-- For a reproducible bug, write the regression test before fixing it. Skip tests for trivial getters, constants, and framework behavior. Prefer a few representative fixtures over generated boilerplate.
+- A test earns its place only when it protects an observable promise whose breakage is a bug, is not already guaranteed by cheaper tooling (static analysis, type checking, compilation, linting, existence checks) or a stronger test, derives its expectation independently, and would fail under a plausible defect.
+- Test what the code promises: assert on the result or visible effect of calling it; a behavior-preserving refactor should not break a test. Expected values come from an independent source — contract, fixture, or hand-derived result; a test recomputing the implementation proves nothing.
+- Use coarse fakes at boundaries; avoid fine-grained mocks that confirm internal calls or invent provider shapes.
+- For a reproducible bug, write the regression test before fixing it. Skip trivial getters, constants, and framework behavior; prefer a few representative fixtures over generated boilerplate.
 
 ## Agent behavior
 
-- Start with the smallest observable slice that can satisfy the current requirement. Match research, checks, and other evidence to the actual consequences of shipped behavior; subject vocabulary alone does not raise risk.
-- Apply the necessity test to research, extra agents, artifacts, reviewer fixes, and optional work: imagine omitting the action. When the current slice can still be completed correctly and verified proportionately, omit it.
-- Understand the existing code and the relevant external API before editing. Trace the real flow; never plan against imagined code. When uncertain external behavior blocks the current slice, use the cheapest authoritative source or direct probe that resolves it. Never present a guess as fact.
-- Research and delegate only the current slice. Ask the user before expanding an approved plan or starting future-slice work.
-- Prefer targeted changes over broad rewrites. Keep the repository runnable as each slice is completed.
-- Delete optional, unshipped, or unrequested artifacts that create audit or maintenance work when the current requirement does not depend on them.
-- A user request to pause or stop, or a question about the current direction, interrupts the workflow: start no new actions, steer active agents to stop, and answer first.
+- Work from the smallest observable slice satisfying the requirement; match research, checks, and evidence to shipped behavior's consequences — vocabulary alone does not raise risk. Research and delegate only that slice; ask before expanding an approved plan or starting future-slice work.
+- Necessity test for research, extra agents, artifacts, reviewer fixes, and optional work: if the slice can still complete correctly and verify proportionately without the action, omit it. Delete unshipped or unrequested artifacts creating audit or maintenance work the requirement does not depend on. Prefer targeted changes over broad rewrites; keep the repository runnable after each slice.
+- Understand existing code and the relevant external API before editing; trace the real flow, never plan against imagined code. When uncertain external behavior blocks the slice, resolve it via the cheapest authoritative source or direct probe; never present a guess as fact.
+- A request to pause or stop, or a direction question, interrupts the workflow: start no new actions, steer active agents to stop, and answer first.
 
 ## Agent workflow
 
-The main agent plans and orchestrates; specialist subagents do the specialized work — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `test-reviewer`, and `final-reviewer`, defined in the selected harness's agent directories. Roles do not blur: the implementer is the only subagent that edits, reviewers inspect and report. Each specialist carries its own pinned model, so a reviewer is never the same model as the writer; do not override it at spawn time.
+The main agent plans and orchestrates; specialists — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `test-reviewer`, `final-reviewer` — are defined in the harness's agent directories. Only the implementer edits; reviewers inspect and report. Each specialist has its own pinned model, so a reviewer is never the writer's; do not override it at spawn.
 
-Pandino also installs `fallback-runner`, a non-specialist, inspection-only escape hatch. Use it only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable — never because a review found problems or the orchestrator dislikes its result. The orchestrator must supply an explicit alternate model, the failed reviewer's canonical instructions verbatim, and the concrete task context; preserve the review role and tool boundaries. For review work, choose a model different from the writer. Never invoke `fallback-runner` without an explicit model, which would silently inherit the parent, and visibly report every substitution.
+`fallback-runner` is a non-specialist, inspection-only escape hatch, only for a reviewer that cannot launch or complete because its provider, quota, session, or pinned model is unavailable — never because a review found problems or the orchestrator dislikes its result. Invocation requires an explicit alternate model (omitting one silently inherits the parent), the failed reviewer's canonical instructions verbatim, and the concrete task context; preserve the review role and tool boundaries. For review work, choose a model different from the writer; visibly report every substitution.
 
-Those definitions are written for [pi](https://pi.dev). On another harness, read them as role descriptions and apply the workflow with whatever that harness offers: its own subagent mechanism, separate sessions, or a single agent that adopts one role at a time and states which. If a role cannot be delegated, run its review yourself against the same definition and say so.
+Written for [pi](https://pi.dev); on another harness, apply them as role descriptions via its subagent mechanism, separate sessions, or one agent adopting each role. If a role cannot be delegated, run its review yourself against the same definition and say so.
 
-1. Work from the smallest current slice. Agree on a bounded plan before substantial or unclear work. Use grilling when the user asks or an unresolved user-owned product choice genuinely blocks that slice.
-2. The main agent directly implements small, short fixes. For substantial implementation, the main agent makes and verifies the first edit that proves the approach, then hands the `implementer` the approved bounded plan, a map of the relevant files and what matters in each, relevant approaches already rejected and why, the landed first edit and its verification, and the remaining steps with their checks. This routes most writing cost while giving the implementer the useful result of the main agent's exploration. The implementer stops and reports when the handoff contradicts the real code.
-3. Run relevant reviewers for substantial changes, normally once near the end of a logical slice. Use taste and spec when implementation or scope benefits from independent review; test when substantial behavior, tests, test infrastructure, or a bug fix warrants evidence review; docs when substantial documented behavior or authority changes; and final when branch composition or end-to-end risk could change the merge decision. When docs and final both run, docs goes first. Preserve each reviewer's separate role.
-4. Treat findings as evidence. Findings cannot create a research stream, deliverable, or maintenance artifact. Fix valid, in-scope, proportionate findings. Reject incorrect, duplicate, out-of-scope, or disproportionate findings with a checkable reason tied to required shipped behavior, current contracts, repository risk, or proportionate evidence. Ask the user only for a remaining product, scope, or risk choice. Give every must-fix an explicit disposition; a valid must-fix left unresolved requires user acceptance before merge. Report-only audits remain report-only unless the user asks for implementation.
-5. Verify the integrated result yourself: read the diff, run proportionate checks, and trace the affected path when needed. Once the current criteria and checks pass, remove dispensable work and stop.
+1. Agree on a bounded plan before substantial or unclear work; use grilling when the user asks or an unresolved user-owned product choice blocks the slice.
+2. The main agent directly implements small, short fixes. For substantial implementation, it makes and verifies the first edit proving the approach, then hands the `implementer`: the approved plan; a map of relevant files and what matters in each; rejected approaches and why; the landed, verified first edit; remaining steps and their checks. The implementer stops and reports when the handoff contradicts the real code.
+3. Run relevant reviewers for substantial changes, normally once near the end of a logical slice: taste and spec when implementation or scope benefits from independent review; test when substantial behavior, tests, test infrastructure, or a bug fix warrants evidence review; docs when substantial documented behavior or authority changes; final when branch composition or end-to-end risk could change the merge decision. Docs precedes final; preserve each reviewer's separate role.
+4. Treat findings as evidence; a finding cannot create a research stream, deliverable, or maintenance artifact. Fix valid, in-scope, proportionate findings; reject incorrect, duplicate, out-of-scope, or disproportionate ones with a checkable reason tied to shipped behavior, contracts, repository risk, or proportionate evidence. Ask the user only for a remaining product, scope, or risk choice. Every must-fix gets an explicit disposition; a valid unresolved must-fix requires user acceptance before merge. Report-only audits stay report-only unless the user asks for implementation.
+5. Verify the integrated result yourself: read the diff, run proportionate checks, trace the affected path when needed. Once current criteria and checks pass, remove dispensable work and stop.
 
-The orchestrator wrote the plan, so it is the least neutral judge of it: a plan's author defends the plan by default. Separate reviewers provide independent evidence when they run; their pass does not replace the orchestrator's judgment about what was discussed and rejected.
+The plan's author defends it by default; reviewers give independent evidence but do not replace the orchestrator's judgment of what was discussed and rejected.
 
 ## Definition of done
 
@@ -136,27 +124,27 @@ Do not edit Backlog task, draft, document, decision, or milestone markdown files
 <!-- pandino:document-governance -->
 ## Document governance
 
-Keep one authoritative home for each kind of knowledge:
+One authoritative home per kind of knowledge:
 
-- Current product truth belongs in `backlog/docs/specs/`, managed with `backlog doc` as type `specification`.
-- Human-run procedures belong in `backlog/docs/runbooks/`, normally as type `guide`.
-- Current module or codebase explanations belong in `backlog/docs/codebase/`.
-- Rationale and trade-offs belong in `backlog/decisions/`.
-- Planned work, status, and investigation trace belong in `backlog/tasks/`.
-- Durable falsified hypotheses belong in root `FINDINGS.md`.
+- Current product truth: `backlog/docs/specs/`, managed with `backlog doc` as type `specification`.
+- Human-run procedures: `backlog/docs/runbooks/`, normally as type `guide`.
+- Current module or codebase explanations: `backlog/docs/codebase/`.
+- Rationale and trade-offs: `backlog/decisions/`.
+- Planned work, status, and investigation trace: `backlog/tasks/`.
+- Durable falsified hypotheses: root `FINDINGS.md`.
 
-When current behavior changes, update the current specification and add a decision for a meaningful choice. Manual procedures are runbooks. Decisions explain why a choice was made; they do not become the current specification. README and AGENTS.md may orient and link, but must not duplicate authoritative product truth.
+When current behavior changes, update the specification and add a decision for a meaningful choice. Decisions explain why a choice was made; the specification states current behavior. README and AGENTS.md may orient and link, but must not duplicate authoritative product truth.
 
-`FINDINGS.md` is not a changelog, session diary, or source of current truth. Create it only when the first qualifying finding exists. A finding qualifies only when reproducible evidence or an authoritative source falsifies a plausible hypothesis that is likely to be retried and remains useful after the task closes. Each entry records the hypothesis, evidence, practical consequence, and links to the relevant task, specification, or decision. Announcements, refactors, file moves, and provisional failed attempts do not qualify. Later evidence adds a superseding finding instead of silently rewriting history.
+`FINDINGS.md` is not a changelog, session diary, or source of current truth; create it only when the first qualifying finding exists. A finding qualifies only when reproducible evidence or an authoritative source falsifies a plausible hypothesis that is likely to be retried and remains useful after the task closes. Each entry records the hypothesis, evidence, practical consequence, and links to the relevant task, specification, or decision. Announcements, refactors, file moves, and provisional failed attempts do not qualify. Later evidence adds a superseding finding instead of rewriting history.
 
 Do not add OKF, a validator, index or log generation, migration logic, or metadata beyond Backlog's own.
 
 <!-- pandino:session-continuity -->
 ## Session continuity
 
-Context does not persist between agent sessions. Preserve it with one personal Backlog task per operator named `Session pickup — <name>`. The task is a replaceable current snapshot, not a diary; Git history and normal Backlog tasks preserve history.
+Context does not persist between agent sessions. Preserve it with one personal Backlog task per operator named `Session pickup — <name>`: a replaceable current snapshot, not a diary; Git history and normal Backlog tasks preserve history.
 
-The snapshot is branch-scoped, and that is by design, not divergence. The pickup task is a normal Git-versioned file: each branch carries its own version, and Backlog does not sync task edits across branches (the current working copy always wins). So the snapshot describes the state of work on the branch it lives on — update it at session end on the branch where the work happened, and let it merge into `main` together with that work. A merge conflict on the pickup task is resolved by keeping the most recent snapshot, or by rewriting it post-merge. To read another branch's snapshot without switching, use `git show <branch>:"backlog/tasks/task-1 - Session-pickup-—-<name>.md"`; Backlog's browser resolves same-ID variants to one task and therefore cannot select another branch's version while a working-copy version exists.
+The snapshot is branch-scoped by design. The pickup task is a normal Git-versioned file: each branch carries its own version, and Backlog does not sync task edits across branches (the current working copy always wins). So the snapshot describes the branch it lives on — update it at session end on the branch where the work happened, and let it merge into `main` with that work. Resolve a merge conflict on it by keeping the most recent snapshot, or by rewriting it post-merge. To read another branch's snapshot without switching, use `git show <branch>:"backlog/tasks/task-1 - Session-pickup-—-<name>.md"`; Backlog's browser resolves same-ID variants to one task and cannot select another branch's version while a working-copy version exists.
 
 At the start or resumption of project work:
 
