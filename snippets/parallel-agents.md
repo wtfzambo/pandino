@@ -1,20 +1,18 @@
 ## Parallel implementation
 
-For large, complex codebases where work genuinely splits across several agents at once. On small or short-lived projects, ignore this section: one implementer at a time is the default. Parallelism buys wall-clock time and costs orchestration attention, so it must earn its place.
+Use this section for large, complex codebases where work genuinely splits across several agents at once. Give small or short-lived projects one implementer at a time. Parallelism earns its orchestration cost by reducing meaningful wall-clock time.
 
 ### Foundations first, then parallel
 
-Do not run agents in isolation and reconcile afterwards with a "merger" agent. Real collisions between slices are usually design decisions — which shape an event takes, which table owns a column — and a merger cannot settle those without re-deciding, which means redoing the work.
+Establish shared foundations before parallel slices: one agent owns the enum every slice touches, the state machine, and shared constants. Then assign the remaining agents genuinely disjoint files.
 
-Instead, one agent does the shared core alone: the enum every slice touches, the state machine, the shared constants. Only then do the rest run in parallel, on genuinely disjoint files.
-
-The foundations slice must leave the repository compiling and green. Removing an API without fixing its callers is not a foundation, it is a broken tree every downstream agent inherits.
+The foundations slice leaves the repository compiling and green. Keep callers working when changing an API so each downstream agent starts from a runnable tree.
 
 ### Isolate the working directories
 
-Give each parallel agent its own worktree. Sharing one directory means a check run mid-flight measures another agent's half-finished work, and the time goes into proving it was not a bug.
+Give each parallel agent its own worktree. This keeps a mid-flight check focused on that agent's work rather than another agent's half-finished changes.
 
-Isolation requires committing the foundations before the downstream agents start, which is cleaner anyway — each begins from a stable base instead of from someone's uncommitted work:
+Commit the foundations before downstream agents start so each begins from a stable base:
 
 ```
 foundations -> commit -> one worktree per agent from that commit -> merge each
@@ -22,10 +20,10 @@ foundations -> commit -> one worktree per agent from that commit -> merge each
 
 ### Mind the gaps between mandates
 
-Agents can each do their slice correctly, report truthfully, and still leave bugs in the space no mandate covered: a constant that disagrees across two slices, documentation describing deleted behavior, a stub that means the feature does not work end to end. Those are orchestration errors, not agent failures.
+Agents can each complete their slice and still leave bugs in work no mandate covered: a constant that disagrees across two slices, documentation describing deleted behavior, or a stub that prevents the feature from working end to end. The orchestrator owns these integration gaps.
 
-So write mandates that name the files each agent owns, assign the leftovers to yourself, and integrate as described in the workflow above: read the diff, re-run the checks, trace one user path end to end.
+Write mandates that name each agent's files, assign the leftovers to yourself, and integrate through the workflow above: read the diff, run checks matched to each artifact's purpose, and trace one user path end to end.
 
 ### Match review depth to review cost
 
-For substantial slices, run the relevant reviewers when their independent evidence helps: taste and spec for implementation or scope, and test for relevant behavior or evidence changes. Run `final-reviewer` when whole-branch composition or end-to-end value could change the merge decision. That deep pass is where cross-slice contradictions surface — stale user-facing copy, constants that disagree — which per-slice reviews structurally cannot see.
+For substantial slices, run the relevant reviewers when their independent evidence helps: taste and spec for implementation or scope, and test for relevant behavior or evidence changes. Run `final-reviewer` when whole-branch composition or end-to-end value could change the merge decision. That deep pass surfaces cross-slice contradictions such as stale user-facing copy or disagreeing constants that per-slice reviews cannot see.
