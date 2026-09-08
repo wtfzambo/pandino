@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-02 22:05'
+updated_date: '2026-09-08 18:01'
 labels:
   - continuity
   - handoff
@@ -18,19 +18,17 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-02. `main` is synchronized with `origin/main` through `c511e51` before this final continuity correction; after its commit and push, the tree remains clean and synchronized. Annotated tags are pushed: `agents-v1` marks `a08e597`, the last long-form AGENTS.md, and `agents-v2` marks `92e7b34`, the rewrite. Two changes shipped. First, `a08e597` changes the implementer handoff: for substantial work the main agent makes and verifies the first edit that proves the approach, then hands the implementer a map of relevant files, rejected approaches with reasons, that landed edit, and the remaining steps with checks; the implementer continues from the edit and reads the mapped files instead of exploring. This is the subagent-shaped version of Prewalk: pi-subagents' `inherit_context` drops tool results and `resumeSessionFile` is internal-only, while the main agent remains available to adjudicate. Second, `92e7b34` compresses `AGENTS.md` from 2,734 to 2,270 words using the GLM 5.3 Flash rewrite as core with four hand-repaired regressions and two reverted cuts. Both appended snippets are synchronized and compressed; decision-6 records the choice. Evidence lives in `bench/agents-variants/`: 45 existing runs, three variants × five tasks × three runs on production role models, with identical recall across variants and lower input cost for the rewrite. No further benchmark runs were made after the user approved the rewrite. The only result spread was `taste-clean`, where every variant sometimes flags a real slug-length quirk the fixture calls clean; the fixture remains untouched. `tests/test_install.sh` and `tests/test_review_bench.sh` pass.
+2026-09-08. Branch `main`; implementation commit `c7900be` (`feat: make verification purpose-driven`) is pushed to `origin/main`. TASK-16 is Done with all four acceptance criteria checked. At snapshot preparation, only this continuity refresh is dirty; its commit and push are the final handoff operation. The completed change covers `AGENTS.md`, seven agent roles, three snippets, README install/update prompts, `doc-1 - Testing evidence policy`, and live benchmark prompts. Visual choices finish with screenshot plus inspection; behavior exploration gets a focused check/probe; shipping or operationally relied-on code retains delivery checks and regression-first fixes. Active instructions favor affirmative actions while preserving safety, scope, approvals, read-only review roles, and motivated contrasts. Installed `.pi/agents/` and `.pandino/snippets/` mirrors are synchronized with existing pins. TASK-16 holds the rationale and spec/docs review dispositions. Both existing shell suites, parity checks, and diff hygiene passed. Runtime code, upstream instructions, and historical benchmark results remain unchanged. Actual model-behavior improvement is unmeasured.
 
 WHAT'S NEXT
-1. No Pandino work is active. The most useful validation is in the GOODBOY dog-horoscope repository: run `.pandino/check-update` (or update once if that checker is absent), update to this Pandino revision, retry a low-risk editorial slice like GOOD-13, and observe whether the lean workflow avoids research fan-out.
-2. On a substantial GOODBOY slice, observe the new handoff: the main agent should make the first verified edit and Terra should use the supplied map instead of re-exploring broadly.
-3. If the `taste-clean` fixture should stop calling the slug overflow clean, update its ground truth only when that benchmark is next run.
-4. Optional unrelated work remains `TASK-10 - Prune low-value installer tests`.
+1. No Pandino implementation work is active. When updating a downstream repository such as QuitCorn, start there with `.pandino/check-update`, then use the normal update and semantic-merge flow in `README.md`.
+2. Observe the stopping rule during the next real visual exploration: the useful evidence is whether screenshot and inspection answer the visual question. Existing unrelated optional work remains TASK-10.
 
 WAITING ON / GATED BY
-Nothing as of 2026-09-02. GOODBOY validation happens in its own repository when the operator chooses.
+Nothing blocks Pandino as of 2026-09-08. Downstream installation and real-use observation happen in the chosen repository when the operator starts that work.
 
 VERIFY
-`git status -sb` is clean and synchronized; `git log --oneline -4` shows this continuity commit above `c511e51`, `92e7b34`, and `a08e597`; `git tag -n1` shows `agents-v1` and `agents-v2`; `git diff agents-v1 agents-v2 --stat -- AGENTS.md` shows the rewrite; `wc -w AGENTS.md` prints 2270; `bash tests/test_install.sh` and `bash tests/test_review_bench.sh` print PASS; `bench/agents-variants/results/results.csv` has 45 data rows.
+After this handoff, `git status -sb` is clean and synchronized with `origin/main`; `git log --oneline -2` shows the continuity commit above `c7900be`. `backlog task view TASK-16 --plain` shows Done with all acceptance criteria checked. `git diff --check`, `bash tests/test_install.sh`, and `bash tests/test_review_bench.sh` pass; the benchmark suite intentionally prints a fake/provider failure before its PASS line.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
