@@ -31,12 +31,11 @@ agent_role() {
 
 # Ordered preferences per role, best first. From the 2026-07-31 benchmarks in
 # NOTES.md: terra implements cheapest with a clean stop on a wrong plan;
-# deepseek and glm review perfectly for cents; opus is kept out of routine
-# review (noisiest on clean diffs, 10-100x the cost) and saved for the one
-# whole-branch pass, where that thoroughness is the point. Claude's fable is
-# absent everywhere: it is the priciest of that family, and opus already fills
-# the one role worth paying for.
+# deepseek and glm review perfectly for cents; Opus remains a whole-branch
+# fallback because its thoroughness was noisy and costly on routine reviews.
 # The 2026-08-20 test benchmark recommended Sol at high thinking for test review.
+# The operator selected GPT-6 Astra high for final review on 2026-09-08;
+# catalogues without Astra keep the existing fallbacks, including Claude's opus alias.
 #
 # A model published under several dated tags is listed tag-first: Ollama Cloud
 # dropped the bare "deepseek-v4-flash" for ":0731" and ":preview", and an
@@ -58,7 +57,7 @@ role_preferences() {
                 deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 gpt-5.6-terra
             ;;
         final)
-            printf '%s\n' claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet
+            printf '%s\n' gpt-6-astra claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet
             ;;
     esac
 }

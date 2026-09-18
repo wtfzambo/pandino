@@ -48,6 +48,7 @@ if [ "$1" = "--list-models" ]; then
     echo 'provider      model'
     echo 'openai-codex  gpt-5.6-terra'
     echo 'openai-codex  gpt-5.6-sol'
+    echo 'openai-codex  gpt-6-astra'
     echo 'ollama-cloud  deepseek-v4-flash:0731'
     echo 'ollama-cloud  glm-5.2'
     echo 'anthropic     claude-opus-5'
@@ -601,7 +602,7 @@ mkdir "$pin_target"
 cat > "$tmp_dir/bin/opencode" <<'STUB'
 #!/bin/sh
 [ "$1" = models ] || exit 1
-printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol openai/deepseek-v4-flash openai/claude-opus-5
+printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol openai/deepseek-v4-flash openai/claude-opus-5 opencode/gpt-6-astra
 STUB
 cat > "$tmp_dir/bin/codex" <<'STUB'
 #!/bin/sh
@@ -615,7 +616,7 @@ chmod +x "$tmp_dir/bin/opencode" "$tmp_dir/bin/codex" "$tmp_dir/bin/claude"
 pin_home="$tmp_dir/pin-home"
 mkdir -p "$pin_home/.codex"
 cat > "$pin_home/.codex/models_cache.json" <<'JSON'
-{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "codex-auto-review"}]}
+{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "gpt-6-astra"}, {"slug": "codex-auto-review"}]}
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
@@ -673,7 +674,13 @@ grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/taste-re
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/spec-reviewer.md"
 grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/docs-reviewer.md"
 grep -qx "model: openai/gpt-5.6-terra" "$pin_target/.opencode/agent/implementer.md"
-grep -qx "model: openai/claude-opus-5" "$pin_target/.opencode/agent/final-reviewer.md"
+# Astra final review uses each harness's native high-effort field.
+grep -qx "model: openai-codex/gpt-6-astra" "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'thinking: high' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx "model: opencode/gpt-6-astra" "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'reasoningEffort: high' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'model = "gpt-6-astra"' "$pin_target/.codex/agents/final-reviewer.toml"
+grep -qx 'model_reasoning_effort = "high"' "$pin_target/.codex/agents/final-reviewer.toml"
 grep -qx "model: openai-codex/gpt-5.6-sol" "$pin_target/.pi/agents/test-reviewer.md"
 grep -qx "model: openai/gpt-5.6-sol" "$pin_target/.opencode/agent/test-reviewer.md"
 grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
@@ -681,6 +688,10 @@ grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
 grep -qx "model: sonnet" "$pin_target/.claude/agents/implementer.md"
 grep -qx "model: sonnet" "$pin_target/.claude/agents/test-reviewer.md"
 grep -qx "model: opus" "$pin_target/.claude/agents/final-reviewer.md"
+# Catalogues without Astra retain the provider-qualified and bare-id fallbacks.
+. "$repo_dir/models.sh"
+[ "$(resolve_role_model $'openai/gpt-5.6-sol\nanthropic/claude-opus-5' final)" = 'anthropic/claude-opus-5' ]
+[ "$(resolve_role_model $'gpt-5.6-terra\ngpt-5.6-sol' final)" = 'gpt-5.6-sol' ]
 # A hosted review pipeline is not a model to pin.
 if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
     echo "FAIL: Codex output includes codex-auto-review" >&2
@@ -689,7 +700,7 @@ fi
 
 # The assignment is saved, and the matrix is printed once with everything else.
 [ -f "$pin_target/.pandino/models.json" ]
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'openai/claude-opus-5' else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'opencode/gpt-6-astra' else 1)" \
     "$pin_target/.pandino/models.json"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
@@ -718,7 +729,7 @@ expected = [
     "openai-codex/gpt-5.6-terra",
     "ollama-cloud/deepseek-v4-flash:0731",
     "openai-codex/gpt-5.6-sol",
-    "anthropic/claude-opus-5",
+    "openai-codex/gpt-6-astra",
 ]
 if models != expected:
     raise SystemExit(f"unexpected Pi model matrix row: {models}")
@@ -747,6 +758,9 @@ with open(sys.argv[1]) as f:
     saved = json.load(f)
 saved["pi"]["reviewer"] = "anthropic/claude-sonnet-5"
 saved["pi"]["test"] = "ollama-cloud/glm-5.2"
+saved["pi"]["final"] = "anthropic/claude-opus-5"
+saved["opencode"]["final"] = "openai/claude-opus-5"
+saved["codex"]["final"] = "gpt-5.6-sol"
 saved["pi"]["fallback-runner"] = "ollama-cloud/fallback-model"
 saved["pi"]["unknown"] = "ollama-cloud/unknown-model"
 with open(sys.argv[1], "w") as f:
@@ -757,6 +771,15 @@ grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/taste-review
 grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/spec-reviewer.md"
 grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/docs-reviewer.md"
 grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/test-reviewer.md"
+# Saved final choices win over Astra; its effort override stays scoped to Astra.
+grep -qx 'model: anthropic/claude-opus-5' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'model: openai/claude-opus-5' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/final-reviewer.toml"
+if grep -Eq '^(reasoningEffort:|model_reasoning_effort =)' \
+    "$pin_target/.opencode/agent/final-reviewer.md" "$pin_target/.codex/agents/final-reviewer.toml"; then
+    echo 'FAIL: Astra effort override leaked into a saved fallback model' >&2
+    exit 1
+fi
 for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
     if grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/$agent.md"; then
         echo "FAIL: saved test model pinned $agent" >&2
@@ -858,7 +881,7 @@ custom_home="$tmp_dir/custom-home"
 mkdir -p "$custom_home"
 env PATH="$tmp_dir/bin:/usr/bin:/bin" HOME="$custom_home" \
     "$python_bin" "$tmp_dir/drive_customize.py" "$repo_dir/install.sh" "$custom_target"
-# The stub lists terra, Sol, deepseek, glm and opus; second choice per role is the second entry of that role's preference list that the stub carries.
+# Each selection is the second entry of that role's preference list present in the stub catalogue.
 grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/taste-reviewer.md"
 grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/spec-reviewer.md"
 grep -qx "model: anthropic/claude-sonnet-5" "$custom_target/.pi/agents/implementer.md"

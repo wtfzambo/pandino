@@ -78,15 +78,17 @@ It reads the models each editor can actually run, assigns one per role, and prin
 ```
 Models each specialist will run on:
               implementer    reviewers                     test review       final
-  · pi        gpt-5.6-terra  deepseek-v4-flash:0731       gpt-5.6-sol       claude-opus-5
+  · pi        gpt-5.6-terra  deepseek-v4-flash:0731       gpt-5.6-sol       gpt-6-astra
     fallback-runner has no default and requires a call-time model
 ```
 
-The split follows the [benchmarks](NOTES.md) and [full benchmark](bench/README.md): Flash remains the cheap, fast choice for routine taste, spec, and docs review, while Sol high is a separate test reviewer because comparable original-plus-language r1 found 13/15 defects versus Flash's 8/15. High won over medium for its stronger recall floor and fewer defect false positives; the expensive final model is saved for a whole-branch pass when one runs.
+The split follows the [benchmarks](NOTES.md) and [full benchmark](bench/README.md): Flash remains the cheap, fast choice for routine taste, spec, and docs review, while Sol high is a separate test reviewer because comparable original-plus-language r1 found 13/15 defects versus Flash's 8/15. High won over medium for its stronger recall floor and fewer defect false positives. Final review prefers GPT-6 Astra at high reasoning wherever the harness catalogue offers it, by operator choice on 2026-09-08. Claude Code keeps its `opus` alias; other catalogues retain the existing fallback chain.
 
 A model that is not available falls back to the next one down the list, and the substitution is printed. If nothing suitable exists, that helper follows the main model and the installer says so — it never pretends to have pinned something.
 
 Each harness resolves recommendations against the catalogue it can access. The choices land in `.pandino/models.json` as implementer, reviewer, test, and final roles; edit that file and re-run the installer to change them, because your edits win over the recommendation. `fallback-runner` is intentionally absent: it must always receive an explicit call-time model rather than inherit the parent model.
+
+Existing installations keep their saved assignments. To adopt the new final-review recommendation, remove only the selected harness's `final` entry from `.pandino/models.json` and re-run the installer; it resolves the best available model again. Astra final agents carry explicit high effort in pi, Codex, and OpenCode.
 
 ### If you already have an AGENTS.md
 

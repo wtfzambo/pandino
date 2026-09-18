@@ -24,6 +24,11 @@ agent_tools() {
     awk -F': *' '/^tools:/ { print $2; exit }' "$1"
 }
 
+# Canonical effort level, translated to the selected harness's native field.
+agent_thinking() {
+    awk -F': *' '/^thinking:/ { print $2; exit }' "$1"
+}
+
 # One-line description, frontmatter folding removed.
 agent_description() {
     awk '
@@ -85,6 +90,9 @@ write_opencode_agent() {
         echo "description: $(agent_description "$src")"
         echo "mode: subagent"
         [ -n "$model" ] && echo "model: $model"
+        if [ "$name" = final-reviewer ] && [ "${model##*/}" = gpt-6-astra ]; then
+            echo "reasoningEffort: $(agent_thinking "$src")"
+        fi
         if [ -n "$tools" ] && [ "$tools" != "all" ]; then
             echo "tools:"
             echo "  write: false"
@@ -105,6 +113,9 @@ write_codex_agent() {
         printf 'name = "%s"\n' "$name"
         printf 'description = "%s"\n' "$(agent_description "$src" | sed 's/"/\\"/g')"
         [ -n "$model" ] && printf 'model = "%s"\n' "$model"
+        if [ "$name" = final-reviewer ] && [ "${model##*/}" = gpt-6-astra ]; then
+            printf 'model_reasoning_effort = "%s"\n' "$(agent_thinking "$src")"
+        fi
         [ -n "$tools" ] && [ "$tools" != "all" ] && printf 'sandbox_mode = "read-only"\n'
         printf 'developer_instructions = """\n'
         # A closing triple quote inside the body would end the string early.

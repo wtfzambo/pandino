@@ -2,7 +2,7 @@
 
 ## Model routing
 
-These are tested examples, not requirements. Ask the user which available models to use during setup.
+Routing combines benchmark evidence with explicit operator choices. The installer recommends models from each harness's catalogue and preserves saved user assignments.
 
 Ollama Cloud publishes deepseek-v4-flash under dated tags: since 2026-08-09 the bare `deepseek-v4-flash` is gone from its catalogue, replaced by `:0731` and `:preview`. Pin the dated tag — the benchmark tables below predate the rename and name the model as it was then.
 
@@ -11,6 +11,7 @@ Ollama Cloud publishes deepseek-v4-flash under dated tags: since 2026-08-09 the 
 - Taste reviewer: `ollama-cloud/deepseek-v4-flash:0731` or `ollama-cloud/glm-5.2`, thinking `high`. Both went 12/12 on planted defects with zero false positives in the 2026-07-31 reviewer benchmark; deepseek is the cheapest of the whole field (~$0.004/review), glm the fastest (~12s). A 2026-08-30 follow-up gave deepseek 9/9 recall on unmotivated negations, preserved all six motivated-control appearances, and produced one unrelated false positive. `kimi-k2.7-code` remains a fine pick (11–12/12, negligible cost difference).
 - Spec reviewer: `ollama-cloud/deepseek-v4-flash:0731`, thinking `high`. Found all planted spec divergences in all runs with zero false positives, at ~1/50 of Opus's cost. `anthropic/claude-opus-5` also scored perfect on spec but is the most expensive and slowest option; keep it in mind for genuinely hard reviews, where these small benchmarks cannot see a difference.
 - Test reviewer: `openai-codex/gpt-5.6-sol`, thinking `high`, operator approved 2026-08-20. Each harness resolves it through its available catalogue and fallback chain; `.pandino/models.json` stores implementer, reviewer, test, and final choices, user edits win, and `fallback-runner` remains absent.
+- Final reviewer: `gpt-6-astra`, thinking `high`, selected by the operator on 2026-09-08. pi uses `openai-codex/gpt-6-astra`, Codex the bare slug, and OpenCode its catalogue's provider-qualified ID. Claude Code retains `opus`, and other catalogues fall back through the existing preferences. This choice has no new benchmark result; the historical evidence below is unchanged.
 
 ## Benchmark 2026-07-31
 
