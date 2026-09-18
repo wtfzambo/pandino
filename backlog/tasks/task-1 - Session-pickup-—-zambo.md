@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-08 18:01'
+updated_date: '2026-09-18 16:46'
 labels:
   - continuity
   - handoff
@@ -18,17 +18,17 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-08. Branch `main`; implementation commit `c7900be` (`feat: make verification purpose-driven`) is pushed to `origin/main`. TASK-16 is Done with all four acceptance criteria checked. At snapshot preparation, only this continuity refresh is dirty; its commit and push are the final handoff operation. The completed change covers `AGENTS.md`, seven agent roles, three snippets, README install/update prompts, `doc-1 - Testing evidence policy`, and live benchmark prompts. Visual choices finish with screenshot plus inspection; behavior exploration gets a focused check/probe; shipping or operationally relied-on code retains delivery checks and regression-first fixes. Active instructions favor affirmative actions while preserving safety, scope, approvals, read-only review roles, and motivated contrasts. Installed `.pi/agents/` and `.pandino/snippets/` mirrors are synchronized with existing pins. TASK-16 holds the rationale and spec/docs review dispositions. Both existing shell suites, parity checks, and diff hygiene passed. Runtime code, upstream instructions, and historical benchmark results remain unchanged. Actual model-behavior improvement is unmeasured.
+2026-09-08. Branch `main`; TASK-17 implementation commit `3398211` (`feat: prefer GPT-6 Astra high for final review`) is pushed to `origin/main`. At snapshot preparation, only this continuity refresh is dirty; its commit and push complete the handoff. TASK-17 is Done with all three acceptance criteria checked. Final review now prefers `gpt-6-astra` at high effort in pi, Codex, and OpenCode wherever their catalogues offer it. `harnesses.sh` translates the canonical setting into each native field. Claude Code keeps `opus`, other catalogues retain the previous fallback order, and saved user assignments remain authoritative. The ignored local pi agent and `.pandino/models.json` already select `openai-codex/gpt-6-astra` high. README/NOTES explain the new recommendation and adoption by existing installs. Installer regressions, shell syntax, diff hygiene, and a real isolated OpenCode agent-loader probe passed; TASK-17 records the evidence. Earlier TASK-16 purpose-driven verification and affirmative-instruction changes remain published. No implementation work is active.
 
 WHAT'S NEXT
-1. No Pandino implementation work is active. When updating a downstream repository such as QuitCorn, start there with `.pandino/check-update`, then use the normal update and semantic-merge flow in `README.md`.
-2. Observe the stopping rule during the next real visual exploration: the useful evidence is whether screenshot and inspection answer the visual question. Existing unrelated optional work remains TASK-10.
+1. When updating a downstream repository, run its `.pandino/check-update` and follow the README update flow.
+2. To adopt Astra in an existing installation, remove only the selected harness's `final` entry from `.pandino/models.json`, rerun the installer, and resolve normal merge candidates. Saved choices otherwise remain in place.
 
 WAITING ON / GATED BY
-Nothing blocks Pandino as of 2026-09-08. Downstream installation and real-use observation happen in the chosen repository when the operator starts that work.
+Nothing blocks Pandino as of 2026-09-08. Downstream installation happens when the operator chooses that repository. Astra review quality remains an explicit operator choice, without a new benchmark claim.
 
 VERIFY
-After this handoff, `git status -sb` is clean and synchronized with `origin/main`; `git log --oneline -2` shows the continuity commit above `c7900be`. `backlog task view TASK-16 --plain` shows Done with all acceptance criteria checked. `git diff --check`, `bash tests/test_install.sh`, and `bash tests/test_review_bench.sh` pass; the benchmark suite intentionally prints a fake/provider failure before its PASS line.
+After this handoff, `git status -sb` is clean and synchronized with `origin/main`; `git log --oneline -2` shows the continuity commit above `3398211`. `backlog task view TASK-17 --plain` shows Done with all three acceptance criteria checked. `git diff --check`, `bash -n models.sh harnesses.sh tests/test_install.sh`, and `bash tests/test_install.sh` pass. The local pi final agent has `model: openai-codex/gpt-6-astra` and `thinking: high`, matching its saved assignment.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
