@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-28 21:07'
+updated_date: '2026-09-28 22:51'
 labels:
   - continuity
   - handoff
@@ -18,17 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-28. Branch `main`; TASK-18 is Done with all five acceptance criteria checked. Implementation commit `2f856a2` (feat: bound reviewer effort and incremental follow-ups) is published on origin/main; push and clean working tree were verified. This closing update touches only TASK-18 publication notes and this pickup snapshot; its handoff commit and push complete the session. Current policy: reviewer turn defaults 20/40, explicit 8-turn correction calls, incremental follow-ups, bounded investigation, and partial verdicts at exhaustion. See TASK-18 for evidence, doc-3 for current behavior, and decision-7 for rationale. No implementation work remains active. Existing ignored local .pi agents and downstream installations were not updated.
+2026-09-29. Branch `main`; this snapshot accompanies the closing commit `feat: refresh specialist model routing`, whose parent is `bdc8c80`. Resolve its hash with `git log -1 --format=%h`. The user authorized committing all repository changes, without pushing; after the closing commit the working tree should be clean and main one commit ahead of the locally recorded origin/main. TASK-19 and TASK-20 are Done with checked acceptance criteria. The commit contains the new specialist models/native effort, removal of superseded automatic recommendations, and the Kimi correction preserving K2.6 then K2.7 Code while excluding K3. Current authority: doc-4; rationale: decision-8; OpenCode GPT6 compatibility evidence: FINDINGS.md. Saved user pins and historical benchmarks remain intact. Local ignored Pi assignments were updated earlier and remain outside Git.
 
 WHAT'S NEXT
-1. When the user requests adoption in an existing project, run its `.pandino/check-update` and follow the README update/merge-candidate flow. Preserve saved model choices.
-2. Calibrate the 20/40/8 defaults from future real reviews when evidence warrants it. This completed slice needs no further review or unsolicited benchmark sweep.
+1. Run `git status -sb` and `git log --oneline -2` to verify the closing commit and clean local tree. Push only on user request.
+2. For downstream adoption, use the README update/merge flow and explicitly reset or edit saved model roles as desired. Existing saved assignments override recommendations.
+3. Investigate the pre-existing colon-tag model-picker truncation in `install.sh` only if requested; TASK-19 records it and it remains outside this completed work.
 
 WAITING ON / GATED BY
-Nothing blocks Pandino as of 2026-09-28. The user approved and requested publication. Downstream adoption remains a separate user choice. Hard abort after grace and workflow inheritance were source-inspected; native wrap-up and the closed-finding/new-regression probe were exercised.
+As of 2026-09-29, no implementation blocker remains. Push and downstream adoption await user direction. Kimi K3 is excluded at the operator request due to uncertain operation in their setup; no independent live failure is claimed. No paid inference probes or new model benchmarks were requested. Unrelated local agent bodies and review budgets remain unchanged.
 
 VERIFY
-`git status -sb` should be clean and synchronized with origin/main. `git log --oneline -2` should show the closing handoff commit above implementation commit2f856a2; `git ls-remote --heads origin main` should match local HEAD. TASK-18 is Done with all criteria checked. Installer and benchmark harness suites, shell syntax, and diff hygiene passed; the closing update changes only Backlog metadata/text. `bash tests/test_review_bench.sh` intentionally prints one fake-provider failure before PASS. No time, tool-count, token or cost guarantee is claimed by the turn limits.
+Final pre-commit checks passed: `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, `bash -n models.sh harnesses.sh install.sh tests/*.sh`, and `git diff --check`. The benchmark-harness suite intentionally prints one fake-provider failure before PASS. Installer regressions cover selected model/effort, preserved legacy saved pins, excluded recommendations, Kimi K2.6 priority/K2.7 Code fallback and interactive customization. TASK-19 records real-catalogue resolution, native OpenCode loader checks and local Pi pin/catalogue agreement; TASK-20 records the pruning and Kimi red-to-green checks. Old models intentionally remain in test catalogues to prove they are ignored by automatic selection. Publication state: local commit only, no push.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF

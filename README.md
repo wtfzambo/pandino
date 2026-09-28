@@ -71,24 +71,11 @@ The six specialists, and what each one is there to prevent:
 
 ### Which model runs each specialist
 
-Left alone, every editor spawns its helpers on whatever model the main agent is running. A reviewer that is the same model as the writer is not a second opinion, so the installer pins one instead.
+The current routing is defined in the [specialist-model routing specification](backlog/docs/specs/doc-4%20-%20Specialist-model-routing.md). On a catalogue with the requested models, Pi and OpenCode assign GPT-6 Sol medium to implementation, DeepSeek V4.1 Flash high to taste/spec/docs review, GPT-6 Sol high to test review, and Claude Opus 5.5 medium to final review. The writer and test reviewer deliberately share Sol with different efforts. This is an operator choice; the [historical benchmarks](NOTES.md) and [full benchmark](bench/README.md) evaluated older models. The earlier test-evidence benchmark favored Sol high for recall, but did not benchmark GPT-6 Sol.
 
-It reads the models each editor can actually run, assigns one per role, and prints the result:
+Claude Code uses subscription aliases (`sonnet` for implementation, `opus` for reviewers and final review); Codex falls back to GPT-6 Luna for routine review and GPT-6 Astra for final review when those models are available. Installer resolution uses the role preferences in `models.sh` and the catalogue each editor exposes. The canonical effort is in `agents/*.md`; `harnesses.sh` translates it to each editor's native fields. OpenCode GPT-6 agents also receive `forceReasoning: true` so its installed OpenAI adapter transmits the requested reasoning effort. The emitted configuration is tested; live provider execution is outside this installer test.
 
-```
-Models each specialist will run on:
-              implementer    reviewers                     test review       final
-  · pi        gpt-5.6-terra  deepseek-v4-flash:0731       gpt-5.6-sol       gpt-6-astra
-    fallback-runner has no default and requires a call-time model
-```
-
-The split follows the [benchmarks](NOTES.md) and [full benchmark](bench/README.md): Flash remains the cheap, fast choice for routine taste, spec, and docs review, while Sol high is a separate test reviewer because comparable original-plus-language r1 found 13/15 defects versus Flash's 8/15. High won over medium for its stronger recall floor and fewer defect false positives. Final review prefers GPT-6 Astra at high reasoning wherever the harness catalogue offers it, by operator choice on 2026-09-08. Claude Code keeps its `opus` alias; other catalogues retain the existing fallback chain.
-
-A model that is not available falls back to the next one down the list, and the substitution is printed. If nothing suitable exists, that helper follows the main model and the installer says so — it never pretends to have pinned something.
-
-Each harness resolves recommendations against the catalogue it can access. The choices land in `.pandino/models.json` as implementer, reviewer, test, and final roles; edit that file and re-run the installer to change them, because your edits win over the recommendation. `fallback-runner` is intentionally absent: it must always receive an explicit call-time model rather than inherit the parent model.
-
-Existing installations keep their saved assignments. To adopt the new final-review recommendation, remove only the selected harness's `final` entry from `.pandino/models.json` and re-run the installer; it resolves the best available model again. Astra final agents carry explicit high effort in pi, Codex, and OpenCode.
+The installer prints the resolved assignments and saves them under `.pandino/models.json` as `implementer`, `reviewer`, `test`, and `final` per editor. Saved choices remain authoritative: to adopt a new recommendation, delete only that editor's relevant role entry and re-run the installer. A model missing from a catalogue falls back to the next supported preference. `fallback-runner` has no saved pin and requires an explicit model when called.
 
 ### If you already have an AGENTS.md
 
@@ -179,7 +166,7 @@ Review mandates and incremental follow-ups follow [Bounded reviews](AGENTS.md#bo
 
 Run standalone or whole-repository audits as report-only work until implementation is requested. The coordinator synthesizes useful findings and waits for the user before changing scope or creating work.
 
-The installer assigns separate writer and reviewer models when reviews run — see [which model runs each specialist](#which-model-runs-each-specialist). The [benchmarks](NOTES.md) found Flash competitive for routine taste, spec, and docs review, while Sol's stronger test-evidence recall earns its conditional separate role. The expensive model is reserved for `final-reviewer` when that whole-branch pass adds value.
+The installer pins the configured model for each role — see [which model runs each specialist](#which-model-runs-each-specialist). Historical [benchmarks](NOTES.md) informed earlier routing. Current operator choices and available-model fallbacks are documented in the [routing specification](backlog/docs/specs/doc-4%20-%20Specialist-model-routing.md).
 
 ## When Pandino meets your existing rules
 

@@ -1,8 +1,8 @@
 # Pandino notes
 
-## Model routing
+## Historical model routing — through 2026-09-08
 
-Routing combines benchmark evidence with explicit operator choices. The installer recommends models from each harness's catalogue and preserves saved user assignments.
+The recommendations below are a historical snapshot, retained alongside the benchmarks that informed them. Current routing and operator choices are defined in the [specialist-model routing specification](backlog/docs/specs/doc-4%20-%20Specialist-model-routing.md). Replacement model versions have not been benchmarked here.
 
 Ollama Cloud publishes deepseek-v4-flash under dated tags: since 2026-08-09 the bare `deepseek-v4-flash` is gone from its catalogue, replaced by `:0731` and `:preview`. Pin the dated tag — the benchmark tables below predate the rename and name the model as it was then.
 

@@ -3,7 +3,7 @@ description: >-
   Read-only deep review of a substantial whole branch when composition or
   end-to-end value could change the merge decision.
 tools: read, grep, find, ls, bash
-thinking: high
+thinking: medium
 max_turns: 40
 ---
 

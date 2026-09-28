@@ -10,9 +10,8 @@
 #   codex        .codex/agents/       TOML: name, description, model, developer_instructions
 #
 # The body is copied verbatim every time; only its wrapper differs. Each writer
-# takes the model this harness resolved for that agent's role and pins it, so
-# the orchestrator cannot spawn a reviewer on its own model. fallback-runner
-# is deliberately unpinned so the orchestrator must select its model at call time.
+# takes the model this harness resolved for that agent's role and pins it.
+# fallback-runner is unpinned so the orchestrator must select its model at call time.
 
 # Body of a kit agent file: everything after the closing frontmatter fence.
 agent_body() {
@@ -75,6 +74,7 @@ write_claude_agent() {
         echo "description: $(agent_description "$src")"
         [ -n "$tools" ] && echo "tools: $tools"
         [ -n "$model" ] && echo "model: $model"
+        [ -n "$model" ] && echo "effort: $(agent_thinking "$src")"
         echo "---"
         agent_body "$src"
     } > "$dst"
@@ -90,9 +90,14 @@ write_opencode_agent() {
         echo "description: $(agent_description "$src")"
         echo "mode: subagent"
         [ -n "$model" ] && echo "model: $model"
-        if [ "$name" = final-reviewer ] && [ "${model##*/}" = gpt-6-astra ]; then
-            echo "reasoningEffort: $(agent_thinking "$src")"
-        fi
+        case "${model##*/}" in
+            gpt-6-*)
+                echo "reasoningEffort: $(agent_thinking "$src")"
+                echo "forceReasoning: true"
+                ;;
+            gpt-*|deepseek-*) [ -n "$model" ] && echo "reasoningEffort: $(agent_thinking "$src")" ;;
+            claude-*-5-5) echo "effort: $(agent_thinking "$src")" ;;
+        esac
         if [ -n "$tools" ] && [ "$tools" != "all" ]; then
             echo "tools:"
             echo "  write: false"
@@ -113,9 +118,7 @@ write_codex_agent() {
         printf 'name = "%s"\n' "$name"
         printf 'description = "%s"\n' "$(agent_description "$src" | sed 's/"/\\"/g')"
         [ -n "$model" ] && printf 'model = "%s"\n' "$model"
-        if [ "$name" = final-reviewer ] && [ "${model##*/}" = gpt-6-astra ]; then
-            printf 'model_reasoning_effort = "%s"\n' "$(agent_thinking "$src")"
-        fi
+        [ -n "$model" ] && printf 'model_reasoning_effort = "%s"\n' "$(agent_thinking "$src")"
         [ -n "$tools" ] && [ "$tools" != "all" ] && printf 'sandbox_mode = "read-only"\n'
         printf 'developer_instructions = """\n'
         # A closing triple quote inside the body would end the string early.

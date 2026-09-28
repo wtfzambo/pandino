@@ -3,12 +3,11 @@
 # actually run. Sourced by install.sh.
 #
 # Without a pin, every harness lets the orchestrator spawn subagents on its own
-# model — a reviewer that is the same model as the writer is not a second
-# opinion. So each role gets a real model written into the agent file.
+# model. Each role gets its resolved model written into the agent file.
 #
 # One preference list per role covers all four harnesses: each catalogue
 # filters it down on its own, and a model is matched on its bare id, so
-# "glm-5.2" finds it under whichever provider a user has it.
+# "glm-5.3" finds it under whichever provider a user has it.
 #
 # Verified 2026-08-05:
 #   pi        pi --list-models          provider/id
@@ -29,35 +28,26 @@ agent_role() {
     esac
 }
 
-# Ordered preferences per role, best first. From the 2026-07-31 benchmarks in
-# NOTES.md: terra implements cheapest with a clean stop on a wrong plan;
-# deepseek and glm review perfectly for cents; Opus remains a whole-branch
-# fallback because its thoroughness was noisy and costly on routine reviews.
-# The 2026-08-20 test benchmark recommended Sol at high thinking for test review.
-# The operator selected GPT-6 Astra high for final review on 2026-09-08;
-# catalogues without Astra keep the existing fallbacks, including Claude's opus alias.
-#
-# A model published under several dated tags is listed tag-first: Ollama Cloud
-# dropped the bare "deepseek-v4-flash" for ":0731" and ":preview", and an
-# unpinned bare id would silently fall through to the next model in the list.
-# The bare id stays behind it for catalogues that still carry it, like
-# opencode's.
+# Ordered operator choices per role. NOTES.md records historical benchmarks;
+# current routing is an operator choice. Superseded generations are omitted;
+# Pro retains its dated and bare IDs because it has no listed successor.
+# Kimi stays on K2.6/K2.7 Code at the operator's request; K3 is not adopted.
 role_preferences() {
     case "$1" in
         implementer)
-            printf '%s\n' gpt-5.6-terra claude-sonnet-5 sonnet gpt-5.6-sol gpt-5.6
+            printf '%s\n' gpt-6-sol claude-sonnet-5-5 sonnet
             ;;
         reviewer)
-            printf '%s\n' deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 \
-                kimi-k2.6 kimi-k2.7-code claude-sonnet-5 sonnet gpt-5.6-terra
+            printf '%s\n' deepseek-v4.1-flash glm-5.3 kimi-k2.6 kimi-k2.7-code \
+                claude-sonnet-5-5 opus sonnet gpt-6-luna
             ;;
         test)
-            printf '%s\n' gpt-5.6-sol claude-sonnet-5 sonnet \
-                deepseek-v4-pro:0813 deepseek-v4-pro gpt-5.6 \
-                deepseek-v4-flash:0731 deepseek-v4-flash glm-5.2 gpt-5.6-terra
+            printf '%s\n' gpt-6-sol claude-sonnet-5-5 opus sonnet \
+                deepseek-v4-pro:0813 deepseek-v4-pro deepseek-v4.1-flash glm-5.3
             ;;
         final)
-            printf '%s\n' gpt-6-astra claude-opus-5 opus gpt-5.6-sol gpt-5.6 claude-sonnet-5 sonnet
+            printf '%s\n' claude-opus-5-5 opus gpt-6-astra \
+                gpt-6-sol claude-sonnet-5-5 sonnet
             ;;
     esac
 }

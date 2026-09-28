@@ -3,7 +3,7 @@ id: doc-1
 title: Testing evidence policy
 type: specification
 created_date: '2026-08-19 18:04'
-updated_date: '2026-09-08 17:19'
+updated_date: '2026-09-28 22:20'
 ---
 # Testing evidence policy
 
@@ -34,4 +34,4 @@ Run the read-only test review when substantial behavior, test, test-infrastructu
 
 ## Model routing
 
-The installer stores test review as the separate `test` model role for each selected harness. Its first recommendation is `openai-codex/gpt-5.6-sol` at high thinking, approved by the operator on 2026-08-20 after the reviewer benchmark showed a material recall advantage over the shared routine-review model. Each harness resolves that preference against its own catalogue and uses the documented fallback order when Sol is unavailable; an existing `.pandino/models.json` choice wins. `fallback-runner` remains absent from saved routing and always requires an explicit call-time model.
+The installer stores test review as the separate `test` model role for each selected harness. Current models, effort settings, catalogue fallbacks and saved-choice precedence are defined in [Specialist model routing](doc-4%20-%20Specialist-model-routing.md). The separate test-review role retains its historical benchmark rationale (decision-2); replacement model versions are operator choices rather than new benchmark results.

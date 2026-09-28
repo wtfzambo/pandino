@@ -76,7 +76,7 @@ For shipping code, tests are maintained evidence for observable product promises
 
 ## Agent workflow
 
-The main agent plans and orchestrates; specialists — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `test-reviewer`, `final-reviewer` — are defined in the harness's agent directories. The implementer is the only editing role; reviewers inspect and report. Each specialist has its own pinned model, so review work uses a model different from the writer's; retain the pin at spawn.
+The main agent plans and orchestrates; specialists — `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `test-reviewer`, `final-reviewer` — are defined in the harness's agent directories. The implementer is the only editing role; reviewers inspect and report. Each specialist has a pinned model; retain the pin at spawn. Separate roles can share a model when the configured routing explicitly selects it.
 
 `fallback-runner` is a non-specialist, inspection-only escape hatch for a reviewer that cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Use it for availability failures, not review findings or dissatisfaction with a result. Invocation requires an explicit alternate model (omitting one silently inherits the parent), the failed reviewer's canonical instructions verbatim, and the concrete task context; preserve the review role and tool boundaries. For review work, choose a model different from the writer; visibly report every substitution.
 

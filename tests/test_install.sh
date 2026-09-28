@@ -49,10 +49,17 @@ if [ "$1" = "--list-models" ]; then
     echo 'openai-codex  gpt-5.6-terra'
     echo 'openai-codex  gpt-5.6-sol'
     echo 'openai-codex  gpt-6-astra'
+    echo 'openai-codex  gpt-6-sol'
+    echo 'openai-codex  gpt-6-luna'
+    echo 'ollama-cloud  deepseek-v4.1-flash'
+    echo 'anthropic     claude-opus-5-5'
     echo 'ollama-cloud  deepseek-v4-flash:0731'
     echo 'ollama-cloud  glm-5.2'
+    echo 'ollama-cloud  glm-5.3'
+    echo 'ollama-cloud  kimi-k3'
     echo 'anthropic     claude-opus-5'
     echo 'anthropic     claude-sonnet-5'
+    echo 'anthropic     claude-sonnet-5-5'
 fi
 exit 0
 EOF
@@ -140,6 +147,18 @@ kit_revision="$(git -C "$repo_dir" rev-parse HEAD | tr '[:upper:]' '[:lower:]')"
 fresh_target="$tmp_dir/fresh"
 mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
+
+# Current operator routing must win even when older models remain available.
+grep -qx 'model: openai-codex/gpt-6-sol' "$fresh_target/.pi/agents/implementer.md"
+grep -qx 'thinking: medium' "$fresh_target/.pi/agents/implementer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer; do
+    grep -qx 'model: ollama-cloud/deepseek-v4.1-flash' "$fresh_target/.pi/agents/$agent.md"
+    grep -qx 'thinking: high' "$fresh_target/.pi/agents/$agent.md"
+done
+grep -qx 'model: openai-codex/gpt-6-sol' "$fresh_target/.pi/agents/test-reviewer.md"
+grep -qx 'thinking: high' "$fresh_target/.pi/agents/test-reviewer.md"
+grep -qx 'model: anthropic/claude-opus-5-5' "$fresh_target/.pi/agents/final-reviewer.md"
+grep -qx 'thinking: medium' "$fresh_target/.pi/agents/final-reviewer.md"
 
 diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
 for agent in implementer spec-reviewer taste-reviewer docs-reviewer test-reviewer final-reviewer fallback-runner; do
@@ -595,14 +614,13 @@ grep -F "i-have-adhd (global)" "$tmp_dir/global.out" > /dev/null
 
 
 # Each specialist carries a real model pin, in each harness's own format.
-# Without one the orchestrator spawns reviewers on its own model, which is the
-# whole reason the reviewers are separate agents.
+# Without a pin the orchestrator spawns a specialist on its own model.
 pin_target="$tmp_dir/pins"
 mkdir "$pin_target"
 cat > "$tmp_dir/bin/opencode" <<'STUB'
 #!/bin/sh
 [ "$1" = models ] || exit 1
-printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol openai/deepseek-v4-flash openai/claude-opus-5 opencode/gpt-6-astra
+printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol opencode/gpt-6-sol opencode/gpt-6-luna openai/deepseek-v4-flash opencode/deepseek-v4.1-flash openai/claude-opus-5 opencode/claude-opus-5-5 opencode/gpt-6-astra
 STUB
 cat > "$tmp_dir/bin/codex" <<'STUB'
 #!/bin/sh
@@ -616,11 +634,11 @@ chmod +x "$tmp_dir/bin/opencode" "$tmp_dir/bin/codex" "$tmp_dir/bin/claude"
 pin_home="$tmp_dir/pin-home"
 mkdir -p "$pin_home/.codex"
 cat > "$pin_home/.codex/models_cache.json" <<'JSON'
-{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "gpt-6-astra"}, {"slug": "codex-auto-review"}]}
+{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "gpt-6-astra"}, {"slug": "gpt-6-sol"}, {"slug": "gpt-6-luna"}, {"slug": "codex-auto-review"}]}
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
-# All seven agents ship everywhere. The six specialists remain pinned, so reviewers do not run the implementer's model by accident.
+# All seven agents ship everywhere. The six specialists retain their resolved pins.
 for agent in implementer taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer fallback-runner; do
     [ -f "$pin_target/.pi/agents/$agent.md" ]
     [ -f "$pin_target/.claude/agents/$agent.md" ]
@@ -678,30 +696,65 @@ done
 python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:]]" \
     "$pin_target"/.codex/agents/*.toml
 
-# Shared reviewers use one model; test review gets the separately benchmarked Sol recommendation. pi's catalogue carries the dated tag and opencode's bare id, and a preference has to match both spellings or the role silently falls through to the next model down the list.
-grep -qx "model: ollama-cloud/deepseek-v4-flash:0731" "$pin_target/.pi/agents/taste-reviewer.md"
-grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/taste-reviewer.md"
-grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/spec-reviewer.md"
-grep -qx "model: openai/deepseek-v4-flash" "$pin_target/.opencode/agent/docs-reviewer.md"
-grep -qx "model: openai/gpt-5.6-terra" "$pin_target/.opencode/agent/implementer.md"
-# Astra final review uses each harness's native high-effort field.
-grep -qx "model: openai-codex/gpt-6-astra" "$pin_target/.pi/agents/final-reviewer.md"
-grep -qx 'thinking: high' "$pin_target/.pi/agents/final-reviewer.md"
-grep -qx "model: opencode/gpt-6-astra" "$pin_target/.opencode/agent/final-reviewer.md"
-grep -qx 'reasoningEffort: high' "$pin_target/.opencode/agent/final-reviewer.md"
+# Current choices are resolved against each editor's available models.
+for agent in taste-reviewer spec-reviewer docs-reviewer; do
+    grep -qx 'model: ollama-cloud/deepseek-v4.1-flash' "$pin_target/.pi/agents/$agent.md"
+    grep -qx 'model: opencode/deepseek-v4.1-flash' "$pin_target/.opencode/agent/$agent.md"
+    grep -qx 'model = "gpt-6-luna"' "$pin_target/.codex/agents/$agent.toml"
+done
+grep -qx 'model: opencode/gpt-6-sol' "$pin_target/.opencode/agent/implementer.md"
+grep -qx 'model: opencode/gpt-6-sol' "$pin_target/.opencode/agent/test-reviewer.md"
+grep -qx 'reasoningEffort: medium' "$pin_target/.opencode/agent/implementer.md"
+grep -qx 'reasoningEffort: high' "$pin_target/.opencode/agent/test-reviewer.md"
+for agent in implementer test-reviewer; do
+    grep -qx 'forceReasoning: true' "$pin_target/.opencode/agent/$agent.md"
+done
+grep -qx 'model: openai-codex/gpt-6-sol' "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx 'model: anthropic/claude-opus-5-5' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'thinking: medium' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'model: opencode/claude-opus-5-5' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'effort: medium' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'reasoningEffort: high' "$pin_target/.opencode/agent/taste-reviewer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
+    if grep -q '^forceReasoning:' "$pin_target/.opencode/agent/$agent.md"; then
+        echo "FAIL: OpenCode forceReasoning leaked into $agent" >&2
+        exit 1
+    fi
+done
 grep -qx 'model = "gpt-6-astra"' "$pin_target/.codex/agents/final-reviewer.toml"
-grep -qx 'model_reasoning_effort = "high"' "$pin_target/.codex/agents/final-reviewer.toml"
-grep -qx "model: openai-codex/gpt-5.6-sol" "$pin_target/.pi/agents/test-reviewer.md"
-grep -qx "model: openai/gpt-5.6-sol" "$pin_target/.opencode/agent/test-reviewer.md"
-grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
-# Claude Code takes subscription aliases, not provider-qualified ids.
-grep -qx "model: sonnet" "$pin_target/.claude/agents/implementer.md"
-grep -qx "model: sonnet" "$pin_target/.claude/agents/test-reviewer.md"
-grep -qx "model: opus" "$pin_target/.claude/agents/final-reviewer.md"
-# Catalogues without Astra retain the provider-qualified and bare-id fallbacks.
+grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/implementer.toml"
+grep -qx 'model_reasoning_effort = "high"' "$pin_target/.codex/agents/test-reviewer.toml"
+grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/final-reviewer.toml"
+grep -qx 'model = "gpt-6-sol"' "$pin_target/.codex/agents/implementer.toml"
+grep -qx 'model = "gpt-6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
+# Claude Code takes subscription aliases.
+grep -qx 'model: sonnet' "$pin_target/.claude/agents/implementer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer; do
+    grep -qx 'model: opus' "$pin_target/.claude/agents/$agent.md"
+done
+grep -qx 'effort: medium' "$pin_target/.claude/agents/implementer.md"
+grep -qx 'effort: medium' "$pin_target/.claude/agents/final-reviewer.md"
+grep -qx 'effort: high' "$pin_target/.claude/agents/test-reviewer.md"
+if grep -q '^effort:' "$pin_target/.claude/agents/fallback-runner.md"; then
+    echo 'FAIL: unpinned Claude fallback-runner has an effort override' >&2
+    exit 1
+fi
+# Excluded recommendations are skipped even when the catalogue still lists them.
 . "$repo_dir/models.sh"
-[ "$(resolve_role_model $'openai/gpt-5.6-sol\nanthropic/claude-opus-5' final)" = 'anthropic/claude-opus-5' ]
-[ "$(resolve_role_model $'gpt-5.6-terra\ngpt-5.6-sol' final)" = 'gpt-5.6-sol' ]
+excluded_catalog=$'gpt-5.6-terra\ngpt-5.6-sol\ngpt-5.6\nclaude-sonnet-5\nclaude-opus-5\ndeepseek-v4-flash:0731\ndeepseek-v4-flash\nglm-5.2\nkimi-k3'
+for role in implementer reviewer test final; do
+    if resolve_role_model "$excluded_catalog" "$role" > /dev/null; then
+        echo "FAIL: $role recommended an excluded model" >&2
+        exit 1
+    fi
+done
+[ "$(resolve_role_model $'openai/gpt-5.6-terra\nanthropic/claude-sonnet-5-5' implementer)" = 'anthropic/claude-sonnet-5-5' ]
+[ "$(resolve_role_model $'ollama-cloud/deepseek-v4-flash:0731\nollama-cloud/glm-5.2\nollama-cloud/glm-5.3' reviewer)" = 'ollama-cloud/glm-5.3' ]
+# Keep the operator's Kimi exception even when K3 is advertised by the catalogue.
+[ "$(resolve_role_model $'ollama-cloud/kimi-k3\nollama-cloud/kimi-k2.7-code\nollama-cloud/kimi-k2.6' reviewer)" = 'ollama-cloud/kimi-k2.6' ]
+[ "$(resolve_role_model $'ollama-cloud/kimi-k3\nollama-cloud/kimi-k2.7-code' reviewer)" = 'ollama-cloud/kimi-k2.7-code' ]
+[ "$(resolve_role_model $'gpt-5.6-sol\ndeepseek-v4-pro:0813' test)" = 'deepseek-v4-pro:0813' ]
+[ "$(resolve_role_model $'claude-opus-5\ngpt-6-astra' final)" = 'gpt-6-astra' ]
 # A hosted review pipeline is not a model to pin.
 if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
     echo "FAIL: Codex output includes codex-auto-review" >&2
@@ -710,7 +763,7 @@ fi
 
 # The assignment is saved, and the matrix is printed once with everything else.
 [ -f "$pin_target/.pandino/models.json" ]
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'opencode/gpt-6-astra' else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'opencode/claude-opus-5-5' else 1)" \
     "$pin_target/.pandino/models.json"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
@@ -736,10 +789,10 @@ pi_row = next(
 )
 models = re.split(r"\s{2,}", pi_row.strip())[1:]
 expected = [
-    "openai-codex/gpt-5.6-terra",
-    "ollama-cloud/deepseek-v4-flash:0731",
-    "openai-codex/gpt-5.6-sol",
-    "openai-codex/gpt-6-astra",
+    "openai-codex/gpt-6-sol",
+    "ollama-cloud/deepseek-v4.1-flash",
+    "openai-codex/gpt-6-sol",
+    "anthropic/claude-opus-5-5",
 ]
 if models != expected:
     raise SystemExit(f"unexpected Pi model matrix row: {models}")
@@ -756,12 +809,12 @@ with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-upgrade.out"
-grep -qx "model: openai-codex/gpt-5.6-sol" "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx "model: openai-codex/gpt-6-sol" "$pin_target/.pi/agents/test-reviewer.md"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if set(d['pi']) == {'implementer', 'reviewer', 'test', 'final'} else 1)" \
     "$pin_target/.pandino/models.json"
 
-# A model chosen by hand outranks the recommendation, and rewriting the pin is
-# Pandino updating its own output — not a conflict to stage.
+# Saved choices remain authoritative even after removal from recommendations.
+# Rewriting the pin updates Pandino-owned output without staging a conflict.
 python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
@@ -781,13 +834,17 @@ grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/taste-review
 grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/spec-reviewer.md"
 grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/docs-reviewer.md"
 grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/test-reviewer.md"
-# Saved final choices win over Astra; its effort override stays scoped to Astra.
+# Saved final choices win over the current recommendation.
 grep -qx 'model: anthropic/claude-opus-5' "$pin_target/.pi/agents/final-reviewer.md"
 grep -qx 'model: openai/claude-opus-5' "$pin_target/.opencode/agent/final-reviewer.md"
 grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/final-reviewer.toml"
-if grep -Eq '^(reasoningEffort:|model_reasoning_effort =)' \
-    "$pin_target/.opencode/agent/final-reviewer.md" "$pin_target/.codex/agents/final-reviewer.toml"; then
-    echo 'FAIL: Astra effort override leaked into a saved fallback model' >&2
+if grep -Eq '^(reasoningEffort:|effort:)' "$pin_target/.opencode/agent/final-reviewer.md"; then
+    echo 'FAIL: effort field leaked into an unsupported saved OpenCode model' >&2
+    exit 1
+fi
+grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/final-reviewer.toml"
+if grep -q '^forceReasoning:' "$pin_target/.opencode/agent/final-reviewer.md"; then
+    echo 'FAIL: saved OpenCode fallback has forceReasoning' >&2
     exit 1
 fi
 for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
@@ -827,9 +884,7 @@ fi
 grep -F "main model" "$tmp_dir/bare.out" > /dev/null
 
 
-# Reassigning models by hand: accept nothing, press "e", and take the second
-# offer for each of the four roles. This is also the only test that sends an
-# arrow key, which is its own escape-sequence path through the picker.
+# Reassigning models by hand: select each role's second current candidate.
 cat > "$tmp_dir/drive_customize.py" <<'PY'
 import os
 import pty
@@ -891,12 +946,13 @@ custom_home="$tmp_dir/custom-home"
 mkdir -p "$custom_home"
 env PATH="$tmp_dir/bin:/usr/bin:/bin" HOME="$custom_home" \
     "$python_bin" "$tmp_dir/drive_customize.py" "$repo_dir/install.sh" "$custom_target"
-# Each selection is the second entry of that role's preference list present in the stub catalogue.
-grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/taste-reviewer.md"
-grep -qx "model: ollama-cloud/glm-5.2" "$custom_target/.pi/agents/spec-reviewer.md"
-grep -qx "model: anthropic/claude-sonnet-5" "$custom_target/.pi/agents/implementer.md"
-grep -qx "model: anthropic/claude-sonnet-5" "$custom_target/.pi/agents/test-reviewer.md"
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['reviewer'] == 'ollama-cloud/glm-5.2' else 1)" \
+# The choices are Sonnet 5.5 for writer/test, GLM 5.3 for routine review, and Astra for final.
+grep -qx "model: ollama-cloud/glm-5.3" "$custom_target/.pi/agents/taste-reviewer.md"
+grep -qx "model: ollama-cloud/glm-5.3" "$custom_target/.pi/agents/spec-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5-5" "$custom_target/.pi/agents/implementer.md"
+grep -qx "model: anthropic/claude-sonnet-5-5" "$custom_target/.pi/agents/test-reviewer.md"
+grep -qx "model: openai-codex/gpt-6-astra" "$custom_target/.pi/agents/final-reviewer.md"
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['reviewer'] == 'ollama-cloud/glm-5.3' else 1)" \
     "$custom_target/.pandino/models.json"
 
 # Declining leaves no Backlog and no session-continuity section.
