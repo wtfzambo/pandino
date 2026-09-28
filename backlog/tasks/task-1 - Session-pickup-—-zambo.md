@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-28 20:50'
+updated_date: '2026-09-28 21:07'
 labels:
   - continuity
   - handoff
@@ -18,18 +18,17 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-28. Branch `main`; TASK-18 is Done and the user approved both commit and push. This snapshot accompanies `feat: bound reviewer effort and incremental follow-ups`, based on `b536ac199692f24e58d7beb24fcc65dd26140208`. At snapshot preparation the approved changes are dirty and not yet published; the immediate remaining operations are the single commit and push to origin/main, followed by the verification below. The implementation includes the simplified AGENTS.md instructions, reviewer20/40-turn defaults and explicit8-turn correction calls, prompt snapshots, installer assertions, doc-3 and decision-7. TASK-18 records evidence and review dispositions. Existing ignored local .pi agents and downstream installations remain unchanged.
+2026-09-28. Branch `main`; TASK-18 is Done with all five acceptance criteria checked. Implementation commit `2f856a2` (feat: bound reviewer effort and incremental follow-ups) is published on origin/main; push and clean working tree were verified. This closing update touches only TASK-18 publication notes and this pickup snapshot; its handoff commit and push complete the session. Current policy: reviewer turn defaults 20/40, explicit 8-turn correction calls, incremental follow-ups, bounded investigation, and partial verdicts at exhaustion. See TASK-18 for evidence, doc-3 for current behavior, and decision-7 for rationale. No implementation work remains active. Existing ignored local .pi agents and downstream installations were not updated.
 
 WHAT'S NEXT
-1. Verify publication: `git status -sb`, `git log --oneline -1`, and `git ls-remote --heads origin main`. A successful handoff has a clean main, the commit subject above at HEAD, and the same remote SHA. If push is still pending, complete the already-authorized publication.
-2. When requested, adopt the published policy in existing projects through the README installer/merge-candidate flow. Keep saved model choices.
-3. Calibrate20/40/8 on future real reviews; avoid an unsolicited benchmark sweep or another full review of this completed slice.
+1. When the user requests adoption in an existing project, run its `.pandino/check-update` and follow the README update/merge-candidate flow. Preserve saved model choices.
+2. Calibrate the 20/40/8 defaults from future real reviews when evidence warrants it. This completed slice needs no further review or unsolicited benchmark sweep.
 
 WAITING ON / GATED BY
-User approval is satisfied as of 2026-09-28. Publication needs the commit/push verification above. No further implementation decision is open. Hard abort after grace and workflow inheritance were source-inspected; native six-turn wrap-up and an eight-turn closed-finding/new-regression probe were exercised.
+Nothing blocks Pandino as of 2026-09-28. The user approved and requested publication. Downstream adoption remains a separate user choice. Hard abort after grace and workflow inheritance were source-inspected; native wrap-up and the closed-finding/new-regression probe were exercised.
 
 VERIFY
-TASK-18 has all five acceptance criteria checked. `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, shell syntax checks and `git diff --check` passed. The benchmark shell suite intentionally prints one fake-provider failure before PASS and does not run a real model benchmark. No time, tool-count, token or monetary cap is promised by the turn limit.
+`git status -sb` should be clean and synchronized with origin/main. `git log --oneline -2` should show the closing handoff commit above implementation commit2f856a2; `git ls-remote --heads origin main` should match local HEAD. TASK-18 is Done with all criteria checked. Installer and benchmark harness suites, shell syntax, and diff hygiene passed; the closing update changes only Backlog metadata/text. `bash tests/test_review_bench.sh` intentionally prints one fake-provider failure before PASS. No time, tool-count, token or cost guarantee is claimed by the turn limits.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF

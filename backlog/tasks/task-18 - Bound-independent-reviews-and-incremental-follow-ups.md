@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@zambo'
 created_date: '2026-09-28 16:02'
-updated_date: '2026-09-28 20:50'
+updated_date: '2026-09-28 21:07'
 labels: []
 dependencies: []
 references:
@@ -67,4 +67,6 @@ User follow-up: rewrote only the AGENTS.md Bounded reviews section as six short,
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Implemented bounded review mandates, incremental correction checks, and clearer positive instructions without changing reviewer roles/models or adding a runtime. Pi defaults are 20 ordinary / 40 final; correction calls specify 8, with the existing five-turn default grace. Added deployed-limit regression checks and synchronized benchmark prompt snapshots. Installer and benchmark harness suites, shell syntax and diff hygiene pass. Native wrap-up and a closed-finding/new-regression probe were exercised; hard abort after grace and workflow inheritance were source-inspected. Scope/docs reviews found no demonstrated defects or must-fix; minor dispositions are recorded. The user approved the final patch and authorized commit/push on 2026-09-28. Local ignored and downstream installations remain unchanged.
+
+Published on origin/main as 2f856a2 (feat: bound reviewer effort and incremental follow-ups) on 2026-09-28. Push and clean working tree were verified; session closing updates only the Backlog handoff.
 <!-- SECTION:FINAL_SUMMARY:END -->
