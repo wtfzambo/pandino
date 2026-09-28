@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-18 16:46'
+updated_date: '2026-09-28 20:50'
 labels:
   - continuity
   - handoff
@@ -18,17 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-08. Branch `main`; TASK-17 implementation commit `3398211` (`feat: prefer GPT-6 Astra high for final review`) is pushed to `origin/main`. At snapshot preparation, only this continuity refresh is dirty; its commit and push complete the handoff. TASK-17 is Done with all three acceptance criteria checked. Final review now prefers `gpt-6-astra` at high effort in pi, Codex, and OpenCode wherever their catalogues offer it. `harnesses.sh` translates the canonical setting into each native field. Claude Code keeps `opus`, other catalogues retain the previous fallback order, and saved user assignments remain authoritative. The ignored local pi agent and `.pandino/models.json` already select `openai-codex/gpt-6-astra` high. README/NOTES explain the new recommendation and adoption by existing installs. Installer regressions, shell syntax, diff hygiene, and a real isolated OpenCode agent-loader probe passed; TASK-17 records the evidence. Earlier TASK-16 purpose-driven verification and affirmative-instruction changes remain published. No implementation work is active.
+2026-09-28. Branch `main`; TASK-18 is Done and the user approved both commit and push. This snapshot accompanies `feat: bound reviewer effort and incremental follow-ups`, based on `b536ac199692f24e58d7beb24fcc65dd26140208`. At snapshot preparation the approved changes are dirty and not yet published; the immediate remaining operations are the single commit and push to origin/main, followed by the verification below. The implementation includes the simplified AGENTS.md instructions, reviewer20/40-turn defaults and explicit8-turn correction calls, prompt snapshots, installer assertions, doc-3 and decision-7. TASK-18 records evidence and review dispositions. Existing ignored local .pi agents and downstream installations remain unchanged.
 
 WHAT'S NEXT
-1. When updating a downstream repository, run its `.pandino/check-update` and follow the README update flow.
-2. To adopt Astra in an existing installation, remove only the selected harness's `final` entry from `.pandino/models.json`, rerun the installer, and resolve normal merge candidates. Saved choices otherwise remain in place.
+1. Verify publication: `git status -sb`, `git log --oneline -1`, and `git ls-remote --heads origin main`. A successful handoff has a clean main, the commit subject above at HEAD, and the same remote SHA. If push is still pending, complete the already-authorized publication.
+2. When requested, adopt the published policy in existing projects through the README installer/merge-candidate flow. Keep saved model choices.
+3. Calibrate20/40/8 on future real reviews; avoid an unsolicited benchmark sweep or another full review of this completed slice.
 
 WAITING ON / GATED BY
-Nothing blocks Pandino as of 2026-09-08. Downstream installation happens when the operator chooses that repository. Astra review quality remains an explicit operator choice, without a new benchmark claim.
+User approval is satisfied as of 2026-09-28. Publication needs the commit/push verification above. No further implementation decision is open. Hard abort after grace and workflow inheritance were source-inspected; native six-turn wrap-up and an eight-turn closed-finding/new-regression probe were exercised.
 
 VERIFY
-After this handoff, `git status -sb` is clean and synchronized with `origin/main`; `git log --oneline -2` shows the continuity commit above `3398211`. `backlog task view TASK-17 --plain` shows Done with all three acceptance criteria checked. `git diff --check`, `bash -n models.sh harnesses.sh tests/test_install.sh`, and `bash tests/test_install.sh` pass. The local pi final agent has `model: openai-codex/gpt-6-astra` and `thinking: high`, matching its saved assignment.
+TASK-18 has all five acceptance criteria checked. `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, shell syntax checks and `git diff --check` passed. The benchmark shell suite intentionally prints one fake-provider failure before PASS and does not run a real model benchmark. No time, tool-count, token or monetary cap is promised by the turn limit.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF

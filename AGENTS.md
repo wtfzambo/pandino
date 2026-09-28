@@ -90,6 +90,17 @@ Written for [pi](https://pi.dev); on another harness, apply them as role descrip
 
 The plan's author defends it by default; reviewers give independent evidence but do not replace the orchestrator's judgment of what was discussed and rejected.
 
+### Bounded reviews
+
+- **Brief the reviewer.** Supply the revision or diff, role-specific scope, existing evidence, settled findings, open questions, and budget. The reviewer chooses its checks and judges independently.
+- **Review corrections locally.** Identify what changed, which findings or evidence it affects, and which reviewer is needed. Check the fix and its consequences. Reopen settled or rejected findings only with new evidence or invalidated earlier evidence. Run one full final review; justify a repeat by a substantive change that invalidates it, within the approved budget.
+- **Keep investigation focused.** Explore beyond changed interactions, including dependencies and unchanged code, for a concrete bug hypothesis. State the question and stopping point. Report unexpected defects. The orchestrator skips redundant launches and redirects or stops redundant work.
+- **Set a budget.** Allow 20 turns for ordinary reviews, 40 for final review, and 8 for corrections. Apply limits to reviewers; preserve project-wide defaults and implementer settings. Lower budgets freely. For increases, ask the user with a decision-changing question and the extra turns requested.
+- **Conclude.** Finish when the review questions have evidence-backed answers or the budget is spent. Reserve time to report. State the verdict, evidence, proven defects, plausible risks, and unverified areas; distinguish certainty from severity. At the limit, mark the verdict provisional and get approval before continuing. Mark truncated reviews incomplete. Withhold approval when essential evidence is missing.
+- **Switch blocked checks.** After an environmental failure, allow one retry backed by a diagnosis. Then use a narrower or manual check, explain its limits, and preserve required regression coverage.
+
+**Pi enforcement.** The runner counts completed turns, warns at the limit, and aborts after its grace allowance (five turns by default). Workflows inherit reviewer frontmatter limits. Use direct `Agent(max_turns: 8, ...)` calls for corrections and explicit role-specific limits for fallback reviewers. Elapsed time, tool calls, tokens, and cost remain unbounded by this setting. Budget-increase approval depends on the orchestrator following these instructions. Other harnesses receive the budget as an instruction.
+
 ## Verification by purpose
 
 Choose verification depth by the decision the artifact must support. This rule governs test requirements, reviewer expectations, and completion checks throughout the workflow.

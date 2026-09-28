@@ -654,6 +654,16 @@ grep -q '^  edit: false' "$pin_target/.opencode/agent/fallback-runner.md"
 grep -q '^sandbox_mode = "read-only"' "$pin_target/.codex/agents/fallback-runner.toml"
 # Test review has the same inspection-only boundary in every harness.
 grep -qx 'thinking: high' "$pin_target/.pi/agents/test-reviewer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer test-reviewer; do
+    grep -qx 'max_turns: 20' "$pin_target/.pi/agents/$agent.md"
+done
+grep -qx 'max_turns: 40' "$pin_target/.pi/agents/final-reviewer.md"
+for agent in implementer fallback-runner; do
+    if grep -q '^max_turns:' "$pin_target/.pi/agents/$agent.md"; then
+        echo "FAIL: Pi $agent has a review turn limit" >&2
+        exit 1
+    fi
+done
 grep -qx 'tools: Bash,Glob,Grep,Read' "$pin_target/.claude/agents/test-reviewer.md"
 grep -q '^  write: false' "$pin_target/.opencode/agent/test-reviewer.md"
 grep -q '^  edit: false' "$pin_target/.opencode/agent/test-reviewer.md"
