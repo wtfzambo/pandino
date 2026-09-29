@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-28 22:51'
+updated_date: '2026-09-29 09:59'
 labels:
   - continuity
   - handoff
@@ -18,18 +18,23 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-29. Branch `main`; this snapshot accompanies the closing commit `feat: refresh specialist model routing`, whose parent is `bdc8c80`. Resolve its hash with `git log -1 --format=%h`. The user authorized committing all repository changes, without pushing; after the closing commit the working tree should be clean and main one commit ahead of the locally recorded origin/main. TASK-19 and TASK-20 are Done with checked acceptance criteria. The commit contains the new specialist models/native effort, removal of superseded automatic recommendations, and the Kimi correction preserving K2.6 then K2.7 Code while excluding K3. Current authority: doc-4; rationale: decision-8; OpenCode GPT6 compatibility evidence: FINDINGS.md. Saved user pins and historical benchmarks remain intact. Local ignored Pi assignments were updated earlier and remain outside Git.
+2026-09-29. Branch `main`; completed implementation commit `9b33158` (`feat: refresh specialist model routing`) follows `bdc8c80`. This snapshot accompanies the closing commit `chore: record review policy follow-ups and handoff`, with parent `9b33158`; resolve its hash with `git log -1 --format=%h`. At snapshot write, main is one commit ahead of origin/main and only the new tasks plus this handoff are uncommitted. The user authorized committing and pushing everything; the closing procedure commits these records and pushes both commits to origin/main. Expected post-publication state: clean tree and HEAD equal to origin/main; verify rather than assume push success.
+
+TASK-19 and TASK-20 are Done: specialist model/native-effort routing and automatic preference pruning are implemented, with saved pins and historical benchmarks preserved. Authority: doc-4; rationale: decision-8; OpenCode GPT6 compatibility evidence: FINDINGS.md. Ignored local Pi assignments were updated earlier and remain outside Git.
+
+Review-policy discussion is captured as future work, with no new policy or runner changes implemented: TASK-21 covers shared product onboarding and change-specific mandates; TASK-22 covers relevant specialist reviews before coherent commits and final review before merge; TASK-23 covers blocking findings, nits and deferred evidence; TASK-24 preserves the timeout investigation but is explicitly paused. Existing operational authority remains doc-3 and TASK-18 (20/40/8 turn limits).
 
 WHAT'S NEXT
-1. Run `git status -sb` and `git log --oneline -2` to verify the closing commit and clean local tree. Push only on user request.
-2. For downstream adoption, use the README update/merge flow and explicitly reset or edit saved model roles as desired. Existing saved assignments override recommendations.
-3. Investigate the pre-existing colon-tag model-picker truncation in `install.sh` only if requested; TASK-19 records it and it remains outside this completed work.
+1. Verify publication with `git status -sb`, `git log --oneline -3` and `git ls-remote origin refs/heads/main`; compare the remote hash with `git rev-parse HEAD`.
+2. When the operator resumes policy work, start with `backlog task view TASK-21 --plain` and agree the minimum onboarding questions and context home before implementation. Then address TASK-22 and TASK-23 as separately bounded slices on feature branches, settling their open decisions with the operator.
+3. Leave TASK-24 paused until explicitly reactivated. Do not migrate runners or implement wall-clock deadlines as part of TASK-21 through TASK-23.
+4. Downstream adoption of the completed model updates uses the README update/merge flow; existing saved assignments override recommendations. The unrelated colon-tag model-picker truncation in `install.sh` remains recorded in TASK-19 and outside scope.
 
 WAITING ON / GATED BY
-As of 2026-09-29, no implementation blocker remains. Push and downstream adoption await user direction. Kimi K3 is excluded at the operator request due to uncertain operation in their setup; no independent live failure is claimed. No paid inference probes or new model benchmarks were requested. Unrelated local agent bodies and review budgets remain unchanged.
+As of 2026-09-29, the operator ended this session after requesting task creation, continuity update, commit and push. Future policy work awaits resumption and agreement on the open choices captured in TASK-21 through TASK-23. Timeout and runner changes are explicitly suspended: the desired final-review ceiling is 20 minutes, but cross-harness portability and migration have not been approved or tested. Alternative runner documentation supports single-agent execution deadlines; incompatibility with Claude Code or other harnesses is not established. No live timeout probes or installations were performed. The recent model changes have not yet been operator-tested in a new target repository.
 
 VERIFY
-Final pre-commit checks passed: `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, `bash -n models.sh harnesses.sh install.sh tests/*.sh`, and `git diff --check`. The benchmark-harness suite intentionally prints one fake-provider failure before PASS. Installer regressions cover selected model/effort, preserved legacy saved pins, excluded recommendations, Kimi K2.6 priority/K2.7 Code fallback and interactive customization. TASK-19 records real-catalogue resolution, native OpenCode loader checks and local Pi pin/catalogue agreement; TASK-20 records the pruning and Kimi red-to-green checks. Old models intentionally remain in test catalogues to prove they are ignored by automatic selection. Publication state: local commit only, no push.
+For this closing slice, verify that the diff contains only Backlog task records, read back TASK-21 through TASK-24 and this snapshot, and run `git diff --cached --check` before committing. No runtime changes or new model calls require software-suite reruns for task creation. Prior implementation evidence for 9b33158: `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, `bash -n models.sh harnesses.sh install.sh tests/*.sh`, and diff hygiene passed; TASK-19/TASK-20 contain catalogue, native loading and regression details. After publication, `git status --porcelain` should be empty and HEAD should match the origin/main hash returned by `git ls-remote`.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
