@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-29 09:59'
+updated_date: '2026-09-30 15:30'
 labels:
   - continuity
   - handoff
@@ -18,23 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-29. Branch `main`; completed implementation commit `9b33158` (`feat: refresh specialist model routing`) follows `bdc8c80`. This snapshot accompanies the closing commit `chore: record review policy follow-ups and handoff`, with parent `9b33158`; resolve its hash with `git log -1 --format=%h`. At snapshot write, main is one commit ahead of origin/main and only the new tasks plus this handoff are uncommitted. The user authorized committing and pushing everything; the closing procedure commits these records and pushes both commits to origin/main. Expected post-publication state: clean tree and HEAD equal to origin/main; verify rather than assume push success.
+2026-09-30. Branch `main`; previous published commit `d7b9ee4` (`chore: record review policy follow-ups and handoff`), equal to origin/main before this session's closing commit. This session changed no code: the operator asked whether Pandino could become a pi package (pi-only, updates via `pi update --extensions`) and the analysis was captured as TASK-25. The closing commit `chore: record pi-package spike and handoff` contains only TASK-25 and this snapshot and is pushed to origin/main; resolve its hash with `git log -1 --format=%h` and verify rather than assume push success.
 
-TASK-19 and TASK-20 are Done: specialist model/native-effort routing and automatic preference pruning are implemented, with saved pins and historical benchmarks preserved. Authority: doc-4; rationale: decision-8; OpenCode GPT6 compatibility evidence: FINDINGS.md. Ignored local Pi assignments were updated earlier and remain outside Git.
-
-Review-policy discussion is captured as future work, with no new policy or runner changes implemented: TASK-21 covers shared product onboarding and change-specific mandates; TASK-22 covers relevant specialist reviews before coherent commits and final review before merge; TASK-23 covers blocking findings, nits and deferred evidence; TASK-24 preserves the timeout investigation but is explicitly paused. Existing operational authority remains doc-3 and TASK-18 (20/40/8 turn limits).
+Earlier work is unchanged. TASK-19 and TASK-20 (model/effort routing, preference pruning) are Done; authority doc-4, rationale decision-8. TASK-21 (product onboarding and change-specific mandates), TASK-22 (review checkpoints) and TASK-23 (blocking findings and nits) are open future work; TASK-24 (real review deadlines, runner portability) is explicitly paused.
 
 WHAT'S NEXT
-1. Verify publication with `git status -sb`, `git log --oneline -3` and `git ls-remote origin refs/heads/main`; compare the remote hash with `git rev-parse HEAD`.
-2. When the operator resumes policy work, start with `backlog task view TASK-21 --plain` and agree the minimum onboarding questions and context home before implementation. Then address TASK-22 and TASK-23 as separately bounded slices on feature branches, settling their open decisions with the operator.
-3. Leave TASK-24 paused until explicitly reactivated. Do not migrate runners or implement wall-clock deadlines as part of TASK-21 through TASK-23.
-4. Downstream adoption of the completed model updates uses the README update/merge flow; existing saved assignments override recommendations. The unrelated colon-tag model-picker truncation in `install.sh` remains recorded in TASK-19 and outside scope.
+1. Nothing is in progress; the operator deferred all of it on 2026-09-30. Verify publication first with `git status -sb` and `git ls-remote origin refs/heads/main` against `git rev-parse HEAD`.
+2. When the operator resumes, pick among: `backlog task view TASK-25 --plain` (pi-package spike: begin with its open risks 1-3 using a ~20-line throwaway extension, then settle the operator decisions listed there), or the policy work from `backlog task view TASK-21 --plain`.
+3. Do not start TASK-25 implementation or any installer removal before the operator approves the pi-only direction; TASK-25 is a spike that ends in a decision.
+4. Leave TASK-24 paused. The unrelated colon-tag model-picker truncation in `install.sh` stays recorded in TASK-19.
 
 WAITING ON / GATED BY
-As of 2026-09-29, the operator ended this session after requesting task creation, continuity update, commit and push. Future policy work awaits resumption and agreement on the open choices captured in TASK-21 through TASK-23. Timeout and runner changes are explicitly suspended: the desired final-review ceiling is 20 minutes, but cross-harness portability and migration have not been approved or tested. Alternative runner documentation supports single-agent execution deadlines; incompatibility with Claude Code or other harnesses is not established. No live timeout probes or installations were performed. The recent model changes have not yet been operator-tested in a new target repository.
+As of 2026-09-30, the operator's decisions on TASK-25: whether Pandino becomes pi-only, whether the core rules apply to every pi session or only in repos with `AGENTS.md` or `.git`, and whether `bench/`, `NOTES.md` and `FINDINGS.md` stay in this repo. Policy work (TASK-21 through TASK-23) awaits agreement on the open choices captured in those tasks. The recent model changes have not yet been operator-tested in a new target repository.
 
 VERIFY
-For this closing slice, verify that the diff contains only Backlog task records, read back TASK-21 through TASK-24 and this snapshot, and run `git diff --cached --check` before committing. No runtime changes or new model calls require software-suite reruns for task creation. Prior implementation evidence for 9b33158: `bash tests/test_install.sh`, `bash tests/test_review_bench.sh`, `bash -n models.sh harnesses.sh install.sh tests/*.sh`, and diff hygiene passed; TASK-19/TASK-20 contain catalogue, native loading and regression details. After publication, `git status --porcelain` should be empty and HEAD should match the origin/main hash returned by `git ls-remote`.
+`git status --porcelain` should be empty and HEAD should match `git ls-remote origin refs/heads/main`. `backlog task list --plain` should show TASK-25 in To Do with type spike and TASK-1 as this pickup. The spike's source facts can be rechecked in pi's `docs/packages.md`, `docs/extensions.md` and `.pi/npm/node_modules/@tintinweb/pi-subagents/src/custom-agents.ts` (local, git-ignored).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
