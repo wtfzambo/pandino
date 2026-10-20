@@ -1,10 +1,11 @@
 ---
 id: TASK-26
 title: Split always-on instructions into a core and on-demand playbooks
-status: To Do
+status: In Progress
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
+updated_date: '2026-10-20 16:05'
 labels:
   - instructions
   - installer
