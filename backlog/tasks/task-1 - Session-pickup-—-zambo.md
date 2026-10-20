@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-09-30 15:30'
+updated_date: '2026-10-20 20:49'
 labels:
   - continuity
   - handoff
@@ -18,21 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-09-30. Branch `main`; previous published commit `d7b9ee4` (`chore: record review policy follow-ups and handoff`), equal to origin/main before this session's closing commit. This session changed no code: the operator asked whether Pandino could become a pi package (pi-only, updates via `pi update --extensions`) and the analysis was captured as TASK-25. The closing commit `chore: record pi-package spike and handoff` contains only TASK-25 and this snapshot and is pushed to origin/main; resolve its hash with `git log -1 --format=%h` and verify rather than assume push success.
-
-Earlier work is unchanged. TASK-19 and TASK-20 (model/effort routing, preference pruning) are Done; authority doc-4, rationale decision-8. TASK-21 (product onboarding and change-specific mandates), TASK-22 (review checkpoints) and TASK-23 (blocking findings and nits) are open future work; TASK-24 (real review deadlines, runner portability) is explicitly paused.
+2026-10-20. Branch `task-26-skills-and-playbooks` (local only, not pushed), created from main at 74f889b; tree clean after the commit that records this snapshot. Work: TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and continuity skills), agreed with the operator in a long grilling session; all decisions are in the TASK-26 description. TASK-26.1 (rule inventory, 102 rows in its notes) is Done. TASK-26.2 (write core, playbooks, skills) is In Progress: content landed in commit 4e9fadd (AGENTS.md core, .pandino/playbooks/*.md, .agents/skills/pandino-{pickup,handoff}/), acceptance criteria 1, 3, 4 checked; criterion 2 (word budget) is open because the total is +24% against the agreed ~20%. DRAFT-1 holds parked ideas (explain-the-repo skill, pstack /correct, independent design candidates).
 
 WHAT'S NEXT
-1. Nothing is in progress; the operator deferred all of it on 2026-09-30. Verify publication first with `git status -sb` and `git ls-remote origin refs/heads/main` against `git rev-parse HEAD`.
-2. When the operator resumes, pick among: `backlog task view TASK-25 --plain` (pi-package spike: begin with its open risks 1-3 using a ~20-line throwaway extension, then settle the operator decisions listed there), or the policy work from `backlog task view TASK-21 --plain`.
-3. Do not start TASK-25 implementation or any installer removal before the operator approves the pi-only direction; TASK-25 is a spike that ends in a decision.
-4. Leave TASK-24 paused. The unrelated colon-tag model-picker truncation in `install.sh` stays recorded in TASK-19.
+1. Get the operator's call on the budget overshoot (accept +24% or trim review.md, the largest playbook), then finish TASK-26.2: `backlog task view TASK-26.2 --plain`.
+2. TASK-26.3: rewire agents/*.md to the core plus their playbooks and update bench prompt copies and work-dir seeding.
+3. TASK-26.4 installer, TASK-26.5 docs, TASK-26.6 probe on a speak-like-you-eat worktree plus bench rerun, in that order; ask the operator before starting each subtask.
 
 WAITING ON / GATED BY
-As of 2026-09-30, the operator's decisions on TASK-25: whether Pandino becomes pi-only, whether the core rules apply to every pi session or only in repos with `AGENTS.md` or `.git`, and whether `bench/`, `NOTES.md` and `FINDINGS.md` stay in this repo. Policy work (TASK-21 through TASK-23) awaits agreement on the open choices captured in those tasks. The recent model changes have not yet been operator-tested in a new target repository.
+As of 2026-10-20, the operator's decision on the word budget. The implementer subagent was unavailable in this session, so the main agent wrote content directly. TASK-21, TASK-24, TASK-25 remain out of scope.
 
 VERIFY
-`git status --porcelain` should be empty and HEAD should match `git ls-remote origin refs/heads/main`. `backlog task list --plain` should show TASK-25 in To Do with type spike and TASK-1 as this pickup. The spike's source facts can be rechecked in pi's `docs/packages.md`, `docs/extensions.md` and `.pi/npm/node_modules/@tintinweb/pi-subagents/src/custom-agents.ts` (local, git-ignored).
+`git status -sb` on task-26-skills-and-playbooks is clean; `git log --oneline -6` shows 4e9fadd; `bash tests/test_install.sh` prints PASS; `wc -w AGENTS.md .pandino/playbooks/*.md .agents/skills/*/SKILL.md agents/*.md` totals about 7,600.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
