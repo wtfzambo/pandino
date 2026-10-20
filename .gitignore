@@ -4,7 +4,8 @@ __pycache__/
 bench/*/results/raw/*.jsonl
 bench/*/results/raw/*.err
 
-# Pandino installed into itself: the agent definitions live in agents/ and the
-# snippets in snippets/, so the generated copies are noise.
+# Pandino installed into itself: the agent definitions live in agents/, so the
+# generated copies are noise. The playbooks are sources and stay tracked.
 .pi/
-.pandino/
+.pandino/*
+!.pandino/playbooks/

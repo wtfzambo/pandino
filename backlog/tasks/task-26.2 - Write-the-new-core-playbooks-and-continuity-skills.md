@@ -1,10 +1,11 @@
 ---
 id: TASK-26.2
 title: 'Write the new core, playbooks and continuity skills'
-status: To Do
+status: In Progress
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
+updated_date: '2026-10-20 20:36'
 labels: []
 dependencies:
   - TASK-26.1
@@ -26,3 +27,13 @@ Produce the content agreed for TASK-26: the reduced `AGENTS.md` core with its tr
 - [ ] #3 The pickup and handoff skills carry the current Session continuity text verbatim, split between them
 - [ ] #4 Instructions state desired actions; remaining prohibitions mark a safety or scope boundary
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Rewrite AGENTS.md core with the playbook index, comment and prose rules, compact tests and DoD; drop the appended pandino sections from this repo's AGENTS.md.
+2. Write .pandino/playbooks/{workflow,review,design,testing,debugging,writing,docs,parallel}.md from the inventory.
+3. Split session continuity verbatim into .agents/skills/pandino-pickup and pandino-handoff.
+4. Track .pandino/playbooks/ in git.
+5. Verify: walk the inventory, word counts, tests/test_install.sh still passes (snippets stay until TASK-26.4).
+<!-- SECTION:PLAN:END -->
