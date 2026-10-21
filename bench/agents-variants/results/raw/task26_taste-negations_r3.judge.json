@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "All three must-fix defects found; FPs: flagged the motivated 'total calls, not retries' control comment (billing.py:9-10) and an unplanted docstring complaint at billing.py:33."
+}

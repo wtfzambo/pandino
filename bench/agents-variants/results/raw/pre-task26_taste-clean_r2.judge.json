@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth says clean; findings 1-3 are concretely demonstrated real defects in the described code (suffix bypasses MAX_SLUG_LENGTH, untested branch, empty-base slug) so not false positives, but finding 4 (mid-word truncation) is a non-defect style preference counted as a false positive."
+}

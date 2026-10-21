@@ -1,0 +1,260 @@
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/debugging.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/debugging.md
+0a1,10
+> # Debugging
+> 
+> Use this playbook when you fix a bug, or a failure whose cause is unknown.
+> 
+> 1. **Reproduce it.** Find the smallest observable reproduction on the surface where the bug was reported: a command, a request, a test, or a UI step. Record the expected and the actual behavior.
+> 2. **Write the regression test first.** For a reproducible bug in shipping code, turn the reproduction into a focused test at the closest stable boundary and run it. It must fail for the reported reason; if it passes or fails for another reason, fix the test before touching the code. When the only test path is expensive, use the closest repeatable check (a script, a probe, a logged assertion) and say why. Follow `.pandino/playbooks/testing.md`.
+> 3. **Trace to the cause.** Follow the wrong value back to the first place the system went wrong. Read the real code path and the relevant external API; label every step you infer instead of observe.
+> 4. **Fix the cause.** Make the smallest change that corrects the first wrong step. A guard, retry, default, or special case is a fix only when the state it handles is legitimate; a guard that hides an illegitimate state moves the bug elsewhere. When the real cause is outside the current work, report it to the user.
+> 5. **Test the premise after two failed fixes.** When two fixes based on the same assumption have failed the same check, stop fixing. Write the assumption down and test it directly before the next attempt.
+> 6. **Confirm.** Rerun the regression test and the original reproduction. Both must now pass, and the surrounding checks must stay green.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/design.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/design.md
+0a1,26
+> # Design
+> 
+> Use this playbook to design new modules, public interfaces, or types that cross a module boundary, and to check any code against the rules in `AGENTS.md`.
+> 
+> ## Sketch new structure before code
+> 
+> 1. Write two or three real call sites first, as they will read in the codebase. Derive the types from that usage.
+> 2. Sketch the domain types, signatures, and module map with bodies that raise "not implemented". A reader should trace data from input to output through the signatures alone.
+> 3. Trace the main access patterns through the types. A pattern that needs an index or cache "added later" means the structure is wrong now.
+> 4. Screen the sketch against the red flags below and revise it.
+> 5. Put the sketch in the plan, so the user sees the shape before implementation starts.
+> 
+> ## Red flags in any code
+> 
+> - **Cleverer than the problem**: bit tricks, dense expressions, exotic control flow. Write the plain version.
+> - **Pass-through**: a layer that forwards its arguments unchanged. If deleting it removes complexity, delete it.
+> - **Single-use abstraction**: an interface, base class, factory, or helper with one trivial caller. Inline it.
+> - **Speculative generality**: parameters nothing passes, hooks nothing uses, configuration nobody asked for. Delete them.
+> - **Shallow module**: callers coordinate several calls to finish one operation. Move the coordination behind one call.
+> - **Split ownership**: two modules write the same state or keep copies of it. Give it one named owner.
+> - **Two ways to do one task**: keep one, move its callers, delete the other in the same change.
+> - **Hand-synced lists**: keep one list and derive the others.
+> - **Leaking boundaries**: wire formats, storage schemas, or framework objects past the edge. Parse them into domain types there.
+> - **Hidden side effects**: I/O, clock, randomness, or mutation inside business logic. Move them to the boundary.
+> - **Deep nesting**: more than two levels, or a happy path hidden in branches. Use guard clauses.
+> - **Comment as excuse**: a comment explaining a workaround, or a suppression in our own code. Fix the cause.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/docs.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/docs.md
+0a1,29
+> # Documents
+> 
+> Use this playbook when documented behavior changes, when a choice is worth recording, or when evidence disproves a plausible hypothesis. Write each document following `.pandino/playbooks/writing.md`.
+> 
+> ## Where each kind of knowledge lives
+> 
+> Keep one authoritative home for each kind of knowledge:
+> 
+> - Current product truth: `backlog/docs/specs/`, managed with `backlog doc` as type `specification`.
+> - Human-run procedures: `backlog/docs/runbooks/`, normally as type `guide`.
+> - Rationale and trade-offs: `backlog/decisions/`.
+> - Planned work, status, and investigation trace: `backlog/tasks/`.
+> - Durable falsified hypotheses: root `FINDINGS.md`.
+> 
+> The code is its own explanation of how it is built; specifications describe what the product promises.
+> 
+> ## When behavior changes
+> 
+> Update the specification, and add a decision for a meaningful choice. Decisions explain why a choice was made; the specification states current behavior. README and `AGENTS.md` may orient and link without duplicating authoritative product truth.
+> 
+> Create a decision with `backlog decision create "<title>" -s accepted --plain`, then fill its Context, Decision, and Consequences sections by editing the created file. This is the one exception to the Backlog rule against editing its files by hand, because the CLI offers no way to write those sections.
+> 
+> ## Findings
+> 
+> Create `FINDINGS.md` when the first qualifying finding exists. Record only durable falsified hypotheses: reproducible evidence or an authoritative source must falsify a plausible hypothesis likely to be retried and useful after the task closes. Each entry records the hypothesis, evidence, practical consequence, and links to the relevant task, specification, or decision. Leave announcements, refactors, file moves, and provisional failed attempts out. Add later evidence as a superseding finding to preserve history.
+> 
+> ## Keep it to Backlog
+> 
+> Use Backlog's own metadata and the homes listed above, and keep documents as plain files maintained by hand.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/review.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/review.md
+0a1,40
+> # Review
+> 
+> Use this playbook when you launch or brief reviewers and when you handle their findings. Reviewers inspect and report; you, the orchestrator, judge what to act on, and the plan's author defends the plan by default. Reviewers follow `.pandino/playbooks/reviewing.md`.
+> 
+> Treat the steps as a checklist. When you skip a step, say why in one line of your reply.
+> 
+> ## Steps
+> 
+> 1. **Choose the reviewers.** For substantial changes, run the relevant reviewers once near the end of a logical slice:
+>    - `taste-reviewer` and `spec-reviewer` when implementation or scope benefits from independent review;
+>    - `test-reviewer` when substantial behavior, tests, test infrastructure, or a shipping-code bug fix warrants evidence review;
+>    - `docs-reviewer` when substantial documented behavior or authority changes;
+>    - `final-reviewer` when the change as a whole (a branch against its base, or a range of commits on `main`) could fail end to end or change the decision to keep it.
+> 
+>    Run docs before final when both apply, and keep each reviewer to its role.
+> 2. **Brief each reviewer** with the template below. The reviewer chooses its checks and judges independently.
+> 3. **Set the budget**: 20 turns for ordinary reviews, 40 for final review, 8 for a correction check. Lower budgets freely. For an increase, ask the user with a decision-changing question and the extra turns requested.
+> 4. **Decide each finding.** Fix valid, in-scope, proportionate findings yourself or through the `implementer`. Reject a finding that is wrong, duplicated, out of scope, or disproportionate with a reason someone else can check against the code, the contract, or the evidence (for example "rejected: needs input above 65,535, which `parse.py:40` rejects"). Ask the user only for a remaining product, scope, or risk choice. Give every must-fix an explicit outcome, and get the user's acceptance before keeping the change with a valid must-fix unresolved. Keep report-only audits report-only until the user asks for changes.
+> 5. **Check corrections locally.** After fixing findings, identify what changed and which findings or evidence it affects, and send only that delta to the reviewer it concerns, with the 8-turn budget. Reopen settled or rejected findings only with new evidence. Run one full final review; repeat it only after a substantive change that invalidates it.
+> 6. **Record the cost.** Append each review's `Turns` line, its wall-clock minutes, and any timed-out commands to the task notes. These numbers let the user decide whether budgets or reviewers need to change; Pandino sets no baseline.
+> 
+> ## Brief template
+> 
+> ```
+> Revision: <branch against its merge base, commit range on main, or working diff>
+> Scope for this role: <what to judge; what belongs to other reviewers>
+> Task and specification: <IDs and paths>
+> Existing evidence: <checks already run and their results>
+> Settled findings: <findings already decided, with their outcome>
+> Open questions: <what you want answered>
+> Budget: <turns>
+> ```
+> 
+> ## When a reviewer cannot run
+> 
+> Use `fallback-runner` only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Give it an explicit alternate model (omitting one silently inherits yours), the failed reviewer's agent definition verbatim, this repository's `.pandino/playbooks/reviewing.md`, and the brief. Choose a model different from the writer's, and report every substitution to the user.
+> 
+> ## Limits
+> 
+> Turn budgets and the timeouts in `reviewing.md` are experimental. A turn limit stops a reviewer that keeps taking turns; it leaves a long single command or an unproductive line of inquiry unbounded. How each editor enforces the limit is described in the specialist routing and bounded review specifications.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/reviewing.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/reviewing.md
+0a1,41
+> # Reviewing
+> 
+> Use this playbook when you act as a reviewer. Your agent definition says what your role judges; this playbook says how every reviewer works and reports. You inspect and report; the orchestrator decides what to change.
+> 
+> ## Work within the brief
+> 
+> - Review the revision and scope in the brief. Leave other reviewers' scopes to them, and treat settled findings as closed unless you have new evidence.
+> - Keep the repository, files, tasks, and configuration exactly as you found them. Run only inspection commands and checks that leave them unchanged.
+> - Read beyond the changed code (dependencies, unchanged callers) for a concrete bug hypothesis. Write the question and the point where you stop, then follow it.
+> - Run every command with a timeout of at most two minutes, through the tool's timeout parameter or `timeout 120 <command>`.
+> - When a check fails for an environmental reason or times out, retry once after diagnosing the cause. Then switch to a narrower or manual check and state its limits.
+> - Track your turns against the budget. Reserve the last turns for the report.
+> 
+> ## Conclude
+> 
+> Finish when the brief's questions have evidence-backed answers or the budget is spent. At the limit, mark the verdict provisional. Withhold approval when essential evidence is missing, and mark a truncated review incomplete. Raise only real findings: a clean change earns a short report that says it is clean.
+> 
+> ## Report format
+> 
+> Use exactly this structure:
+> 
+> ```
+> ## Verdict
+> <clean | changes needed | do not merge>, followed by "provisional" when evidence or budget is incomplete
+> 
+> ## Findings
+> ### must-fix
+> - `file:line` | <demonstrated defect | plausible risk | incomplete coverage> | <what is wrong> | <the fix in one sentence> | <role field>
+> ### minor
+> - same shape
+> 
+> ## Good
+> - one or two lines on what works well
+> 
+> ## Coverage
+> - Checked: <checks you ran, with results>
+> - Unverified: <areas left open, and why>
+> - Turns: <used> of <budget>; timed-out commands: <list or none>
+> ```
+> 
+> Order findings by severity and keep certainty (the label) separate from severity (the heading). Mark findings that predate the change as pre-existing. Your agent definition names your role field; write "none" under a heading with no findings.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/testing.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/testing.md
+0a1,29
+> # Testing
+> 
+> Use this playbook to write, change, or review tests, and to choose how to verify a change.
+> 
+> ## Choose the evidence by purpose
+> 
+> Choose verification depth by the decision the artifact must support, as the Definition of done in `AGENTS.md` states. Shipping code gets meaningful tests, applicable lint and type checks, and regression-first bug fixes. Explorations are done when they answer their question. Behavior under exploration gets the narrowest test or probe that answers it, and delivery standards apply once the artifact is promoted into shipping code.
+> 
+> For shipping code, tests are maintained evidence for observable product promises. Prefer integration tests at stable boundaries, keep end-to-end coverage to critical user paths, and unit-test pure logic, tricky edge cases, and decisions hard to reach through a boundary.
+> 
+> ## Start from the invariants
+> 
+> For substantial shipping work, the planner turns the requirement into "when X, then Y" invariants and writes each as a test against the sketched interface, before the implementation exists. Run them and check they fail for the missing behavior, rather than an import error or a typo. The implementer makes them pass and adds tests for promises the implementation reveals.
+> 
+> ## Judge each test with two imagined edits
+> 
+> 1. **Break the behavior**: the code returns a wrong value, skips an effect, or performs it twice. A test that still passes proves nothing. Usual causes are an assertion looser than the contract, an expected value computed by the code under test, an assertion on data the test built itself, and a failure swallowed by the shell or test framework.
+> 2. **Change the internals**: every observable result stays the same and the code underneath is restructured. A test that now fails is pinned to the implementation. Usual causes are assertions on internal calls or their order, on private state, and on wording no caller reads.
+> 
+> Keep a test that fails under the first edit and survives the second. The second edit changes nothing a user can observe, so a test that fails there is a false alarm: it blocks refactoring and teaches people to rewrite tests until they protect nothing. Rewrite or delete the rest.
+> 
+> ## Write tests that pass both edits
+> 
+> - Drive the code through the interface its users call, with concrete input.
+> - Take expected values from an independent source: the contract, a fixture, or a result derived by hand.
+> - Assert exactly what the contract promises. An effect on an external system is behavior; a call to an internal helper is implementation. The error type callers branch on is the contract; its message usually is not.
+> - Pair a "this never happens" test with a case where it happens, so the test shows it can see the effect.
+> - Use coarse fakes at real boundaries (network, storage, clock, providers) shaped by the provider's documented contract, and real code inside them.
+> - Add a test only when it protects a promise whose breakage is a bug, beyond what types, static analysis, compilation, linting, existence checks, or a stronger test already guarantee. Use a few representative fixtures.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/workflow.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/workflow.md
+0a1,19
+> # Workflow
+> 
+> Use this playbook to plan, delegate, and close substantial implementation. The main agent plans and orchestrates; it implements small, short fixes directly and closes them with step 6.
+> 
+> Treat the steps as a checklist. When you skip a step, say why in one line of your reply.
+> 
+> ## Roles
+> 
+> The specialists `implementer`, `taste-reviewer`, `spec-reviewer`, `docs-reviewer`, `test-reviewer`, and `final-reviewer` are defined in the harness's agent directories. The implementer is the only editing role; reviewers inspect and report. Each specialist has a pinned model; retain the pin at spawn. Roles can share a model when the configured routing selects it. On a harness without subagents, apply the roles through separate sessions or one agent adopting each role; when delegation is unavailable, do the work yourself against the same definition and say so.
+> 
+> ## Steps
+> 
+> 1. **Agree a bounded plan** with the user before substantial or unclear work. Use grilling when the user asks or when an unresolved product choice that belongs to the user blocks the slice.
+> 2. **Sketch the shape** of new modules or cross-boundary interfaces with `.pandino/playbooks/design.md`, and put the sketch in the plan.
+> 3. **Write the invariants as failing tests** for shipping code, following `.pandino/playbooks/testing.md`.
+> 4. **Hand off to the implementer.** The sketch and failing tests are the verified first edit that proves the approach. Give it the approved plan; a map of the relevant files and what matters in each; rejected approaches and why; the landed first edit and its verification; the remaining steps and their checks. The implementer stops and reports when the handoff contradicts the real code.
+> 5. **Review** substantial changes once near the end of a logical slice with `.pandino/playbooks/review.md`. A change is a branch against its base or a range of commits on `main`; either works.
+> 6. **Verify and stop.** Read the diff, run proportionate checks, and trace the affected path when needed. Once current criteria and checks pass, remove dispensable work and stop.
+> 7. **Hand off the session state** with the skill `pandino-handoff` after a substantial implementation is verified.
+diff -rN --exclude AGENTS.md --exclude __pycache__ /Users/wtfzambo/mystuff/01_projects/pandino/bench/agents-variants/../implementer/tasks/adversarial-config/files/.pandino/playbooks/writing.md /var/folders/wc/wymrvc59105ftdvymsjh1_1m0000gn/T/tmp.kh5yTTP8Fx/.pandino/playbooks/writing.md
+0a1,50
+> # Writing
+> 
+> Use this playbook to write or edit documentation, specifications, decisions, README files, playbooks, or multi-line commit messages. The prose rules in `AGENTS.md` always apply.
+> 
+> ## Pick the document's mode
+> 
+> One document has one mode; move other content to its own document and link it.
+> 
+> | Document | Mode | Write |
+> |---|---|---|
+> | Specification | reference | Current promises only: behavior, options, limits, errors. Mirror the structure of the thing described. |
+> | Runbook | how-to | Steps toward one goal for a competent reader, named by the task. Forks as "If you want X, do Y". |
+> | Decision | explanation | Context, the choice, the alternatives, the consequences. Opinion belongs here. |
+> | Playbook, agent definition | how-to for an agent | Imperative steps with their trigger. Every sentence is an instruction. |
+> | README | orientation | What it is, how to start, links to the authoritative documents. |
+> 
+> ## Shape it for a reader in a hurry
+> 
+> - Make the first line say what the document is for, or the first action to take.
+> - Start with the content and end when it is done: the first sentence carries information, and the last one is the final step or fact.
+> - Number multi-step work. Each step is one action, and the list has the fewest steps that still work.
+> - Give quantities and times in concrete units ("about 15 minutes", "three files").
+> - Write a problem as its cause and its fix.
+> - Put a side topic in its own section or document and link it.
+> - Use headings that let a reader scan back to a point.
+> 
+> ## Write the sentences
+> 
+> - Use the real name of the symbol, file, flag, or command, in code font, and one name per thing everywhere.
+> - Name the actor, in active voice.
+> - Say the mechanism or the number. "A column rename fails the build" says something; "types that follow your schema" names a feeling. Cut a sentence that could appear unchanged in another project.
+> - Use the plain word, one idea per sentence, and the condition before the instruction.
+> - Introduce a list with a full sentence, and keep its items parallel.
+> - Make every count, path, and command true at the commit that lands it.
+> - Write a commit message or pull request as a briefing read in under a minute: why the change exists and what changes for the user. Link logs instead of pasting them.
+> 
+> ## Check before you finish
+> 
+> Reread and rewrite:
+> 
+> - em dashes, as a period or a comma;
+> - colons in the middle of a sentence, as two sentences (a colon stays before a list or an example);
+> - AI vocabulary (additionally, crucial, delve, enhance, foster, intricate, leverage, pivotal, robust, seamless, showcase, underscore, utilize), as the plain word;
+> - "serves as" or "boasts", as "is" or "has";
+> - "not just X, but Y", ideas forced into groups of three, and filler ("in order to", "it is important to note"), as the direct statement;
+> - stacked hedges, as one hedge that carries real uncertainty;
+> - abstract metaphors (substrate, north star, surface for an interface), as the concrete word;
+> - bold on every other phrase, decorative emoji, and chatbot phrases, by deleting them.
+> 
+> Then read only the first and the last line. A reader should know what the document is for and what to do next.

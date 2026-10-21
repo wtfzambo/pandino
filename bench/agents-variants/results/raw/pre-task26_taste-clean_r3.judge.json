@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth says clean; the review's findings (post-suffix length exceeding MAX_SLUG_LENGTH, empty-stem '-2', vacuous length test) are demonstrated real defects in the described code, so they are not false positives, but the run still fails pass criteria due to a must-fix finding."
+}

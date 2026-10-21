@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Found 4/5 must-fix (missed call-order item 5) and both minor groups; criticizing the intentional isinstance/type shape assertions counts as one false positive."
+}

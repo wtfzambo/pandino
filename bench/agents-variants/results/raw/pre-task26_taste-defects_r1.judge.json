@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found (GT1 across findings 1/3/5, GT2=finding 2, GT3=finding 7, GT4=finding 4); extra findings 6 and 8 describe real issues, not false positives."
+}

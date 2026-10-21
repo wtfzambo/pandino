@@ -3,4 +3,4 @@
 # originals (a report is expected in the transcript, not on disk).
 set -euo pipefail
 work="${1:?workdir}" orig="${2:?origdir}"
-diff -rN --exclude AGENTS.md --exclude __pycache__ "$orig" "$work"
+diff -rN --exclude AGENTS.md --exclude .pandino --exclude __pycache__ "$orig" "$work"

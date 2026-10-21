@@ -31,7 +31,7 @@ else
     pass=0
 fi
 
-diff_lines=$(diff -rN --exclude AGENTS.md --exclude __pycache__ "$task_dir/files" "$work" | grep -c '^[<>]')
+diff_lines=$(diff -rN --exclude AGENTS.md --exclude .pandino --exclude __pycache__ "$task_dir/files" "$work" | grep -c '^[<>]')
 
 metrics=$(python3 "$bench_dir/summarize.py" --one "$raw_dir/$slug.jsonl")
 echo "$model,$task,$run,$pass,$((end - start)),$metrics,$diff_lines,$pi_status" >> "$bench_dir/results/results.csv"

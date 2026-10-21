@@ -1,0 +1,24 @@
+## Verdict
+changes needed
+
+## Findings
+
+### must-fix
+- `billing.py:17` | demonstrated defect | The docstring now reads "…into cents, not a pre-parsed integer cent value." No caller would assume otherwise: this is a contrast with no likely misreading, and it pushes the line to 106 characters. Comments may only carry an external constraint, a scale limit, or a license. | Restore the original one-line docstring `"""Convert a dollar amount with two decimal places into cents."""`, which is exactly what the function does. | AGENTS.md → *Plain code* (comment policy) and *Prose* (contrast only to correct a likely misreading).
+- `billing.py:26` | demonstrated defect | `# Return not a status message, but the total in cents.` is another contrast for a misreading nobody makes; the function name, the `-> int` annotation and `total_cents` already say it. | Delete the comment. | AGENTS.md → *Plain code* (comment policy) and *Prose*.
+- `billing.py:5-6` | demonstrated defect | "calendar days, not business days" is an unnecessary contrast. The second line (the provider's aging feed includes weekends) is a legitimate external-constraint comment, but it is attached to the noise line. | Keep at most the provider line, or delete both: `age_days` is plain days and the function treats it as such. | AGENTS.md → *Plain code* (comment policy) and *Prose*.
+- `billing.py:9-10` | demonstrated defect | The comment explains our own semantics ("count total calls, not retries / the initial call plus two retries…"), which is neither external constraint, scale limit, nor license — a comment standing in for a name that does not carry the concept. It also papers over a naming mismatch: the constant says *attempt*, the parameter says *calls*. | Delete the comment and use one word for the concept — either `ATTEMPT_LIMIT` with `attempts`, or `COLLECTION_CALL_LIMIT` with `total_calls`. | AGENTS.md → *Plain code* (comment as excuse) and *Constants, duplication, abstraction* (name the concept once).
+- `billing.py:30-31` | demonstrated defect | `age_days_not_status_text` encodes a negative contrast ("not_status_text") that names nothing in the domain, and its length is what forces the signature to wrap across three lines (91 chars unwrapped, 75 with a plain name). | Rename to `age_days`; the signature then fits on one line. | AGENTS.md → *Plain code* (code explains itself) and *Prose*; `.pandino/playbooks/design.md` → "cleverer than the problem".
+
+### minor
+- `billing.py:33` | plausible risk | "…with the due window taking precedence" narrates the guard order rather than stating what the function returns; it restates the first `if`. | Say what the function returns (`"""Choose the next collection step for an invoice."""`) and let the two guards show the precedence. | AGENTS.md → *Plain code* (comment policy).
+- `billing.py:30-38` | plausible risk | The function takes a bare `age_days: int` and `total_calls: int` with no relationship expressed between them, which is fine now, but the pair "invoice age + calls already made" is exactly one domain value; nothing enforces `total_calls >= 0`. | Leave as is until a second caller exists; do not add a wrapper class yet. | AGENTS.md → *Types and contracts* (add a type when it prevents invalid states — not yet).
+
+## Good
+- `CollectionAction = Literal["wait", "stop", "collect"]` names the three outcomes as a domain type at the boundary instead of a bare `str`, and the module docstring was correctly widened from "Billing amount helpers." to "Billing helpers." now that the module holds collection logic.
+- The new tests follow the existing bare-assert style, pin both boundaries inclusively (`30 → wait`, `31,3 → stop`, `31,2 → collect`), and the `(30, 3) → wait` case actually proves the precedence rule rather than re-testing a branch.
+
+## Coverage
+- Checked: `git status`/`git diff` (unstaged, 2 files, 32 insertions, 3 deletions; no staged or untracked changes); full contents of `billing.py`, `test_billing.py`, `AGENTS.md`, `.pandino/playbooks/reviewing.md`, `design.md`, `testing.md`; `python3 -B test_billing.py` → `test_billing: PASS` (exit 0); `python3 -m py_compile` on both files → OK; line lengths via `awk` (only line 17 exceeds 88 chars); searched for formatter/linter/type-checker config and tooling — no `pyproject.toml`, `setup.cfg`, `ruff.toml`, `mypy.ini`, `tox.ini`, or `.editorconfig`, and no `ruff`/`black`/`mypy` on `PATH`, so style was judged by reading rather than by running a formatter or linter. The `__pycache__/` directory created by `py_compile` was removed afterwards; the working tree is back to the two modified files.
+- Unverified: whether `PAYMENT_DUE_DAYS`/`COLLECTION_ATTEMPT_LIMIT` values and the `>=` vs `>` semantics match the provider's aging feed — I read the diff for style and plainness only; the spec review owns whether the change does the right thing. No ruff/black/mypy run possible in this environment.
+- Turns: 8 of 30; timed-out commands: none.
