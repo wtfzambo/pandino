@@ -14,7 +14,7 @@ For substantial shipping work, the planner turns the requirement into "when X, t
 
 ## Judge each test with two imagined edits
 
-1. **Break the behavior**: the code returns a wrong value, skips an effect, or performs it twice. A test that still passes proves nothing. Usual causes are an assertion looser than the contract, an expected value computed by the code under test, an assertion on data the test built itself, and a failure swallowed by the shell or framework (a Bash `!` under `set -e`).
+1. **Break the behavior**: the code returns a wrong value, skips an effect, or performs it twice. A test that still passes proves nothing. Usual causes are an assertion looser than the contract, an expected value computed by the code under test, an assertion on data the test built itself, and a failure swallowed by the shell or test framework.
 2. **Change the internals**: every observable result stays the same and the code underneath is restructured. A test that now fails is pinned to the implementation. Usual causes are assertions on internal calls or their order, on private state, and on wording no caller reads.
 
 Keep a test that fails under the first edit and survives the second. Rewrite or delete the rest.
