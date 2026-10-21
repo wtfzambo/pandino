@@ -4,6 +4,7 @@ title: 'Deferred: evaluate real review deadlines and runner portability'
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:58'
+updated_date: '2026-10-21 16:08'
 labels:
   - review-policy
   - deferred
@@ -35,3 +36,9 @@ PAUSED by the operator on 2026-09-29. Do not begin research, installation, migra
 - [ ] #3 The proposed deadline policy specifies warning, partial-result handling, cancellation limitations and whether incomplete review gates merge or requires authorized continuation.
 - [ ] #4 Any claimed runtime guarantee is supported by a bounded direct check before adoption; this spike produces a decision and does not install or migrate runners without separate authorization.
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-20 (TASK-26 grilling): the operator floated a small programmatic orchestrator, in the spirit of pstack's orch scripts, that could own review deadlines and a heartbeat (detect a reviewer stuck in a loop or an unproductive line of inquiry). Meanwhile TASK-26 adds experimental per-command timeouts, a single retry for blocked checks, and per-review turn and minute logging in task notes.
+<!-- SECTION:NOTES:END -->
