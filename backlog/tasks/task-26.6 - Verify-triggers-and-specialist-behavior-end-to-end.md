@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 16:52'
+updated_date: '2026-10-21 22:24'
 labels: []
 dependencies:
   - TASK-26.5
@@ -23,7 +23,7 @@ The design depends on agents opening the right playbook when a trigger applies, 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 A headless pi probe in a never-pushed worktree of speak-like-you-eat with the branch installed covers session start, a bug fix, writing tests, launching a review and finishing an implementation, and each run opens the expected file
-- [ ] #2 bench/agents-variants runs the new instructions once per task, three times where results diverge, with no regression against the current variant
+- [x] #2 bench/agents-variants runs the new instructions once per task, three times where results diverge, with no regression against the current variant
 - [ ] #3 Relevant reviewers have reviewed the branch and every must-fix has a disposition
 <!-- AC:END -->
 
@@ -61,4 +61,10 @@ Benchmark (bench/agents-variants, production models deepseek-v4.1-flash for tast
 - taste-clean false positives: pre 0,1,0; task26 4,6,5. taste-negations false positives: pre 0,2,1; task26 3,5,2. All planted defects still found.
 
 Cause of the false-positive increase, from the reviews: (1) the new comment rule makes the fixtures' 'intent' comments ('Kept short so slugs stay readable', 'count total calls, not retries') violations, so reviewers flag what the fixtures call clean; (2) the reviewers raise more minor findings and some real-but-unplanted ones (unique_slug can return 61 characters past MAX_SLUG_LENGTH). AC #3 (no regression) is not met as stated; needs an operator decision.
+
+2026-10-21 rerun after operator decisions (product reasons go to specs; fixtures repaired; judge counts real defects as true findings; runs use --no-context-files to match pi-subagents, which strips AGENTS.md from specialists). Both variants on the same repaired fixtures, production models, runs rv1-rv3:
+- taste-clean false positives: pre 0,3,2; task26 0,1,2.
+- taste-negations: 3/3 found in all runs; false positives pre 2,1,3; task26 3,1,1.
+- taste-defects 4/4 both; spec-defects 4/4 both (fp 1 vs 0); test-python-defects 4/5 both; adversarial-config pass both.
+No regression. Without context files every run of both variants opened AGENTS.md itself, and every task26 run also opened its role playbooks (reviewing.md plus design.md or testing.md), including deepseek-v4.1-flash. Operator rejected pasting playbooks into agent files: each playbook is shared by several roles, so it stays a separate file the agent reads.
 <!-- SECTION:NOTES:END -->
