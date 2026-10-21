@@ -552,13 +552,19 @@ else
         "$target/.pandino/merge/AGENTS.md"
 fi
 
-rm -rf "$target/.pandino/playbooks" "$target/.pandino/snippets"
-mkdir -p "$target/.pandino"
-cp -R "$kit_dir/.pandino/playbooks" "$target/.pandino/playbooks"
-say installed "$green" "$target/.pandino/playbooks/"
+rm -rf "$target/.pandino/snippets"
+if [ "$kit_dir/.pandino/playbooks" -ef "$target/.pandino/playbooks" ]; then
+    say unchanged "$dim" "$target/.pandino/playbooks/ ${dim}(the kit's own sources)${reset}"
+else
+    rm -rf "$target/.pandino/playbooks"
+    mkdir -p "$target/.pandino"
+    cp -R "$kit_dir/.pandino/playbooks" "$target/.pandino/playbooks"
+    say installed "$green" "$target/.pandino/playbooks/"
+fi
 
 install_session_skills() {
     local skills_dir="$1" name
+    [ "$kit_dir/.agents/skills" -ef "$skills_dir" ] && return 0
     for name in pandino-pickup pandino-handoff; do
         rm -rf "$skills_dir/$name"
         mkdir -p "$skills_dir"

@@ -21,6 +21,8 @@ pi -p --no-session --no-context-files --no-extensions --no-skills --mode json \
 
 ## Implementer benchmark (`bench/implementer/`)
 
+`implementer-prompt.md` is a fixed historical prompt, kept so earlier model comparisons stay reproducible. It predates the playbooks and never tells the model to read `design.md` or `testing.md`, so it measures plan following and stopping, not playbook use.
+
 Each task is an "approved plan" (`plan.md`) the model must implement in `files/`; `check.sh` decides pass/fail objectively (provided tests, or zero-diff for the adversarial case).
 
 | task | what it probes |

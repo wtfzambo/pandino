@@ -230,6 +230,14 @@ if stat.S_IMODE(os.stat(sys.argv[2]).st_mode) != 0o700:
     raise SystemExit("check-update mode changed after failed install")
 PY
 
+# Installing the kit into itself keeps its playbook and skill sources.
+self_kit="$tmp_dir/self-kit"
+copy_kit "$self_kit"
+mkdir "$self_kit/backlog"
+bash "$self_kit/install.sh" "$self_kit" --no-input > "$tmp_dir/self.out"
+diff -r "$repo_dir/.pandino/playbooks" "$self_kit/.pandino/playbooks" > /dev/null
+diff -r "$repo_dir/.agents/skills" "$self_kit/.agents/skills" > /dev/null
+
 # A copied kit is still installable, but it has no checkout HEAD to record.
 non_git_kit="$tmp_dir/non-git-kit"
 copy_kit "$non_git_kit"
