@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-21 16:52'
+updated_date: '2026-10-21 22:45'
 labels:
   - continuity
   - handoff
@@ -18,18 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-21. Branch `task-26-skills-and-playbooks` (local only, not pushed), from main 74f889b; tree clean after the commit holding this snapshot. TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and session skills): subtasks 26.1-26.5 Done (inventory, content, specialists and benchmark wiring, installer, docs including decision-9). TASK-26.6 (verification) In Progress: trigger probe and A/B benchmark done and recorded in its notes; AC #3 (no regression) not met because taste false positives rose; branch reviews not yet run. Probe worktree /tmp/slye-probe (speak-like-you-eat, branch pandino-probe-task26, never pushed) can be deleted. DRAFT-1 holds parked ideas.
+2026-10-21. Branch `task-26-skills-and-playbooks` (local only, not pushed), from main 74f889b; tree clean after the commit holding this snapshot. TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and session skills) is implemented and verified: subtasks 26.1-26.6 Done. Trigger probe, benchmark rerun on repaired fixtures (no regression), and taste, spec, test, docs and final reviews are recorded in TASK-26.6 notes with costs; every must-fix fixed, final correction check clean. TASK-26 itself stays In Progress until the operator decides the two items below. Probe worktree /tmp/slye-probe (speak-like-you-eat, local branch pandino-probe-task26, never pushed) can be removed with `git -C ~/mystuff/01_projects/speak-like-you-eat worktree remove --force /tmp/slye-probe && git -C ~/mystuff/01_projects/speak-like-you-eat branch -D pandino-probe-task26`. DRAFT-1 holds parked ideas (explain-the-repo skill, pstack /correct, independent design candidates).
 
 WHAT'S NEXT
-1. Get the operator's decision on the taste false positives (see TASK-26.6 notes): adjust the comment rule, update the benchmark fixtures' expected.md, or accept. `backlog task view TASK-26.6 --plain`.
-2. Optionally tune the bug-fix trigger for weaker models (deepseek-v4.1-flash missed debugging.md once).
-3. Run taste, spec, docs and final review on the branch with .pandino/playbooks/review.md, decide findings, then finish TASK-26.6 and TASK-26 and ask the operator about merging to main.
+1. Operator decision: accept the always-on core at 1,322 words (agreed about 1,100) and total +28%, or trim. `backlog task view TASK-26.6 --plain`.
+2. Operator decision: merge task-26-skills-and-playbooks into main and push. Then check TASK-26 acceptance criteria and set it Done.
+3. After merge, update downstream installs (dogoscope, speak-like-you-eat, tmp-carrot) with the normal update flow in README.
 
 WAITING ON / GATED BY
-As of 2026-10-21, the operator's decision on the benchmark regression. TASK-21, TASK-24 (paused; now also holds the orchestrator and heartbeat idea), TASK-25 remain out of scope.
+As of 2026-10-21, the operator on items 1 and 2. TASK-21 (product context against off-topic research), TASK-24 (paused review deadlines, now also holding the orchestrator and heartbeat idea) and TASK-25 (pi package) remain out of scope.
 
 VERIFY
-`git status -sb` clean on task-26-skills-and-playbooks; `git log --oneline -3` shows 7703ad4 or later; `bash tests/test_install.sh` prints PASS; `PATH=/tmp/tshim:$PATH bash tests/test_review_bench.sh` prints PASS (macOS has no coreutils timeout; /tmp/tshim/timeout is a pass-through shim).
+`git status -sb` clean on task-26-skills-and-playbooks; `git log --oneline -3` shows a8663b8 or later; `bash tests/test_install.sh` prints PASS; `PATH=/tmp/tshim:$PATH bash tests/test_review_bench.sh` prints PASS (macOS lacks coreutils timeout; /tmp/tshim/timeout is a pass-through shim: `#!/bin/sh` / `shift` / `exec "$@"`).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
