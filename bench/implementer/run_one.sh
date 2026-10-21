@@ -13,6 +13,7 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 cp -R "$task_dir/files/." "$work/"
 cp "$bench_dir/../../AGENTS.md" "$work/AGENTS.md"
+mkdir -p "$work/.pandino" && cp -R "$bench_dir/../../.pandino/playbooks" "$work/.pandino/"
 
 prompt="$(cat "$task_dir/plan.md")"
 

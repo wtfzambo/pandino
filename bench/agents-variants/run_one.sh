@@ -55,9 +55,11 @@ trap 'rm -rf "$work"' EXIT
 if [[ "$role" == implementer ]]; then
     cp -R "$task_dir/files/." "$work/"
     cp "$agents_file" "$work/AGENTS.md"
+    mkdir -p "$work/.pandino" && cp -R "$bench_dir/../../.pandino/playbooks" "$work/.pandino/"
 else
     cp -R "$task_dir/base/." "$work/"
     cp "$agents_file" "$work/AGENTS.md"
+    mkdir -p "$work/.pandino" && cp -R "$bench_dir/../../.pandino/playbooks" "$work/.pandino/"
     git -C "$work" init -q
     git -C "$work" add -A
     git -C "$work" -c user.email=bench@local -c user.name=bench commit -qm base

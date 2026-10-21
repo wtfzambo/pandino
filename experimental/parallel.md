@@ -1,5 +1,7 @@
 # Parallel agents
 
+Experimental: untested and left out of installs. Copy it into a project and list it below the project marker to try it.
+
 Use this playbook for large, complex codebases where work genuinely splits across several agents at once. Give small or short-lived projects one implementer at a time. Parallelism earns its orchestration cost by reducing meaningful wall-clock time.
 
 ## Foundations first, then parallel

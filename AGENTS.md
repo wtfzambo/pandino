@@ -17,8 +17,8 @@ Apply YAGNI and KISS; optimize what is measured to need it.
 Write the plain version you would explain aloud; rewrite code smarter than its problem.
 
 - Use linear, named steps and boring control flow; express straightforward behavior directly. Guard clauses and early returns keep the happy path visually obvious. One nesting level is normal, two prompt consideration, three is the maximum.
-- Write code that explains itself, without comments. A comment stays only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. Docstrings follow the same rule; a project that needs them says so below the project marker.
-- Treat a comment that justifies a workaround in our own code, and a lint or type-check suppression, as a red flag: fix the root cause even when that costs more. When the cause lies outside the current work, report it to the user and leave the code without the excuse.
+- Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. Docstrings follow the same rule; a project that needs them says so below the project marker.
+- Treat a comment that justifies a workaround in our own code, and a lint or type-check suppression, as a red flag: fix the root cause even when that costs more. When the cause lies outside the current work, report it to the user.
 
 How to apply these rules, with red flags: `.pandino/playbooks/design.md`.
 
@@ -33,7 +33,7 @@ How to apply these rules, with red flags: `.pandino/playbooks/design.md`.
 ## Types and contracts
 
 - Model type signatures and known payloads with named domain types that say what can arrive.
-- Fix types before suppressing checker errors; keep suppressions to badly typed library edges, with one explanatory note when a whole area needs it.
+- Fix types before suppressing checker errors; limit suppressions to badly typed library edges, with one explanatory note when a whole area needs it.
 - Convert untyped library data to typed shapes where cheap and useful; focus typing on the boundary and values that benefit from it.
 - Add a type or class when it adds meaning or prevents invalid states; keep single-caller constant packaging as direct values.
 
@@ -61,19 +61,20 @@ Prefer a functional core: pure business logic, I/O at the edges.
 
 ## Prose
 
-- State desired actions first. Keep explicit prohibitions when they communicate a necessary safety or scope boundary.
-- Add a negation ("X, not Y") in comments, docs, commit messages, or identifiers only when it rules out a stated plausible misreading; delete it if nothing is lost without it.
+- Write each instruction as the action to take. Name a forbidden action only to mark a safety or scope boundary.
+- Describe each thing by what it is and does. Mention a contrast only to correct a misreading the reader is likely to make.
 - Write each paragraph on one line and leave wrapping to the editor.
 
 How to write documents, decisions, playbooks, and commit messages: `.pandino/playbooks/writing.md`.
 
 ## Agent behavior
 
-- Work from the smallest observable slice satisfying the requirement; match research, checks, and evidence to the artifact's use and consequences. Vocabulary alone does not raise risk. Research and delegate only that slice; ask before expanding an approved plan or starting future-slice work.
+- Work from the smallest observable slice satisfying the requirement; match research, checks, and evidence to the artifact's real use and consequences, whatever vocabulary its domain uses. Research and delegate only that slice; ask before expanding an approved plan or starting future-slice work.
 - Apply this necessity test to research, extra agents, artifacts, reviewer fixes, and optional work: keep an action only when the slice needs it to complete correctly and verify proportionately. Remove unshipped or unrequested artifacts that create audit or maintenance work outside the requirement. Prefer targeted changes over broad rewrites; keep the repository runnable after each slice.
 - Understand existing code and the relevant external API before editing; trace the real flow. State verified facts and label assumptions or uncertainty explicitly. When uncertain external behavior blocks the slice, resolve it via the cheapest authoritative source or direct probe.
 - Treat a request to pause or stop, or a direction question, as a workflow interrupt: stop active work, steer active agents to stop, and answer first.
-- When you mention a repository identifier to the user (task, decision, specification, or document ID), say what it is in the same sentence, for example "TASK-21 (product context for agents)"; the user may not remember what a bare ID refers to.
+- When you mention a repository item (task, decision, specification, or document) to the user, lead with what it is and put its ID in parentheses, for example "the product-context work for agents (TASK-21)". The user remembers the content; the ID is only a handle.
+- When the user corrects a mistake, look it up in the Corrections table below the project marker. If it is absent, fix it and add one row for the kind of mistake, enforced by prose. If it is present and enforced only by prose, it has repeated: fix it and propose enforcing it at the highest level that works (code structure, then types or lint, then a test). Delete a row once a check enforces it.
 - Honor explicit user requirements and safety constraints in every artifact.
 
 ## Playbooks
@@ -82,14 +83,16 @@ Before work that a line below covers, read the named file in full and follow it.
 
 - Starting or resuming work in this repository: skill `pandino-pickup` (`.agents/skills/pandino-pickup/SKILL.md`).
 - Planning substantial implementation, handing it to the `implementer`, or closing it: `.pandino/playbooks/workflow.md`.
-- Launching, briefing, or acting as a reviewer, or handling review findings: `.pandino/playbooks/review.md`.
+- Launching or briefing reviewers, or handling their findings: `.pandino/playbooks/review.md`.
+- Reviewing as a reviewer: `.pandino/playbooks/reviewing.md`.
 - Designing new modules, public interfaces, or types that cross a module boundary: `.pandino/playbooks/design.md`.
 - Writing, changing, or reviewing tests, or choosing how to verify a change: `.pandino/playbooks/testing.md`.
 - Fixing a bug, or a failure whose cause is unknown: `.pandino/playbooks/debugging.md`.
 - Writing or editing documentation, specifications, decisions, README, playbooks, or multi-line commit messages: `.pandino/playbooks/writing.md`.
 - Changing documented behavior, making a choice worth recording, or disproving a plausible hypothesis: `.pandino/playbooks/docs.md`.
-- Splitting work across agents running at the same time: `.pandino/playbooks/parallel.md`.
 - Ending a session or handing work over: skill `pandino-handoff` (`.agents/skills/pandino-handoff/SKILL.md`).
+
+The project section below the project marker may add rules to any playbook and list the project's own playbooks with their triggers; follow those lines as well. When one kind of work keeps recurring in a project, write a playbook for it outside `.pandino/`, which the installer overwrites, and add its trigger line there.
 
 ## Definition of done
 
@@ -98,8 +101,15 @@ Choose verification depth by the decision the artifact must support. Exploration
 A shipping change is complete when its behavior satisfies the requirement, the implementation reads plainly, public contracts are typed, meaningful behavior is tested (with a regression test written before the fix for a reproducible bug), and the project's applicable formatter, linter, type checker, and tests all pass. Remove dead code, secrets, debug output, and speculative machinery before completion.
 
 <!-- Project-specific sections go below this line: toolchain, domain context,
-     session continuity IDs, infra conventions. Keep them short; the principles
-     above do not change per project. -->
+     session continuity IDs, infra conventions, playbook additions. Keep them
+     short; the principles above do not change per project. -->
+
+## Corrections
+
+Mistakes the user has corrected, one row per kind of mistake. See Agent behavior for how rows are added, escalated, and deleted.
+
+| Rule | Enforced by |
+|---|---|
 
 <!-- BACKLOG.MD GUIDELINES START -->
 <!-- backlog.md-instructions-version: 1.48.0 -->

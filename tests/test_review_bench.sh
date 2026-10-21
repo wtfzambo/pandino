@@ -18,6 +18,7 @@ cp -R "$repo_dir/bench/review/tasks/test-no-test" "$bench_dir/tasks/test-no-test
 cp -R "$repo_dir/bench/review/tasks/spec-defects" "$bench_dir/tasks/spec-defects"
 cp "$repo_dir/bench/implementer/summarize.py" "$tmp_dir/bench/implementer/summarize.py"
 cp "$repo_dir/AGENTS.md" "$tmp_dir/AGENTS.md"
+mkdir -p "$tmp_dir/.pandino" && cp -R "$repo_dir/.pandino/playbooks" "$tmp_dir/.pandino/"
 printf '%s\n' 'model,role,task,run,found,total,false_positives,latency_s,input_tokens,output_tokens,cost,pi_status,thinking,minor_found,minor_total' \
     > "$bench_dir/results/results.csv"
 

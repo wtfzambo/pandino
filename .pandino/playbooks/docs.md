@@ -26,4 +26,4 @@ Create `FINDINGS.md` when the first qualifying finding exists. Record only durab
 
 ## Keep it to Backlog
 
-Use Backlog's own metadata and these files only. Pandino adds no validator, index or log generation, migration logic, or other document machinery.
+Use Backlog's own metadata and the homes listed above, and keep documents as plain files maintained by hand.
