@@ -5,6 +5,7 @@ status: Draft
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:05'
+updated_date: '2026-10-21 22:33'
 labels:
   - ideas
 dependencies: []
@@ -25,5 +26,5 @@ A mistake becomes a class once it has happened twice. Fix each class at the stro
 
 ## Independent design candidates (pstack arena and architect)
 
-Several agents with isolated contexts each sketch a design, optionally on different models, and a judge or the orchestrator picks a base with a written reason. Rejected for now: Pandino already puts the operator in the loop on the plan, and two extra subagents per design is heavy. TASK-26 adopts only the light version: a substantial design names the main alternative considered and why it was rejected.
+Several agents with isolated contexts each sketch a design, optionally on different models, and a judge or the orchestrator picks a base with a written reason. Rejected for now: Pandino already puts the operator in the loop on the plan, and two extra subagents per design is heavy. The light version (a substantial design names the main alternative considered and why it was rejected) was parked too on 2026-10-21: the alternative comes from the same agent that chose the first shape, so it adds little over the operator reviewing the sketch.
 <!-- SECTION:DESCRIPTION:END -->

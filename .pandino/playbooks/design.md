@@ -22,5 +22,5 @@ Use this playbook to design new modules, public interfaces, or types that cross 
 - **Hand-synced lists**: keep one list and derive the others.
 - **Leaking boundaries**: wire formats, storage schemas, or framework objects past the edge. Parse them into domain types there.
 - **Hidden side effects**: I/O, clock, randomness, or mutation inside business logic. Move them to the boundary.
-- **Deep nesting**: more than two levels, or a happy path hidden in branches. Use guard clauses.
+- **Deep nesting**: three levels, or a happy path hidden in branches. Use guard clauses.
 - **Comment as excuse**: a comment explaining a workaround, or a suppression in our own code. Fix the cause.

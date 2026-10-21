@@ -103,8 +103,8 @@ A shipping change is complete when its behavior satisfies the requirement, the i
 How to choose and judge the evidence: `.pandino/playbooks/testing.md`.
 
 <!-- Project-specific sections go below this line: toolchain, domain context,
-     session continuity IDs, infra conventions, playbook additions. Keep them
-     short; the principles above do not change per project. -->
+     infra conventions, playbook additions. Keep them short; the principles
+     above do not change per project. -->
 
 ## Corrections
 
