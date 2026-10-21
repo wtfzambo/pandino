@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-21 16:36'
+updated_date: '2026-10-21 16:52'
 labels:
   - continuity
   - handoff
@@ -18,19 +18,18 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-21 18:36. Repository /Users/wtfzambo/mystuff/01_projects/pandino on branch task-26-skills-and-playbooks, eabe3b1 "chore: record TASK-26.6 probe evidence and session handoff", local only with no upstream, working tree clean apart from the session-handoff edit that follows this snapshot. The active work is TASK-26, splitting the always-on instructions into a core plus on-demand playbooks. Subtasks 26.2 to 26.5 are Done. TASK-26.6 (verify triggers and specialist behavior end to end) is To Do and its criterion 1 now has evidence from two models, both recorded in its implementation notes: /private/tmp/probe_opus.json and /private/tmp/probe_ds.json. Both ran /private/tmp/probe_run.py inside /private/tmp/slye-probe, a worktree of speak-like-you-eat on local branch pandino-probe-task26 at 3a6fb69 with this branch installed at revision dce075d. The triggers matched on pickup, tests and review in both runs; the config bug fix opened debugging.md and testing.md on the first model and nothing on the second, and the plan prompt skipped docs.md on the second. bash tests/test_install.sh prints PASS and backlog doctor reports no problems. Outside this repository, speak-like-you-eat on feature/slye-tabs holds the other open line: choosing the ELI5 prompt for TASK-21 there, recorded in its own TASK-2.
+2026-10-21. Branch `task-26-skills-and-playbooks` (local only, not pushed), from main 74f889b; tree clean after the commit holding this snapshot. TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and session skills): subtasks 26.1-26.5 Done (inventory, content, specialists and benchmark wiring, installer, docs including decision-9). TASK-26.6 (verification) In Progress: trigger probe and A/B benchmark done and recorded in its notes; AC #3 (no regression) not met because taste false positives rose; branch reviews not yet run. Probe worktree /tmp/slye-probe (speak-like-you-eat, branch pandino-probe-task26, never pushed) can be deleted. DRAFT-1 holds parked ideas.
 
 WHAT'S NEXT
-1. Read both probe notes in TASK-26.6 and decide whether the six triggers pass criterion 1, in particular the bug fix that opened no playbook on the second model. Copy /private/tmp/probe_opus.json and /private/tmp/probe_ds.json somewhere durable first, since they carry no model name and /tmp is volatile.
-2. Give the benchmark regression a split-layout variant. bench/agents-variants/variants/current.md still holds an older AGENTS.md of 2,734 words and no playbooks, so add a variant holding the new core plus the playbooks its seeds need, run ./bench/agents-variants/run_one.sh <variant> <task> <run>, and compare against the current rows in bench/agents-variants/results/results.csv.
-3. Run the review round for criterion 3 with the new review procedure, then check TASK-26 criteria 2 to 5 and close TASK-26.
-4. When the probe worktree is no longer needed, remove it with git -C /Users/wtfzambo/mystuff/01_projects/speak-like-you-eat worktree remove /private/tmp/slye-probe and delete branch pandino-probe-task26. Its copy of the speak-like-you-eat pickup task still describes the merged PR #5 and should not be trusted.
+1. Get the operator's decision on the taste false positives (see TASK-26.6 notes): adjust the comment rule, update the benchmark fixtures' expected.md, or accept. `backlog task view TASK-26.6 --plain`.
+2. Optionally tune the bug-fix trigger for weaker models (deepseek-v4.1-flash missed debugging.md once).
+3. Run taste, spec, docs and final review on the branch with .pandino/playbooks/review.md, decide findings, then finish TASK-26.6 and TASK-26 and ask the operator about merging to main.
 
 WAITING ON / GATED BY
-As of 2026-10-21, the operator's judgment on the probe evidence and on whether a third model is needed. Nothing external is pending; the probes and benchmarks use the model access already configured in pi. Nothing on this branch has been pushed and no release is prepared.
+As of 2026-10-21, the operator's decision on the benchmark regression. TASK-21, TASK-24 (paused; now also holds the orchestrator and heartbeat idea), TASK-25 remain out of scope.
 
 VERIFY
-git -C /Users/wtfzambo/mystuff/01_projects/pandino status -sb is clean on task-26-skills-and-playbooks. bash tests/test_install.sh prints PASS. backlog task view TASK-26.6 --plain shows both probe notes. ls /private/tmp/probe_opus.json /private/tmp/probe_ds.json finds both. git worktree list in speak-like-you-eat shows /private/tmp/slye-probe on pandino-probe-task26 at 3a6fb69. backlog doctor reports no problems.
+`git status -sb` clean on task-26-skills-and-playbooks; `git log --oneline -3` shows 7703ad4 or later; `bash tests/test_install.sh` prints PASS; `PATH=/tmp/tshim:$PATH bash tests/test_review_bench.sh` prints PASS (macOS has no coreutils timeout; /tmp/tshim/timeout is a pass-through shim).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
