@@ -12,7 +12,7 @@ Keep one authoritative home for each kind of knowledge:
 - Planned work, status, and investigation trace: `backlog/tasks/`.
 - Durable falsified hypotheses: root `FINDINGS.md`.
 
-The code is its own explanation of how it is built; specifications describe what the product promises.
+The code is its own explanation of how it is built; specifications describe what the product promises. A threshold or domain rule with a product reason (for example a maximum length that keeps links readable) goes into the specification as a promise, and the code keeps only the named value.
 
 ## When behavior changes
 

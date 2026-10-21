@@ -2,7 +2,6 @@
 
 import re
 
-# Kept short so slugs stay readable in shared links.
 MAX_SLUG_LENGTH = 60
 
 
@@ -13,11 +12,12 @@ def slugify(title: str) -> str:
 
 
 def unique_slug(title: str, taken: set[str]) -> str:
-    """Slug for title, suffixed with -2, -3, ... if already taken."""
-    base = slugify(title)[:MAX_SLUG_LENGTH].rstrip("-")
-    if base not in taken:
-        return base
+    """Slug for title of at most MAX_SLUG_LENGTH characters, suffixed with -2, -3, ... if already taken."""
+    base = slugify(title)
+    slug = base[:MAX_SLUG_LENGTH].rstrip("-")
     n = 2
-    while f"{base}-{n}" in taken:
+    while slug in taken:
+        suffix = f"-{n}"
+        slug = base[: MAX_SLUG_LENGTH - len(suffix)].rstrip("-") + suffix
         n += 1
-    return f"{base}-{n}"
+    return slug

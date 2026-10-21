@@ -18,7 +18,7 @@ mkdir -p "$work/.pandino" && cp -R "$bench_dir/../../.pandino/playbooks" "$work/
 prompt="$(cat "$task_dir/plan.md")"
 
 start=$(date +%s)
-(cd "$work" && timeout 600 pi -p --no-session --no-extensions --no-skills \
+(cd "$work" && timeout 600 pi -p --no-session --no-context-files --no-extensions --no-skills \
     --mode json --model "$model" --thinking high \
     --append-system-prompt "$bench_dir/implementer-prompt.md" \
     "$prompt") > "$raw_dir/$slug.jsonl" 2> "$raw_dir/$slug.err"

@@ -16,7 +16,7 @@ Weigh most heavily:
 - "Scrivi codice come mangi": the code must be the plain version you would explain aloud. Treat a hunk cleverer than its problem (bit tricks, dense expressions, exotic control flow where a boring loop would do) as a finding, even when the code is correct and all tests pass. Propose the plain rewrite.
 - Speculative generality: abstractions, parameters, hooks, configurability, or optional artifacts and machinery whose deletion removes maintenance without affecting required behavior. Apply the deletion test: if deleting it makes complexity vanish rather than reappear at call sites, it is a pass-through. Propose deletion, even when the addition is well written.
 - Readability regressions: added nesting, hidden happy path, and the other red flags in `design.md`.
-- Comments: each comment in the diff must be one `AGENTS.md` allows (external constraint, accepted scale limit, license). A comment that justifies a workaround, or a lint or type-check suppression in our own code, is a finding against the code it excuses; propose the root-cause fix.
+- Comments: each comment in the diff must be one `AGENTS.md` allows (external constraint, accepted scale limit, license); a product reason belongs in the specification. A comment that justifies a workaround, or a lint or type-check suppression in our own code, is a finding against the code it excuses; propose the root-cause fix.
 - Contrasts in the diff's comments and identifiers ("X, not Y") where no reader would have assumed Y. Propose the statement of what the thing is.
 - Object ordering, naming, typing, logging, and error handling per `AGENTS.md`. Run the formatter, linter, and type checker for their rules instead of re-checking them by eye.
 

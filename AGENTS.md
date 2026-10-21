@@ -17,7 +17,7 @@ Apply YAGNI and KISS; optimize what is measured to need it.
 Write the plain version you would explain aloud; rewrite code smarter than its problem.
 
 - Use linear, named steps and boring control flow; express straightforward behavior directly. Guard clauses and early returns keep the happy path visually obvious. One nesting level is normal, two prompt consideration, three is the maximum.
-- Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. Docstrings follow the same rule; a project that needs them says so below the project marker.
+- Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. The product reason behind a threshold or domain rule belongs in the specification. Docstrings follow the same rule; a project that needs them says so below the project marker.
 - Treat a comment that justifies a workaround in our own code, and a lint or type-check suppression, as a red flag: fix the root cause even when that costs more. When the cause lies outside the current work, report it to the user.
 
 How to apply these rules, with red flags: `.pandino/playbooks/design.md`.

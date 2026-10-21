@@ -54,7 +54,7 @@ cp -R "$task_dir/changed/." "$work/"
 start=$(date +%s)
 # pi_status is retained for the shared historical CSV schema.
 if [[ "$model" == ollama-cloud/* ]]; then
-    if (cd "$work" && timeout 600 pi -p --no-session --no-extensions \
+    if (cd "$work" && timeout 600 pi -p --no-session --no-context-files --no-extensions \
         -e "$HOME/.pi/agent/npm/node_modules/pi-ollama-cloud/index.ts" --no-skills \
         --mode json --model "$model" --thinking "$thinking" \
         --append-system-prompt "$bench_dir/prompts/$role.md" \
@@ -66,7 +66,7 @@ if [[ "$model" == ollama-cloud/* ]]; then
         exit "$pi_status"
     fi
 else
-    if (cd "$work" && timeout 600 pi -p --no-session --no-extensions --no-skills \
+    if (cd "$work" && timeout 600 pi -p --no-session --no-context-files --no-extensions --no-skills \
         --mode json --model "$model" --thinking "$thinking" \
         --append-system-prompt "$bench_dir/prompts/$role.md" \
         "$prompt") > "$raw_dir/$slug.jsonl" 2> "$raw_dir/$slug.err"; then

@@ -6,8 +6,6 @@ from typing import Literal
 # The provider's daily aging feed includes weekends.
 PAYMENT_DUE_DAYS: int = 30
 
-# Collection attempts count total calls, not retries.
-# The initial call plus two retries uses all three attempts.
 COLLECTION_ATTEMPT_LIMIT: int = 3
 
 CollectionAction = Literal["wait", "stop", "collect"]
