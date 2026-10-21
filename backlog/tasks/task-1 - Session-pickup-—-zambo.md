@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-21 16:32'
+updated_date: '2026-10-21 16:36'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,19 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-21 18:45. Repository /Users/wtfzambo/mystuff/01_projects/pandino on branch task-26-skills-and-playbooks, local only with no upstream, HEAD dce075d "chore: record TASK-26.5", working tree clean. The active work is TASK-26, splitting the always-on instructions into a core plus on-demand playbooks. Subtasks 26.2, 26.3, 26.4 and 26.5 are Done as of today. TASK-26.6 (verify triggers and specialist behavior end to end) is To Do, and only its first acceptance criterion has evidence, recorded in its implementation notes. A headless probe in /private/tmp/slye-probe, a worktree of speak-like-you-eat on local branch pandino-probe-task26 at 3a6fb69 with this branch installed, opened the expected playbook or skill for all six Italian prompts. bash tests/test_install.sh prints PASS and backlog doctor reports no problems.
+2026-10-21 18:36. Repository /Users/wtfzambo/mystuff/01_projects/pandino on branch task-26-skills-and-playbooks, eabe3b1 "chore: record TASK-26.6 probe evidence and session handoff", local only with no upstream, working tree clean apart from the session-handoff edit that follows this snapshot. The active work is TASK-26, splitting the always-on instructions into a core plus on-demand playbooks. Subtasks 26.2 to 26.5 are Done. TASK-26.6 (verify triggers and specialist behavior end to end) is To Do and its criterion 1 now has evidence from two models, both recorded in its implementation notes: /private/tmp/probe_opus.json and /private/tmp/probe_ds.json. Both ran /private/tmp/probe_run.py inside /private/tmp/slye-probe, a worktree of speak-like-you-eat on local branch pandino-probe-task26 at 3a6fb69 with this branch installed at revision dce075d. The triggers matched on pickup, tests and review in both runs; the config bug fix opened debugging.md and testing.md on the first model and nothing on the second, and the plan prompt skipped docs.md on the second. bash tests/test_install.sh prints PASS and backlog doctor reports no problems. Outside this repository, speak-like-you-eat on feature/slye-tabs holds the other open line: choosing the ELI5 prompt for TASK-21 there, recorded in its own TASK-2.
 
 WHAT'S NEXT
-1. Read the probe evidence in TASK-26.6 and accept or reject it, then check criteria 1 and 2 with the evidence you accept.
-2. Re-run the probe on a second model to show the triggers are not model-specific. python3 /private/tmp/probe_run.py <provider/model> /private/tmp/probe_<name>.json.
-3. Give the benchmark regression a split-layout variant. bench/agents-variants/variants/current.md still holds an older AGENTS.md of 2,734 words and no playbooks, so add a variant holding the new core plus the playbooks its seeds need, run ./bench/agents-variants/run_one.sh <variant> <task> <run>, and compare against the current rows in bench/agents-variants/results/results.csv.
-4. Run the review round for criterion 3 with the new review procedure, then check TASK-26 criteria 2 to 5 and close TASK-26.
-5. When the probe worktree is no longer needed, remove it with git -C /Users/wtfzambo/mystuff/01_projects/speak-like-you-eat worktree remove /private/tmp/slye-probe and delete branch pandino-probe-task26.
+1. Read both probe notes in TASK-26.6 and decide whether the six triggers pass criterion 1, in particular the bug fix that opened no playbook on the second model. Copy /private/tmp/probe_opus.json and /private/tmp/probe_ds.json somewhere durable first, since they carry no model name and /tmp is volatile.
+2. Give the benchmark regression a split-layout variant. bench/agents-variants/variants/current.md still holds an older AGENTS.md of 2,734 words and no playbooks, so add a variant holding the new core plus the playbooks its seeds need, run ./bench/agents-variants/run_one.sh <variant> <task> <run>, and compare against the current rows in bench/agents-variants/results/results.csv.
+3. Run the review round for criterion 3 with the new review procedure, then check TASK-26 criteria 2 to 5 and close TASK-26.
+4. When the probe worktree is no longer needed, remove it with git -C /Users/wtfzambo/mystuff/01_projects/speak-like-you-eat worktree remove /private/tmp/slye-probe and delete branch pandino-probe-task26. Its copy of the speak-like-you-eat pickup task still describes the merged PR #5 and should not be trusted.
 
 WAITING ON / GATED BY
-As of 2026-10-21, the operator's judgment on the probe evidence and on whether a second model is required. Nothing external is pending, and the probes and benchmarks use the model access already configured in pi. Nothing on this branch has been pushed and no release is prepared.
+As of 2026-10-21, the operator's judgment on the probe evidence and on whether a third model is needed. Nothing external is pending; the probes and benchmarks use the model access already configured in pi. Nothing on this branch has been pushed and no release is prepared.
 
 VERIFY
-git -C /Users/wtfzambo/mystuff/01_projects/pandino status -sb is clean on task-26-skills-and-playbooks at dce075d. bash tests/test_install.sh prints PASS. wc -w AGENTS.md .pandino/playbooks/*.md .agents/skills/*/SKILL.md agents/*.md totals 7,783 words. backlog task view TASK-26.6 --plain shows the probe note. git worktree list in speak-like-you-eat shows /private/tmp/slye-probe at 3a6fb69.
+git -C /Users/wtfzambo/mystuff/01_projects/pandino status -sb is clean on task-26-skills-and-playbooks. bash tests/test_install.sh prints PASS. backlog task view TASK-26.6 --plain shows both probe notes. ls /private/tmp/probe_opus.json /private/tmp/probe_ds.json finds both. git worktree list in speak-like-you-eat shows /private/tmp/slye-probe on pandino-probe-task26 at 3a6fb69. backlog doctor reports no problems.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF

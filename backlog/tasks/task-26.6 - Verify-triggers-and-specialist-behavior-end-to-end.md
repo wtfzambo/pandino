@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 16:32'
+updated_date: '2026-10-21 16:36'
 labels: []
 dependencies:
   - TASK-26.5
@@ -41,4 +41,12 @@ Result, in /private/tmp/probe_opus.json. Session pickup opened pandino-pickup/SK
 Reproduce with python3 /private/tmp/probe_run.py <provider/model> /private/tmp/probe_<name>.json. The model of the recorded run is not inside the JSON, only in the file name and in that session's shell history. A second run at 18:27 aborted on a stale .git/worktrees/slye-probe/index.lock and left an empty /private/tmp/probe_sol.json, so a second model is still missing.
 
 Still open for this criterion, a second model and the operator's decision on whether this evidence passes. Criterion 2 needs an agents-variants variant for the split layout, because bench/agents-variants/variants/current.md still holds an older AGENTS.md of 2,734 words and no playbooks. Criterion 3 needs the review round.
+
+2026-10-21, second-model probe evidence, appended after the first probe note.
+
+/private/tmp/probe_ds.json, written at 18:32, holds a complete six-prompt run of /private/tmp/probe_run.py; the model appears only in the file name, deepseek-v4.1-flash. Tool calls against the watched files, per prompt: session pickup opened pandino-pickup/SKILL.md; config bug fix opened none; add tests opened .pandino/playbooks/testing.md; plan opened pandino-pickup/SKILL.md, .pandino/playbooks/workflow.md and .pandino/playbooks/design.md; review brief opened .pandino/playbooks/review.md and .pandino/playbooks/reviewing.md; handoff opened pandino-handoff/SKILL.md plus mentions of pandino-pickup and .pandino/playbooks/debugging.md.
+
+Against /private/tmp/probe_opus.json this run differs in two places: the plan prompt did not open docs.md, and the config bug fix opened no playbook where the first model opened debugging.md and testing.md. The bug fix is the trigger the criterion depends on most, so whether a run that opens nothing there passes criterion 1 is the operator's decision.
+
+Both result files keep only the last 600 characters of each final answer and no model name, so they are reproducible only by file name and shell history. Copy them out of /private/tmp before it is cleared.
 <!-- SECTION:NOTES:END -->
