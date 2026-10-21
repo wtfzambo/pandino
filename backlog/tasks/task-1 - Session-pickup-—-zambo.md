@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-20 20:49'
+updated_date: '2026-10-21 16:32'
 labels:
   - continuity
   - handoff
@@ -18,18 +18,20 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-20. Branch `task-26-skills-and-playbooks` (local only, not pushed), created from main at 74f889b; tree clean after the commit that records this snapshot. Work: TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and continuity skills), agreed with the operator in a long grilling session; all decisions are in the TASK-26 description. TASK-26.1 (rule inventory, 102 rows in its notes) is Done. TASK-26.2 (write core, playbooks, skills) is In Progress: content landed in commit 4e9fadd (AGENTS.md core, .pandino/playbooks/*.md, .agents/skills/pandino-{pickup,handoff}/), acceptance criteria 1, 3, 4 checked; criterion 2 (word budget) is open because the total is +24% against the agreed ~20%. DRAFT-1 holds parked ideas (explain-the-repo skill, pstack /correct, independent design candidates).
+2026-10-21 18:45. Repository /Users/wtfzambo/mystuff/01_projects/pandino on branch task-26-skills-and-playbooks, local only with no upstream, HEAD dce075d "chore: record TASK-26.5", working tree clean. The active work is TASK-26, splitting the always-on instructions into a core plus on-demand playbooks. Subtasks 26.2, 26.3, 26.4 and 26.5 are Done as of today. TASK-26.6 (verify triggers and specialist behavior end to end) is To Do, and only its first acceptance criterion has evidence, recorded in its implementation notes. A headless probe in /private/tmp/slye-probe, a worktree of speak-like-you-eat on local branch pandino-probe-task26 at 3a6fb69 with this branch installed, opened the expected playbook or skill for all six Italian prompts. bash tests/test_install.sh prints PASS and backlog doctor reports no problems.
 
 WHAT'S NEXT
-1. Get the operator's call on the budget overshoot (accept +24% or trim review.md, the largest playbook), then finish TASK-26.2: `backlog task view TASK-26.2 --plain`.
-2. TASK-26.3: rewire agents/*.md to the core plus their playbooks and update bench prompt copies and work-dir seeding.
-3. TASK-26.4 installer, TASK-26.5 docs, TASK-26.6 probe on a speak-like-you-eat worktree plus bench rerun, in that order; ask the operator before starting each subtask.
+1. Read the probe evidence in TASK-26.6 and accept or reject it, then check criteria 1 and 2 with the evidence you accept.
+2. Re-run the probe on a second model to show the triggers are not model-specific. python3 /private/tmp/probe_run.py <provider/model> /private/tmp/probe_<name>.json.
+3. Give the benchmark regression a split-layout variant. bench/agents-variants/variants/current.md still holds an older AGENTS.md of 2,734 words and no playbooks, so add a variant holding the new core plus the playbooks its seeds need, run ./bench/agents-variants/run_one.sh <variant> <task> <run>, and compare against the current rows in bench/agents-variants/results/results.csv.
+4. Run the review round for criterion 3 with the new review procedure, then check TASK-26 criteria 2 to 5 and close TASK-26.
+5. When the probe worktree is no longer needed, remove it with git -C /Users/wtfzambo/mystuff/01_projects/speak-like-you-eat worktree remove /private/tmp/slye-probe and delete branch pandino-probe-task26.
 
 WAITING ON / GATED BY
-As of 2026-10-20, the operator's decision on the word budget. The implementer subagent was unavailable in this session, so the main agent wrote content directly. TASK-21, TASK-24, TASK-25 remain out of scope.
+As of 2026-10-21, the operator's judgment on the probe evidence and on whether a second model is required. Nothing external is pending, and the probes and benchmarks use the model access already configured in pi. Nothing on this branch has been pushed and no release is prepared.
 
 VERIFY
-`git status -sb` on task-26-skills-and-playbooks is clean; `git log --oneline -6` shows 4e9fadd; `bash tests/test_install.sh` prints PASS; `wc -w AGENTS.md .pandino/playbooks/*.md .agents/skills/*/SKILL.md agents/*.md` totals about 7,600.
+git -C /Users/wtfzambo/mystuff/01_projects/pandino status -sb is clean on task-26-skills-and-playbooks at dce075d. bash tests/test_install.sh prints PASS. wc -w AGENTS.md .pandino/playbooks/*.md .agents/skills/*/SKILL.md agents/*.md totals 7,783 words. backlog task view TASK-26.6 --plain shows the probe note. git worktree list in speak-like-you-eat shows /private/tmp/slye-probe at 3a6fb69.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
