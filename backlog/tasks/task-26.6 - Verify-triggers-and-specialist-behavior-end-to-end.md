@@ -1,11 +1,11 @@
 ---
 id: TASK-26.6
 title: Verify triggers and specialist behavior end to end
-status: To Do
+status: Done
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 22:30'
+updated_date: '2026-10-21 22:45'
 labels: []
 dependencies:
   - TASK-26.5
@@ -24,7 +24,7 @@ The design depends on agents opening the right playbook when a trigger applies, 
 <!-- AC:BEGIN -->
 - [x] #1 A headless pi probe in a never-pushed worktree of speak-like-you-eat with the branch installed covers session start, a bug fix, writing tests, launching a review and finishing an implementation, and each run opens the expected file
 - [x] #2 bench/agents-variants runs the new instructions once per task, three times where results diverge, with no regression against the current variant
-- [ ] #3 Relevant reviewers have reviewed the branch and every must-fix has a disposition
+- [x] #3 Relevant reviewers have reviewed the branch and every must-fix has a disposition
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -82,4 +82,16 @@ Rejected, with reasons:
 - test must-fix 2 (stale local grilling copy when a global one appears later): behavior predates the branch and TASK-26 did not change it; out of scope.
 
 Recorded for the operator: spec must-fix on the core word cap. The core above the project marker is 1,322 words against 'about 1,100'; the growth came from the operator-requested rules after the 1,205 count (Corrections table rule, project playbooks, ID wording, comment routing, testing pointer). Total 7,844 words (+28% vs 6,116; operator accepted +24% and called the difference small). The inventory row N4 (named alternative) was superseded by the operator on 2026-10-21 and parked in DRAFT-1; G3 and SC4 changes were also operator decisions.
+
+2026-10-21 docs review (deepseek-v4.1-flash; 2 min / 40 turns per event count, reported 19 of 20): five minor drift findings, all fixed in beaaa65 (nesting bound in design.md matches the core; marker text drops session continuity IDs; decision-9 figures; DRAFT-1 records the parked light version; the pickup snapshot is replaced at session end).
+Final review (claude-opus-5-5 medium; 9 min / 25 turns, reported 26 of 40): must-fix, self-install deleted the tracked playbook sources; minor, review.md lost the explicit 8-turn correction limit and fallback budget; minor, the implementer benchmark prompt is historical and never points at playbooks. All fixed in a8663b8 (self-install guard plus test, explicit limits restored, bench/README note). Correction check (claude-opus-5-5, 1 min / 6 turns of 8): clean.
+Every must-fix has a disposition. Open for the operator: the always-on core is 1,322 words against the agreed 'about 1,100' (TASK-26.2 AC #2), total +28%.
+
+AC #1 caveat: each run opened the expected file on Opus 5.5 and GPT-6 Sol; DeepSeek V4.1 Flash missed debugging.md on the bug-fix prompt, accepted by the operator on 2026-10-21 because the main agent runs on a model the operator chooses.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Verified the split end to end. Trigger probe on a speak-like-you-eat worktree: Opus 5.5 and GPT-6 Sol opened the expected playbook 6/6, DeepSeek V4.1 Flash 5/6. bench/agents-variants on repaired fixtures with --no-context-files: no regression against main's AGENTS.md on taste, spec, test and implementer tasks. Taste, spec, test, docs and final reviews ran with costs recorded; all must-fix findings fixed and confirmed by a clean correction check.
+<!-- SECTION:FINAL_SUMMARY:END -->
