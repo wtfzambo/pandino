@@ -130,6 +130,8 @@ for flag, value in [
         raise SystemExit(f"contestant missing {flag} {value!r}: {contestant}")
 if contestant[-1] != "Review the uncommitted working diff for automated test evidence.":
     raise SystemExit(f"unexpected test-review prompt: {contestant[-1]!r}")
+if "--no-context-files" not in contestant:
+    raise SystemExit(f"contestant loads context files a specialist would not see: {contestant}")
 if "-e" in contestant:
     raise SystemExit(f"non-Ollama contestant loaded an extension: {contestant}")
 PY

@@ -39,6 +39,12 @@ esac
 target="${1:?usage: ./install.sh /path/to/repo [--yes|--no-input]}"
 kit_revision="unknown"
 
+if ! command -v backlog > /dev/null; then
+    printf 'error: Pandino needs Backlog.md, and the backlog command is not installed.\n' >&2
+    printf '       Install it with npm i -g backlog.md, then run this again.\n' >&2
+    exit 1
+fi
+
 # Without the kit beside the script, fetch it.
 if [ -f "$kit_dir/agents/implementer.md" ]; then
     if revision="$(git -C "$kit_dir" rev-parse HEAD 2> /dev/null)" \
@@ -65,14 +71,6 @@ fi
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
 
-# Pandino's playbooks keep tasks, decisions, and the session snapshot in
-# Backlog.md, so a repository without it needs the command to create it.
-if [ ! -d "$target/backlog" ] && ! command -v backlog > /dev/null; then
-    printf 'error: Pandino needs Backlog.md, and the backlog command is not installed.\n' >&2
-    printf '       Install it with npm i -g backlog.md, then run this again.\n' >&2
-    exit 1
-fi
-
 kit_agents=""
 trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"; [ -n "${spinner_pid:-}" ] && kill "$spinner_pid" 2> /dev/null' EXIT
 
@@ -95,11 +93,9 @@ say() { printf '  %s%-9s%s %s\n' "$2" "$1" "$reset" "$3"; }
 note() { printf '%s%s%s\n' "$dim" "$1" "$reset"; }
 step() { printf '\n  %s%s%s\n' "$bold$blue" "$1" "$reset"; }
 
-# Section heading with a rule under it, for the two option blocks.
+# Section heading for the two interactive blocks.
 heading() {
-    printf '\n  %s%s%s %s%s%s' "$bold$cyan" "$1" "$reset" "$grey" "$2" "$reset"
-    [ -n "$3" ] && printf ' %s·%s %s%s%s' "$grey" "$reset" "$4" "$3" "$reset"
-    printf '\n'
+    printf '\n  %s%s%s %s%s%s\n' "$bold$cyan" "$1" "$reset" "$grey" "$2" "$reset"
 }
 
 # Body line of an option block. Bare words wrapped in @...@ are highlighted,
@@ -293,7 +289,7 @@ printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$res
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sOne quick question, then I get out of your way.%s\n' "$grey" "$reset"
+asking && printf '\n  %sPick your editors and confirm their models, then I get out of your way.%s\n' "$grey" "$reset"
 
 global_grilling="$(global_skill_path grilling || true)"
 
@@ -303,7 +299,7 @@ case "$answer_mode" in
     --yes) picked_keys="pi claude opencode codex" ;;
     *)
         if asking; then
-            heading "Editors" "— where to put the seven helpers" "" ""
+            heading "Editors" "— where to put the seven helpers"
             body "  Ticked ones are already on your machine."
             body "  @↑↓ move, space select, enter confirm@"
             printf '\n' > /dev/tty
@@ -431,7 +427,7 @@ spinner_stop
 # Show the whole assignment at once: four pickers in a row would be a worse
 # question than the one it answers.
 if asking && [ -n "${picked_keys// /}" ]; then
-    heading "Models" "— which model runs each specialist" "" ""
+    heading "Models" "— which model runs each specialist"
     body "  A reviewer on the writer's own model is not a second opinion,"
     body "  so each specialist gets its own, from what your editors can run."
     printf '\n' > /dev/tty
@@ -493,18 +489,23 @@ write_install_provenance() {
 
 step "Core files"
 
+# Drop trailing blank lines, so files that differ only there compare equal.
+trim_trailing_blank_lines() {
+    sed -e :a -e '/^$/{$d;N;ba' -e '}'
+}
+
 # Pandino owns everything above the project marker; the project owns the
 # rest. Older installs ended the core at an appended section or Backlog's block.
 core_only() {
     awk '/<!-- Project-specific/ || /<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
-        | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+        | trim_trailing_blank_lines
 }
 
 # The project section a fresh AGENTS.md starts with: the marker and the empty
 # Corrections table, up to Backlog's own block.
 project_template() {
     awk '/<!-- BACKLOG.MD GUIDELINES/ { exit } found || /<!-- Project-specific/ { found = 1; print }' "$1" \
-        | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+        | trim_trailing_blank_lines
 }
 
 # An agent file without its model pin, so two of them can be compared for
@@ -515,16 +516,18 @@ without_model_line() {
 
 # Earlier versions appended governance, continuity, and parallel-agent
 # sections after markers of their own; playbooks and skills replace them. Each
-# section runs to the next marker, Backlog's block, or the end of the file.
+# section is its marker and one level-two heading with its body, ending at the
+# next level-two heading, the next marker, or the end of the file.
 remove_appended_sections() {
     local file="$1" cleaned
     grep -q '^<!-- pandino:[a-z-]* -->$' "$file" || return 0
     cleaned="$(mktemp)"
     awk '
-        /^<!-- pandino:[a-z-]* -->$/ { skip = 1; next }
-        /<!-- BACKLOG.MD GUIDELINES START/ { skip = 0 }
+        /^<!-- pandino:[a-z-]* -->$/ { skip = 1; titled = 0; next }
+        skip && /^<!-- / { skip = 0 }
+        skip && /^## / { if (titled) skip = 0; else { titled = 1; next } }
         !skip { print }
-    ' "$file" | sed -e :a -e '/^$/{$d;N;ba' -e '}' > "$cleaned"
+    ' "$file" | trim_trailing_blank_lines > "$cleaned"
     cat "$cleaned" > "$file"
     rm -f "$cleaned"
     say removed "$green" "earlier appended Pandino sections ${dim}from${reset} $file"
@@ -549,7 +552,6 @@ else
         "$target/.pandino/merge/AGENTS.md"
 fi
 
-# Playbooks and the session skills are Pandino's own: refresh them every run.
 rm -rf "$target/.pandino/playbooks" "$target/.pandino/snippets"
 mkdir -p "$target/.pandino"
 cp -R "$kit_dir/.pandino/playbooks" "$target/.pandino/playbooks"
@@ -653,13 +655,12 @@ step "Backlog.md"
 skipped=()
 
 if [ -d "$target/backlog" ]; then
-    # Make sure Backlog's own guidelines are in AGENTS.md too.
-    if command -v backlog > /dev/null && ! grep -q "BACKLOG.MD GUIDELINES" "$target/AGENTS.md"; then
+    if ! grep -q "BACKLOG.MD GUIDELINES" "$target/AGENTS.md"; then
         (cd "$target" && backlog init "$(basename "$target")" \
             --agent-instructions agents > /dev/null 2>&1)
         say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
     else
-        say unchanged "$dim" "$target/backlog"
+        say unchanged "$dim" "Backlog.md guidelines in $target/AGENTS.md"
     fi
 else
     # A project name and --no-git keep init from opening its own prompt.

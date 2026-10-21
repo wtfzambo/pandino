@@ -100,6 +100,8 @@ Choose verification depth by the decision the artifact must support. Exploration
 
 A shipping change is complete when its behavior satisfies the requirement, the implementation reads plainly, public contracts are typed, meaningful behavior is tested (with a regression test written before the fix for a reproducible bug), and the project's applicable formatter, linter, type checker, and tests all pass. Remove dead code, secrets, debug output, and speculative machinery before completion.
 
+How to choose and judge the evidence: `.pandino/playbooks/testing.md`.
+
 <!-- Project-specific sections go below this line: toolchain, domain context,
      session continuity IDs, infra conventions, playbook additions. Keep them
      short; the principles above do not change per project. -->

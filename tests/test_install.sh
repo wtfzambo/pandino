@@ -450,6 +450,14 @@ then
 fi
 grep -F "npm i -g backlog.md" "$tmp_dir/no-backlog.out" > /dev/null
 [ -z "$(ls -A "$no_backlog_target")" ]
+mkdir "$no_backlog_target/backlog"
+if env PATH="$tmp_dir/emptybin:/usr/bin:/bin" \
+    bash "$repo_dir/install.sh" "$no_backlog_target" --no-input > "$tmp_dir/no-backlog2.out" 2>&1
+then
+    echo "FAIL: installer ran without the backlog command in a Backlog repository" >&2
+    exit 1
+fi
+[ "$(ls -A "$no_backlog_target")" = backlog ]
 
 grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
 [ ! -e "$fresh_target/FINDINGS.md" ]
@@ -486,16 +494,29 @@ Old governance.
 ## Session continuity
 
 Old continuity.
+
+<!-- pandino:parallel-agents -->
+## Parallel implementation
+
+### Foundations first, then parallel
+
+Old parallel notes.
+
+## Release checklist
+
+Tag before publishing.
 LEGACY
 bash "$repo_dir/install.sh" "$legacy_target" --no-input > "$tmp_dir/legacy.out"
 if grep -qF '<!-- pandino:' "$legacy_target/AGENTS.md" \
     || grep -qF 'Old governance.' "$legacy_target/AGENTS.md" \
-    || grep -qF 'Old continuity.' "$legacy_target/AGENTS.md"
+    || grep -qF 'Old continuity.' "$legacy_target/AGENTS.md" \
+    || grep -qF 'Old parallel notes.' "$legacy_target/AGENTS.md"
 then
     echo "FAIL: appended Pandino sections survived the update" >&2
     exit 1
 fi
 grep -qxF 'Run make check.' "$legacy_target/AGENTS.md"
+grep -qxF 'Tag before publishing.' "$legacy_target/AGENTS.md"
 grep -qxF 'Old core rules.' "$legacy_target/AGENTS.md"
 [ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$legacy_target/AGENTS.md")" = "1" ]
 [ ! -e "$legacy_target/.pandino/snippets" ]

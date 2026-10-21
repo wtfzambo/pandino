@@ -39,7 +39,7 @@ It downloads what it needs, so there is nothing to clone. If you have a local co
 
 Pandino needs [Backlog.md](https://github.com/MrLesk/Backlog.md): agents keep tasks, decisions, and the session snapshot in `backlog/`, so the next one picks up instead of starting over. Install the command first with `npm i -g backlog.md`; the installer stops and says so when it is missing, and runs `backlog init` when the repo has no `backlog/` yet.
 
-It asks one question: **which editors?** A list of pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`. `--yes` picks all four, `--no-input` picks pi only, and without a terminal (inside an agent or CI) it takes the ticked ones. It finishes with a recap of what is now in the repo and what each piece is for.
+It asks which editors to set up, then shows the model each specialist will run on for you to accept or change. The editor list has pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`. `--yes` picks all four, `--no-input` picks pi only, and without a terminal (inside an agent or CI) it takes the ticked ones. It finishes with a recap of what is now in the repo and what each piece is for.
 
 ### What it writes
 

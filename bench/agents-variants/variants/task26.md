@@ -17,7 +17,7 @@ Apply YAGNI and KISS; optimize what is measured to need it.
 Write the plain version you would explain aloud; rewrite code smarter than its problem.
 
 - Use linear, named steps and boring control flow; express straightforward behavior directly. Guard clauses and early returns keep the happy path visually obvious. One nesting level is normal, two prompt consideration, three is the maximum.
-- Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. Docstrings follow the same rule; a project that needs them says so below the project marker.
+- Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. The product reason behind a threshold or domain rule belongs in the specification. Docstrings follow the same rule; a project that needs them says so below the project marker.
 - Treat a comment that justifies a workaround in our own code, and a lint or type-check suppression, as a red flag: fix the root cause even when that costs more. When the cause lies outside the current work, report it to the user.
 
 How to apply these rules, with red flags: `.pandino/playbooks/design.md`.
@@ -99,6 +99,8 @@ The project section below the project marker may add rules to any playbook and l
 Choose verification depth by the decision the artifact must support. Explorations, visual mockups, spikes, and throwaway prototypes are done when they answer their stated question; for a visual choice, a rendered and inspected screenshot is sufficient.
 
 A shipping change is complete when its behavior satisfies the requirement, the implementation reads plainly, public contracts are typed, meaningful behavior is tested (with a regression test written before the fix for a reproducible bug), and the project's applicable formatter, linter, type checker, and tests all pass. Remove dead code, secrets, debug output, and speculative machinery before completion.
+
+How to choose and judge the evidence: `.pandino/playbooks/testing.md`.
 
 <!-- Project-specific sections go below this line: toolchain, domain context,
      session continuity IDs, infra conventions, playbook additions. Keep them
