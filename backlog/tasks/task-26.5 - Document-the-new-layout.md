@@ -1,11 +1,11 @@
 ---
 id: TASK-26.5
 title: Document the new layout
-status: In Progress
+status: Done
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 16:16'
+updated_date: '2026-10-21 16:18'
 labels: []
 dependencies:
   - TASK-26.3
@@ -23,7 +23,13 @@ README, the testing evidence and bounded review specifications, and the installe
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 README describes what is installed, the single installer question, the update path and grilling as a suggested global skill
-- [ ] #2 Specifications cite the playbook that now holds each rule they reference
-- [ ] #3 A decision records why the split was chosen and the alternatives rejected in grilling
+- [x] #1 README describes what is installed, the single installer question, the update path and grilling as a suggested global skill
+- [x] #2 Specifications cite the playbook that now holds each rule they reference
+- [x] #3 A decision records why the split was chosen and the alternatives rejected in grilling
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+README now describes the single installer question, required Backlog.md, playbooks, session skills, the update path for older installs, and grilling and i-have-adhd as suggested global skills. Testing (doc-1) and bounded review (doc-3) specifications point to the playbooks and record invariants-first tests, the reviewer report format, cost logging and experimental timeouts. Decision-9 records the split and the rejected alternatives. Removed the snippets folder. Verified by grepping for stale snippet, AGENTS.md section and codebase-doc references (none left) and tests/test_install.sh passing.
+<!-- SECTION:FINAL_SUMMARY:END -->
