@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "All four planted defects found with spec ties; the 'discount_rate as public function' minor is not planted and not a real defect (1 FP); the test-coverage note reflects real gaps tied to planted defects."
+}

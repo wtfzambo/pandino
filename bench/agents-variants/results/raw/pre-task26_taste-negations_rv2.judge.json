@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "All three planted negation defects found and the calendar-days comment correctly kept; the total_calls/attempt_count rename (item 4) is not a planted or clearly real defect, so one false positive."
+}

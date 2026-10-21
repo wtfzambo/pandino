@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found (reduce/double-negation split across findings 1-2, comment in 2, dead branches in 3); test-coverage minor is a real, demonstrated gap, not a false positive."
+}

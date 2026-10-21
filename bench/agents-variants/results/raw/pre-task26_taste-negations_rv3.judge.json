@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 3,
+  "notes": "All three planted must-fix defects found; flagging the billing.py:5-6 control comment plus two unplanted style nits (constant annotations, parameter naming) count as false positives; item 7 self-dismissed."
+}

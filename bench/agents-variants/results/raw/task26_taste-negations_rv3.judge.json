@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "All three planted defects found; the review actionably criticized the billing.py:5-6 false-positive control comment (1 FP); the two other minor findings are plausible real code-quality issues, not counted."
+}

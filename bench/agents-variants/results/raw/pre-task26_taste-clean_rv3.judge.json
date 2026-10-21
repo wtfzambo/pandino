@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "Clean diff; must-fix #1 is a demonstrated real empty-input defect (not FP), #4 self-dismissed, but #2 (style duplication, not a defect) and #3 (test nitpick on coverage ground truth calls adequate) are false positives."
+}
