@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 16:36'
+updated_date: '2026-10-21 16:52'
 labels: []
 dependencies:
   - TASK-26.5
@@ -22,7 +22,7 @@ The design depends on agents opening the right playbook when a trigger applies, 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A headless pi probe in a never-pushed worktree of speak-like-you-eat with the branch installed covers session start, a bug fix, writing tests, launching a review and finishing an implementation, and each run opens the expected file
+- [x] #1 A headless pi probe in a never-pushed worktree of speak-like-you-eat with the branch installed covers session start, a bug fix, writing tests, launching a review and finishing an implementation, and each run opens the expected file
 - [ ] #2 bench/agents-variants runs the new instructions once per task, three times where results diverge, with no regression against the current variant
 - [ ] #3 Relevant reviewers have reviewed the branch and every must-fix has a disposition
 <!-- AC:END -->
@@ -49,4 +49,16 @@ Still open for this criterion, a second model and the operator's decision on whe
 Against /private/tmp/probe_opus.json this run differs in two places: the plan prompt did not open docs.md, and the config bug fix opened no playbook where the first model opened debugging.md and testing.md. The bug fix is the trigger the criterion depends on most, so whether a run that opens nothing there passes criterion 1 is the operator's decision.
 
 Both result files keep only the last 600 characters of each final answer and no model name, so they are reproducible only by file name and shell history. Copy them out of /private/tmp before it is cleared.
+
+2026-10-21 probe: worktree /tmp/slye-probe of speak-like-you-eat (branch pandino-probe-task26, local only, never pushed), Pandino installed from this branch over the old install (installer removed the three appended sections and snippets, staged core and agents; merged by hand). Six headless prompts per model (pickup, bug fix, tests, plan, review brief, end of session), opened files read from tool calls:
+- anthropic/claude-opus-5-5: 6/6 opened the expected file.
+- openai/gpt-6-sol: 6/6, and opened pandino-pickup first on every prompt.
+- ollama-cloud/deepseek-v4.1-flash: 5/6; the bug-fix prompt opened no playbook, and the end-of-session prompt read nearly every playbook.
+
+Benchmark (bench/agents-variants, production models deepseek-v4.1-flash for taste/spec, gpt-6-sol for test/implementer; pre-task26 = main's AGENTS.md without playbooks, task26 = this branch):
+- taste-defects 4/4 vs 4/4; spec-defects 4/4 vs 4/4; test-python-defects 4/5 vs 4/5 (fp 1 vs 0).
+- adversarial-config (implementer must stop): pre 3/3, task26 3/4. The one failure was the zero-diff check counting the seeded .pandino/ playbooks as a change; the transcript shows the implementer stopped correctly. check.sh now excludes .pandino; rerun r1b passes.
+- taste-clean false positives: pre 0,1,0; task26 4,6,5. taste-negations false positives: pre 0,2,1; task26 3,5,2. All planted defects still found.
+
+Cause of the false-positive increase, from the reviews: (1) the new comment rule makes the fixtures' 'intent' comments ('Kept short so slugs stay readable', 'count total calls, not retries') violations, so reviewers flag what the fixtures call clean; (2) the reviewers raise more minor findings and some real-but-unplanted ones (unique_slug can return 61 characters past MAX_SLUG_LENGTH). AC #3 (no regression) is not met as stated; needs an operator decision.
 <!-- SECTION:NOTES:END -->
