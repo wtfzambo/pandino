@@ -3,15 +3,14 @@ set -euo pipefail
 
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
 
-# What the installer is expected to write: the kit's AGENTS.md up to the
-# first appended section.
+# The Pandino-owned part of an AGENTS.md: everything above the project marker.
 # An agent file as the kit ships it: the installed copy differs only by the
 # model line the installer pins in.
 agent_without_pin() {
     grep -v '^model: ' "$1"
 }
 core_agents() {
-    awk '/<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
+    awk '/<!-- Project-specific/ || /<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
         | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
 copy_kit() {
@@ -24,7 +23,7 @@ copy_kit() {
         "$repo_dir/install.sh" \
         "$repo_dir/models.sh" \
         "$destination/"
-    cp -R "$repo_dir/agents" "$repo_dir/snippets" "$destination/"
+    cp -R "$repo_dir/agents" "$repo_dir/.pandino" "$repo_dir/.agents" "$destination/"
 }
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -75,7 +74,8 @@ BLOCK
 exit 0
 STUB
 chmod +x "$tmp_dir/bin/curl" "$tmp_dir/bin/pi" "$tmp_dir/bin/backlog"
-mkdir -p "$tmp_dir/emptybin"
+mkdir -p "$tmp_dir/emptybin" "$tmp_dir/backlogbin"
+cp "$tmp_dir/bin/backlog" "$tmp_dir/backlogbin/backlog"
 export PATH="$tmp_dir/bin:$PATH"
 python_bin="$(command -v python3)"
 
@@ -160,7 +160,10 @@ grep -qx 'thinking: high' "$fresh_target/.pi/agents/test-reviewer.md"
 grep -qx 'model: anthropic/claude-opus-5-5' "$fresh_target/.pi/agents/final-reviewer.md"
 grep -qx 'thinking: medium' "$fresh_target/.pi/agents/final-reviewer.md"
 
-diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
+diff -q <(core_agents "$repo_dir/AGENTS.md") <(core_agents "$fresh_target/AGENTS.md") > /dev/null
+grep -qxF '## Corrections' "$fresh_target/AGENTS.md"
+grep -qF 'BACKLOG.MD GUIDELINES START' "$fresh_target/AGENTS.md"
+[ -d "$fresh_target/backlog" ]
 for agent in implementer spec-reviewer taste-reviewer docs-reviewer test-reviewer final-reviewer fallback-runner; do
     diff -q <(agent_without_pin "$repo_dir/agents/$agent.md") \
         <(agent_without_pin "$fresh_target/.pi/agents/$agent.md") > /dev/null
@@ -170,9 +173,10 @@ if grep -q '^model: ' "$fresh_target/.pi/agents/fallback-runner.md"; then
     exit 1
 fi
 [ ! -e "$fresh_target/.pandino/merge" ]
-cmp -s "$repo_dir/snippets/session-continuity.md" "$fresh_target/.pandino/snippets/session-continuity.md"
-cmp -s "$repo_dir/snippets/parallel-agents.md" "$fresh_target/.pandino/snippets/parallel-agents.md"
-cmp -s "$repo_dir/snippets/document-governance.md" "$fresh_target/.pandino/snippets/document-governance.md"
+diff -r "$repo_dir/.pandino/playbooks" "$fresh_target/.pandino/playbooks" > /dev/null
+diff -r "$repo_dir/.agents/skills" "$fresh_target/.agents/skills" > /dev/null
+[ ! -e "$fresh_target/.pandino/snippets" ]
+[ ! -e "$fresh_target/.claude/skills" ]
 cat > "$tmp_dir/expected-install.json" <<EOF
 {
   "repository": "https://github.com/wtfzambo/pandino",
@@ -411,15 +415,20 @@ cp "$merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/existing-taste-reviewe
 bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/merge.out"
 
 cmp -s "$tmp_dir/expected-install.json" "$merge_target/.pandino/install.json"
-cmp -s "$tmp_dir/existing-AGENTS.md" "$merge_target/AGENTS.md"
+# Backlog appends its own block; the project's text stays as it was.
+[ "$(head -1 "$merge_target/AGENTS.md")" = 'existing project instructions' ]
+if grep -qxF '## Core standard' "$merge_target/AGENTS.md"; then
+    echo "FAIL: installer merged the core into an existing AGENTS.md" >&2
+    exit 1
+fi
 cmp -s "$tmp_dir/existing-taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
-diff -q <(core_agents "$repo_dir/AGENTS.md") "$merge_target/.pandino/merge/AGENTS.md" > /dev/null
+diff -q <(core_agents "$repo_dir/AGENTS.md") <(core_agents "$merge_target/.pandino/merge/AGENTS.md") > /dev/null
 diff -q <(agent_without_pin "$repo_dir/agents/taste-reviewer.md") \
     <(agent_without_pin "$merge_target/.pandino/merge/agents/taste-reviewer.md") > /dev/null
 grep -E "staged +$merge_target/.pandino/merge/AGENTS.md for $merge_target/AGENTS.md" "$tmp_dir/merge.out" > /dev/null
 grep -E "staged +$merge_target/.pandino/merge/agents/taste-reviewer.md for $merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/merge.out" > /dev/null
 
-core_agents "$repo_dir/AGENTS.md" > "$merge_target/AGENTS.md"
+cp "$merge_target/.pandino/merge/AGENTS.md" "$merge_target/AGENTS.md"
 cp "$repo_dir/agents/taste-reviewer.md" "$merge_target/.pi/agents/taste-reviewer.md"
 bash "$repo_dir/install.sh" "$merge_target" --no-input > "$tmp_dir/resolved.out"
 [ ! -e "$merge_target/.pandino/merge" ]
@@ -429,29 +438,82 @@ grep -E "unchanged +$merge_target/AGENTS.md" "$tmp_dir/resolved.out" > /dev/null
 grep -E "updated +$merge_target/.pi/agents/taste-reviewer.md" "$tmp_dir/resolved.out" > /dev/null
 grep -q "^model: " "$merge_target/.pi/agents/taste-reviewer.md"
 
-# --no-input must leave AGENTS.md untouched and report the skipped add-ons.
-[ ! -e "$fresh_target/backlog" ]
-grep -F "Skipped, in case you want them later:" "$tmp_dir/fresh.out" > /dev/null
-grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
-# The recap lists only what was installed: declining leaves no skill behind.
-[ ! -e "$fresh_target/.pi/skills/i-have-adhd" ]
-diff -q <(core_agents "$repo_dir/AGENTS.md") "$fresh_target/AGENTS.md" > /dev/null
-[ ! -e "$fresh_target/FINDINGS.md" ]
-if grep -qF "pandino:document-governance" "$fresh_target/AGENTS.md"; then
-    echo "FAIL: --no-input appended document-governance" >&2
+# Backlog.md is required: without the command and without backlog/, the
+# installer stops before writing anything.
+no_backlog_target="$tmp_dir/no-backlog"
+mkdir "$no_backlog_target"
+if env PATH="$tmp_dir/emptybin:/usr/bin:/bin" \
+    bash "$repo_dir/install.sh" "$no_backlog_target" --no-input > "$tmp_dir/no-backlog.out" 2>&1
+then
+    echo "FAIL: installer ran without the backlog command" >&2
     exit 1
 fi
+grep -F "npm i -g backlog.md" "$tmp_dir/no-backlog.out" > /dev/null
+[ -z "$(ls -A "$no_backlog_target")" ]
 
-# --yes appends each snippet exactly once, and re-running does not duplicate
-# them or mistake Pandino's own additions for a local conflict.
+grep -F "What you now have:" "$tmp_dir/fresh.out" > /dev/null
+[ ! -e "$fresh_target/FINDINGS.md" ]
+
+# An install from an earlier version: appended Pandino sections, the old
+# snippets folder, and project rules. The update removes the sections and the
+# folder, keeps the project rules and Backlog's block, and stages the new core.
+legacy_target="$tmp_dir/legacy"
+mkdir -p "$legacy_target/.pandino/snippets" "$legacy_target/backlog"
+printf '%s\n' 'old snippet' > "$legacy_target/.pandino/snippets/session-continuity.md"
+cat > "$legacy_target/AGENTS.md" <<'LEGACY'
+# AGENTS.md
+
+## Core standard
+
+Old core rules.
+
+<!-- Project-specific sections go below this line. -->
+
+## Toolchain
+
+Run make check.
+
+<!-- BACKLOG.MD GUIDELINES START -->
+stub guidelines
+<!-- BACKLOG.MD GUIDELINES END -->
+
+<!-- pandino:document-governance -->
+## Document governance
+
+Old governance.
+
+<!-- pandino:session-continuity -->
+## Session continuity
+
+Old continuity.
+LEGACY
+bash "$repo_dir/install.sh" "$legacy_target" --no-input > "$tmp_dir/legacy.out"
+if grep -qF '<!-- pandino:' "$legacy_target/AGENTS.md" \
+    || grep -qF 'Old governance.' "$legacy_target/AGENTS.md" \
+    || grep -qF 'Old continuity.' "$legacy_target/AGENTS.md"
+then
+    echo "FAIL: appended Pandino sections survived the update" >&2
+    exit 1
+fi
+grep -qxF 'Run make check.' "$legacy_target/AGENTS.md"
+grep -qxF 'Old core rules.' "$legacy_target/AGENTS.md"
+[ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$legacy_target/AGENTS.md")" = "1" ]
+[ ! -e "$legacy_target/.pandino/snippets" ]
+diff -q <(core_agents "$repo_dir/AGENTS.md") <(core_agents "$legacy_target/.pandino/merge/AGENTS.md") > /dev/null
+grep -E "removed +earlier appended Pandino sections" "$tmp_dir/legacy.out" > /dev/null
+
+# Playbooks and session skills are Pandino's: a re-run restores local edits.
+printf '%s\n' 'local edit' >> "$legacy_target/.pandino/playbooks/testing.md"
+rm -rf "$legacy_target/.agents/skills/pandino-pickup"
+bash "$repo_dir/install.sh" "$legacy_target" --no-input > "$tmp_dir/legacy2.out"
+diff -r "$repo_dir/.pandino/playbooks" "$legacy_target/.pandino/playbooks" > /dev/null
+diff -r "$repo_dir/.agents/skills" "$legacy_target/.agents/skills" > /dev/null
+
+# --yes sets up every editor; a re-run leaves an unchanged core alone.
 yes_target="$tmp_dir/yes"
 mkdir "$yes_target"
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes.out"
-grep -E "appended +document-governance" "$tmp_dir/yes.out" > /dev/null
-grep -E "appended +session-continuity" "$tmp_dir/yes.out" > /dev/null
-grep -E "appended +parallel-agents" "$tmp_dir/yes.out" > /dev/null
-[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "3" ]
-grep -F "Current product truth: \`backlog/docs/specs/\`" "$yes_target/AGENTS.md" > /dev/null
+diff -r "$repo_dir/.agents/skills" "$yes_target/.claude/skills" > /dev/null
 [ ! -e "$yes_target/FINDINGS.md" ]
 
 # Without a terminal, the installed editors are preselected. If only pi is
@@ -466,8 +528,8 @@ env PATH="$tmp_dir/bin:/usr/bin:/bin" \
 [ ! -e "$fallback_target/.opencode" ]
 [ ! -e "$fallback_target/.codex" ]
 
-# Exercise the same case through a real pseudo-terminal: decline the first
-# three questions, then press Enter with only pi preselected in the picker.
+# Exercise the same case through a real pseudo-terminal: press Enter with only
+# pi preselected in the picker.
 cat > "$tmp_dir/drive_interactive.py" <<'PY'
 import os
 import pty
@@ -482,9 +544,6 @@ if pid == 0:
 
 data = b""
 for prompt, reply in [
-    (b"Set up Backlog.md?", b"n\r"),
-    (b"Add the parallel-agent notes?", b"n\r"),
-    (b"Add the i-have-adhd skill?", b"n\r"),
     (b"enter confirm", b"\r"),
     (b"accept", b"\r"),
 ]:
@@ -571,9 +630,6 @@ fi
 [ -f "$yes_target/.opencode/agent/implementer.md" ]
 grep -q "^name: implementer" "$yes_target/.claude/agents/implementer.md"
 grep -q "^mode: subagent" "$yes_target/.opencode/agent/taste-reviewer.md"
-# --yes takes the skill too, and the recap names it.
-[ -f "$yes_target/.pi/skills/i-have-adhd/SKILL.md" ]
-grep -F ".pi/skills/i-have-adhd/" "$tmp_dir/yes.out" > /dev/null
 [ -f "$yes_target/.codex/agents/implementer.toml" ]
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/taste-reviewer.toml"
 grep -q '^sandbox_mode = "read-only"' "$yes_target/.codex/agents/docs-reviewer.toml"
@@ -584,33 +640,22 @@ python3 -c "import tomllib,sys; [tomllib.load(open(f,'rb')) for f in sys.argv[1:
 grep -q "You are the taste reviewer" "$yes_target/.claude/agents/taste-reviewer.md"
 grep -q "You are the test reviewer" "$yes_target/.claude/agents/test-reviewer.md"
 
-# Backlog.md comes with task tracking, its own guidelines, and session
-# continuity — the section is meaningless without it.
 [ -d "$yes_target/backlog" ]
-grep -F "BACKLOG.MD GUIDELINES" "$yes_target/AGENTS.md" > /dev/null
-
 bash "$repo_dir/install.sh" "$yes_target" --yes > "$tmp_dir/yes2.out"
-[ "$(grep -c '<!-- pandino:' "$yes_target/AGENTS.md")" = "3" ]
-[ "$(grep -c '<!-- pandino:document-governance -->' "$yes_target/AGENTS.md")" = "1" ]
 [ "$(grep -c 'BACKLOG.MD GUIDELINES START' "$yes_target/AGENTS.md")" = "1" ]
 grep -E "unchanged +$yes_target/AGENTS.md" "$tmp_dir/yes2.out" > /dev/null
 [ ! -e "$yes_target/.pandino/merge" ]
 
-# Skills already available in pi's global locations are reused, not copied
-# into every project.
+# A grilling skill already in pi's global locations is reused, so the
+# project gets no copy of its own.
 global_home="$tmp_dir/global-home"
-mkdir -p \
-    "$global_home/.pi/agent/skills/grilling" \
-    "$global_home/.agents/skills/i-have-adhd"
+mkdir -p "$global_home/.pi/agent/skills/grilling"
 printf '%s\n' 'global grilling' > "$global_home/.pi/agent/skills/grilling/SKILL.md"
-printf '%s\n' 'global adhd' > "$global_home/.agents/skills/i-have-adhd/SKILL.md"
 global_target="$tmp_dir/global"
 mkdir "$global_target"
 HOME="$global_home" bash "$repo_dir/install.sh" "$global_target" --yes > "$tmp_dir/global.out"
 [ ! -e "$global_target/.pi/skills/grilling" ]
-[ ! -e "$global_target/.pi/skills/i-have-adhd" ]
 grep -F "grilling (global)" "$tmp_dir/global.out" > /dev/null
-grep -F "i-have-adhd (global)" "$tmp_dir/global.out" > /dev/null
 
 
 # Each specialist carries a real model pin, in each harness's own format.
@@ -873,7 +918,7 @@ bare_target="$tmp_dir/bare"
 mkdir "$bare_target"
 bare_home="$tmp_dir/bare-home"
 mkdir -p "$bare_home"
-env PATH="$tmp_dir/emptybin:/usr/bin:/bin" HOME="$bare_home" \
+env PATH="$tmp_dir/backlogbin:/usr/bin:/bin" HOME="$bare_home" \
     bash "$repo_dir/install.sh" "$bare_target" --no-input > "$tmp_dir/bare.out"
 if [ -f "$bare_target/.pi/agents/implementer.md" ] \
     && grep -q "^model: " "$bare_target/.pi/agents/implementer.md"
@@ -899,9 +944,6 @@ if pid == 0:
     os.execvpe("bash", ["bash", installer, target], os.environ)
 
 steps = [
-    (b"Set up Backlog.md?", b"n\r"),
-    (b"Add the parallel-agent notes?", b"n\r"),
-    (b"Add the i-have-adhd skill?", b"n\r"),
     (b"enter confirm", b"\r"),
     (b"customize", b"e"),
     (b"Which editor?", b"\r"),
@@ -955,10 +997,6 @@ grep -qx "model: openai-codex/gpt-6-astra" "$custom_target/.pi/agents/final-revi
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['reviewer'] == 'ollama-cloud/glm-5.3' else 1)" \
     "$custom_target/.pandino/models.json"
 
-# Declining leaves no Backlog and no session-continuity section.
-if grep -qF "pandino:session-continuity" "$fresh_target/AGENTS.md"; then
-    echo "FAIL: session continuity appended without Backlog.md"; exit 1
-fi
 if find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .; then
     echo "FAIL: installer generated a FINDINGS.md file" >&2
     exit 1

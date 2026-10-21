@@ -1,10 +1,11 @@
 ---
 id: TASK-26.4
 title: Update the installer for the new layout
-status: To Do
+status: In Progress
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
+updated_date: '2026-10-21 16:10'
 labels: []
 dependencies:
   - TASK-26.2

@@ -2,8 +2,8 @@
 # Install the coding-practices kit into a target repo (new or existing).
 # Usage: ./install.sh /path/to/repo [--yes|--no-input]
 # Interactive only when attached to a terminal, so agents and CI stay unblocked:
-#   --yes       accept every optional add-on without asking
-#   --no-input  skip them all and just print the manual steps
+#   --yes       set up every supported editor without asking
+#   --no-input  set up pi only, without asking
 set -euo pipefail
 
 repository="https://github.com/wtfzambo/pandino"
@@ -64,6 +64,14 @@ fi
 
 target="$(cd "$target" && pwd)"
 answer_mode="${2:-ask}"
+
+# Pandino's playbooks keep tasks, decisions, and the session snapshot in
+# Backlog.md, so a repository without it needs the command to create it.
+if [ ! -d "$target/backlog" ] && ! command -v backlog > /dev/null; then
+    printf 'error: Pandino needs Backlog.md, and the backlog command is not installed.\n' >&2
+    printf '       Install it with npm i -g backlog.md, then run this again.\n' >&2
+    exit 1
+fi
 
 kit_agents=""
 trap 'rm -rf "${downloaded_kit:-}" "${kit_agents:-}"; [ -n "${spinner_pid:-}" ] && kill "$spinner_pid" 2> /dev/null' EXIT
@@ -148,25 +156,6 @@ global_skill_path() {
         [ -f "$path" ] && { printf '%s\n' "$path"; return 0; }
     done
     return 1
-}
-
-# Yes/no prompt, second argument is the default (y or n). Without a terminal
-# (agent, CI) nothing is asked and the add-on is skipped, so a non-interactive
-# run never blocks.
-confirm() {
-    local question="$1" default="$2"
-    case "$answer_mode" in
-        --yes) return 0 ;;
-        --no-input) return 1 ;;
-    esac
-    asking || return 1
-    local hint="${dim}[y/N]${reset}" reply
-    [ "$default" = "y" ] && hint="${dim}[Y/n]${reset}"
-    printf '\n  %s?%s %s%s%s %s ' \
-        "$bold$magenta" "$reset" "$bold" "$question" "$reset" "$hint" > /dev/tty
-    read -r reply < /dev/tty
-    [ -z "$reply" ] && reply="$default"
-    [[ "$reply" =~ ^[Yy] ]]
 }
 
 # Arrow-key select over "key:Label" pairs, into picked. Mode "many" toggles
@@ -262,20 +251,6 @@ pick_list() {
     return 0
 }
 
-# Append a snippet once; a marker line makes re-runs idempotent.
-append_snippet() {
-    local snippet="$1" name="$2"
-    if grep -qF "<!-- pandino:$name -->" "$target/AGENTS.md"; then
-        say unchanged "$dim" "$name already in $target/AGENTS.md"
-        return
-    fi
-    {
-        printf '\n<!-- pandino:%s -->\n' "$name"
-        cat "$snippet"
-    } >> "$target/AGENTS.md"
-    say appended "$green" "$name ${dim}to${reset} $target/AGENTS.md"
-}
-
 # The banner wears the car's paint: light body on top, dark cladding below.
 # Truecolor when the terminal says so, else the nearest 256-colour greys.
 banner() {
@@ -318,53 +293,9 @@ printf '  %sInstalling into%s %s%s%s\n' "$grey" "$reset" "$cyan" "$target" "$res
 
 # All questions up front: a tool we call later (Backlog's own prompt) would
 # otherwise leave buffered input behind and swallow the next answer.
-asking && printf '\n  %sA few quick questions, then I get out of your way.%s\n' "$grey" "$reset"
-
-want_backlog=no
-if [ -d "$target/backlog" ]; then
-    want_backlog=already
-else
-    if asking; then
-        heading "Backlog.md" "— a to-do list your agents keep" "recommended" "$green"
-        body "  Agents note what they did in @backlog/@, so the next one @picks up where it left off@."
-        body "  Without it they start from zero every session."
-        command -v backlog > /dev/null \
-            || body "  Not on your machine yet — install it with @npm i -g backlog.md@"
-    fi
-    if confirm "Set up Backlog.md?" y; then
-        want_backlog=yes
-    fi
-fi
-
-if asking; then
-    heading "Parallel agents" "— running several at once" "niche" "$yellow"
-    body "  How to keep several agents from stepping on each other."
-    body "  Only if you plan to @run them in parallel@ here — @say no@ otherwise."
-fi
-want_parallel=no
-if confirm "Add the parallel-agent notes?" n; then
-    want_parallel=yes
-fi
+asking && printf '\n  %sOne quick question, then I get out of your way.%s\n' "$grey" "$reset"
 
 global_grilling="$(global_skill_path grilling || true)"
-global_adhd="$(global_skill_path i-have-adhd || true)"
-want_adhd=no
-if [ -n "$global_adhd" ]; then
-    want_adhd=global
-    if asking; then
-        heading "Short replies" "— the i-have-adhd skill" "already global" "$green"
-        body "  pi already has it globally, so this repo needs no copy."
-    fi
-else
-    if asking; then
-        heading "Short replies" "— the i-have-adhd skill" "optional" "$cyan"
-        body "  Answers that lead with the next action instead of a wall of prose."
-        body "  Turn it on with @/i-have-adhd@, off by saying @stop adhd mode@."
-    fi
-    if confirm "Add the i-have-adhd skill?" n; then
-        want_adhd=yes
-    fi
-fi
 
 picked_keys="pi"
 case "$answer_mode" in
@@ -562,10 +493,17 @@ write_install_provenance() {
 
 step "Core files"
 
-# Appended snippets are Pandino's own, so they must not read as a conflict:
-# compare only the part of the file that precedes them.
+# Pandino owns everything above the project marker; the project owns the
+# rest. Older installs ended the core at an appended section or Backlog's block.
 core_only() {
-    awk '/<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
+    awk '/<!-- Project-specific/ || /<!-- pandino:/ || /<!-- BACKLOG.MD GUIDELINES/ { exit } { print }' "$1" \
+        | sed -e :a -e '/^$/{$d;N;ba' -e '}'
+}
+
+# The project section a fresh AGENTS.md starts with: the marker and the empty
+# Corrections table, up to Backlog's own block.
+project_template() {
+    awk '/<!-- BACKLOG.MD GUIDELINES/ { exit } found || /<!-- Project-specific/ { found = 1; print }' "$1" \
         | sed -e :a -e '/^$/{$d;N;ba' -e '}'
 }
 
@@ -575,12 +513,34 @@ without_model_line() {
     grep -v '^model: ' "$1"
 }
 
-# Pandino's own repo has the optional sections appended to its AGENTS.md, so
-# install the core and let the snippets be appended per repo as usual.
-kit_agents="$(mktemp)"
-core_only "$kit_dir/AGENTS.md" > "$kit_agents"
+# Earlier versions appended governance, continuity, and parallel-agent
+# sections after markers of their own; playbooks and skills replace them. Each
+# section runs to the next marker, Backlog's block, or the end of the file.
+remove_appended_sections() {
+    local file="$1" cleaned
+    grep -q '^<!-- pandino:[a-z-]* -->$' "$file" || return 0
+    cleaned="$(mktemp)"
+    awk '
+        /^<!-- pandino:[a-z-]* -->$/ { skip = 1; next }
+        /<!-- BACKLOG.MD GUIDELINES START/ { skip = 0 }
+        !skip { print }
+    ' "$file" | sed -e :a -e '/^$/{$d;N;ba' -e '}' > "$cleaned"
+    cat "$cleaned" > "$file"
+    rm -f "$cleaned"
+    say removed "$green" "earlier appended Pandino sections ${dim}from${reset} $file"
+}
 
-if [ -e "$target/AGENTS.md" ] && diff -q "$kit_agents" <(core_only "$target/AGENTS.md") > /dev/null; then
+kit_agents="$(mktemp)"
+{
+    core_only "$kit_dir/AGENTS.md"
+    printf '\n'
+    project_template "$kit_dir/AGENTS.md"
+} > "$kit_agents"
+
+if [ -e "$target/AGENTS.md" ]; then
+    remove_appended_sections "$target/AGENTS.md"
+fi
+if [ -e "$target/AGENTS.md" ] && diff -q <(core_only "$kit_dir/AGENTS.md") <(core_only "$target/AGENTS.md") > /dev/null; then
     say unchanged "$dim" "$target/AGENTS.md"
 else
     install_or_stage \
@@ -588,6 +548,27 @@ else
         "$target/AGENTS.md" \
         "$target/.pandino/merge/AGENTS.md"
 fi
+
+# Playbooks and the session skills are Pandino's own: refresh them every run.
+rm -rf "$target/.pandino/playbooks" "$target/.pandino/snippets"
+mkdir -p "$target/.pandino"
+cp -R "$kit_dir/.pandino/playbooks" "$target/.pandino/playbooks"
+say installed "$green" "$target/.pandino/playbooks/"
+
+install_session_skills() {
+    local skills_dir="$1" name
+    for name in pandino-pickup pandino-handoff; do
+        rm -rf "$skills_dir/$name"
+        mkdir -p "$skills_dir"
+        cp -R "$kit_dir/.agents/skills/$name" "$skills_dir/$name"
+    done
+    say installed "$green" "$skills_dir/ ${dim}(pandino-pickup, pandino-handoff)${reset}"
+}
+install_session_skills "$target/.agents/skills"
+# Claude Code reads project skills only from .claude/skills.
+case " $picked_keys " in
+    *" claude "*) install_session_skills "$target/.claude/skills" ;;
+esac
 
 agent_count="$(find "$kit_dir/agents" -name '*.md' | wc -l | tr -d ' ')"
 for harness in $picked_keys; do
@@ -618,8 +599,8 @@ for harness in $picked_keys; do
     fi
 done
 
-# Skills and the subagent runtime are pi's own, so they follow that choice.
-# Both are refetched from upstream on every run.
+# The grilling skill and the subagent runtime are pi's own, so they follow
+# that choice. Both are refetched from upstream on every run.
 install_skill() {
     local name="$1" url="$2"
     mkdir -p "$target/.pi/skills/$name"
@@ -639,17 +620,8 @@ case " $picked_keys " in
             install_skill grilling \
                 "https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grilling/SKILL.md"
         fi
-        [ "$want_adhd" = yes ] && install_skill i-have-adhd \
-            "https://raw.githubusercontent.com/ayghri/i-have-adhd/main/.cursor/skills/i-have-adhd/SKILL.md"
         ;;
 esac
-
-# Optional add-ons: copied so the paths below are real in the target repo,
-# refreshed from the kit on every run. Appending them is the user's choice.
-rm -rf "$target/.pandino/snippets"
-mkdir -p "$target/.pandino/snippets"
-cp "$kit_dir"/snippets/*.md "$target/.pandino/snippets/"
-say installed "$green" "$target/.pandino/snippets/ ${dim}(optional sections)${reset}"
 
 # Subagent runtime, project-local.
 case " $picked_keys " in
@@ -677,59 +649,35 @@ if [ "$staged_count" -gt 0 ]; then
     printf '  %sMine are in .pandino/merge/ — take what you want, then delete it.%s\n' "$yellow" "$reset"
 fi
 
-# Act on the answers collected up front.
-step "Optional add-ons"
+step "Backlog.md"
 skipped=()
 
-case "$want_backlog" in
-    already)
-        # Backlog is set up; make sure its own guidelines are in AGENTS.md too.
-        if command -v backlog > /dev/null && ! grep -q "BACKLOG.MD GUIDELINES" "$target/AGENTS.md"; then
-            (cd "$target" && backlog init "$(basename "$target")" \
-                --agent-instructions agents > /dev/null 2>&1)
-            say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
-        fi
-        append_snippet "$target/.pandino/snippets/document-governance.md" document-governance
-        append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
-        ;;
-    yes)
-        if command -v backlog > /dev/null; then
-            # A project name and --no-git keep init from opening its own prompt.
-            # It appends its own AGENTS.md section, which is what teaches the
-            # workflow, so let it: the block carries its own markers and re-runs
-            # cleanly. A repo without git stays without it.
-            git_flag=""
-            [ -d "$target/.git" ] || git_flag="--no-git"
-            (cd "$target" && backlog init "$(basename "$target")" \
-                --agent-instructions agents $git_flag > /dev/null 2>&1)
-            say installed "$green" "Backlog.md task tracking in $target/backlog"
-            say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
-            append_snippet "$target/.pandino/snippets/document-governance.md" document-governance
-            append_snippet "$target/.pandino/snippets/session-continuity.md" session-continuity
-        else
-            say skipped "$yellow" "backlog not found on PATH"
-            note "  install it with 'npm i -g backlog.md', then run this again"
-            skipped+=("Backlog.md: install it, then run this again. Worth it — it is what gives your agents memory.")
-        fi
-        ;;
-    no)
-        skipped+=("Backlog.md: run this again and say yes, if you change your mind")
-        ;;
-esac
-
-if [ "$want_parallel" = yes ]; then
-    append_snippet "$target/.pandino/snippets/parallel-agents.md" parallel-agents
+if [ -d "$target/backlog" ]; then
+    # Make sure Backlog's own guidelines are in AGENTS.md too.
+    if command -v backlog > /dev/null && ! grep -q "BACKLOG.MD GUIDELINES" "$target/AGENTS.md"; then
+        (cd "$target" && backlog init "$(basename "$target")" \
+            --agent-instructions agents > /dev/null 2>&1)
+        say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
+    else
+        say unchanged "$dim" "$target/backlog"
+    fi
 else
-    skipped+=("Parallel agents: add .pandino/snippets/parallel-agents.md to AGENTS.md when you need it")
+    # A project name and --no-git keep init from opening its own prompt.
+    # It appends its own AGENTS.md section, which is what teaches the
+    # workflow, so let it: the block carries its own markers and re-runs
+    # cleanly. A repo without git stays without it.
+    git_flag=""
+    [ -d "$target/.git" ] || git_flag="--no-git"
+    (cd "$target" && backlog init "$(basename "$target")" \
+        --agent-instructions agents $git_flag > /dev/null 2>&1)
+    say installed "$green" "Backlog.md task tracking in $target/backlog"
+    say appended "$green" "Backlog.md guidelines ${dim}to${reset} $target/AGENTS.md"
 fi
 
 case "$picked_keys" in
     *claude*|*opencode*|*codex*) ;;
     *) skipped+=("Other editors: run this again to set the helpers up for Claude Code, opencode or Codex") ;;
 esac
-
-[ "$want_adhd" = no ] \
-    && skipped+=("Short replies: run this again to add the i-have-adhd skill")
 
 write_install_provenance
 
@@ -747,7 +695,9 @@ else
 fi
 recap ".pandino/install.json" " — the source revision from this successful install"
 recap ".pandino/check-update" " — manually checks whether upstream main changed"
-recap "AGENTS.md" " — the coding rules, read by every agent"
+recap "AGENTS.md" " — the always-on rules and the index of playbooks"
+recap ".pandino/playbooks/" " — how-to guides agents read when the work calls for them"
+recap ".agents/skills/" " — pandino-pickup and pandino-handoff, to resume and hand over sessions"
 for harness in $picked_keys; do
     case "$harness" in
         pi)       recap ".pi/agents/" " — six pinned specialists: implementer, taste-reviewer, spec-reviewer, docs-reviewer, test-reviewer, final-reviewer; unpinned fallback-runner" ;;
@@ -764,17 +714,10 @@ case " $picked_keys " in
         else
             recap ".pi/skills/grilling/" " — /skill:grilling picks holes in a plan"
         fi
-        if [ "$want_adhd" = global ]; then
-            recap "i-have-adhd (global)" " — /i-have-adhd for short, action-first replies"
-        elif [ "$want_adhd" = yes ]; then
-            recap ".pi/skills/i-have-adhd/" " — /i-have-adhd for short, action-first replies"
-        fi
         ;;
 esac
 
-if [ "$want_backlog" != no ]; then
-    recap "backlog/" " — tasks your agents read and update between sessions"
-fi
+recap "backlog/" " — tasks your agents read and update between sessions"
 
 printf '\n  %sModels each specialist will run on:%s\n' "$grey" "$reset"
 print_model_matrix
