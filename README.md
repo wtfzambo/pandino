@@ -35,29 +35,25 @@ Run this inside the repo you want to set up:
 curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
 ```
 
-It downloads what it needs, so there is nothing to clone. Add `--yes` to say yes to everything, `--no-input` to say no to everything. If you have a local copy, `./install.sh /path/to/repo` does the same.
+It downloads what it needs, so there is nothing to clone. If you have a local copy, `./install.sh /path/to/repo` does the same.
 
-It asks up to four questions, then gets out of the way:
+Pandino needs [Backlog.md](https://github.com/MrLesk/Backlog.md): agents keep tasks, decisions, and the session snapshot in `backlog/`, so the next one picks up instead of starting over. Install the command first with `npm i -g backlog.md`; the installer stops and says so when it is missing, and runs `backlog init` when the repo has no `backlog/` yet.
 
-- **[Backlog.md](https://github.com/MrLesk/Backlog.md)?** Say yes. Your agents write down what they did in `backlog/`, so the next one picks up instead of starting over — without it they forget every session. Saying yes runs `backlog init`, lets Backlog add its own notes to `AGENTS.md`, and adds Pandino's document-governance and session-continuity sections. You need the `backlog` command first (`npm i -g backlog.md`), or the script tells you to come back.
-- **Notes on running agents in parallel?** Only if you plan to. Defaults to no.
-- **The i-have-adhd skill?** Replies that lead with the next action instead of a wall of prose. Activate it with `/i-have-adhd` and deactivate it with "stop adhd mode". Default no; reuse pi's global copy when available.
-- **Which editors?** A list of pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`.
-
-No terminal, like inside an agent or CI? Then it asks nothing, skips the optional parts, and lists them at the end. Either way it finishes with a recap of what is now in the repo and what each piece is for.
+It asks one question: **which editors?** A list of pi, Claude Code, opencode, and Codex, with the ones already on your machine ticked. `↑↓ move, space select, enter confirm`. `--yes` picks all four, `--no-input` picks pi only, and without a terminal (inside an agent or CI) it takes the ticked ones. It finishes with a recap of what is now in the repo and what each piece is for.
 
 ### What it writes
 
 | What | Where |
 |---|---|
-| `AGENTS.md` | repo root — the coding rules |
+| `AGENTS.md` | repo root — the rules every agent reads on every turn, an index of playbooks, and a project section with a Corrections table |
+| playbooks | `.pandino/playbooks/` — how-to guides agents read when the index says the work calls for them: workflow, review, reviewing, design, testing, debugging, writing, docs. Rewritten on every install |
+| session skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it. Invoke them by name or let the index trigger them |
 | the seven helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — six specialists with a model pinned, plus the unpinned fallback-runner |
 | `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
 | `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
 | `check-update` | `.pandino/` — executable manual check of that recorded commit against upstream `main`; it never changes the installation |
-| skills | `.pi/skills/` if you picked pi — `grilling` challenges a plan when you ask or an unresolved product choice blocks the current slice ([mattpocock/skills](https://github.com/mattpocock/skills)), and `i-have-adhd` if you asked for it ([ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)). Global copies are reused; local copies are refetched every run |
+| grilling | `.pi/skills/` if you picked pi and have no global copy — challenges a plan when you ask or an unresolved product choice blocks the current slice ([mattpocock/skills](https://github.com/mattpocock/skills)). The local copy is refetched every run |
 | `pi-subagents` | `.pi/npm/` if you picked pi — what lets pi run subagents ([npm](https://www.npmjs.com/package/@tintinweb/pi-subagents)) |
-| optional sections | `.pandino/snippets/` — copied, not applied; see [Optional snippets](#optional-snippets) |
 
 The six specialists, and what each one is there to prevent:
 
@@ -65,8 +61,8 @@ The six specialists, and what each one is there to prevent:
 - **taste-reviewer** — reviews *how* it is written when a substantial diff benefits from independent taste review. Catches the clever one-liner, the abstraction with one caller, the parameter nothing passes. Green tests do not make a diff good.
 - **spec-reviewer** — reviews *what* it does against what you actually asked for when a substantial diff benefits from independent scope review. Catches the missing half of the requirement and the three features you never requested.
 - **test-reviewer** — runs when a substantial relevant change benefits from evidence review. Judges whether automated evidence is necessary, effective, independent, and proportionate; it does not judge specification correctness.
-- **docs-reviewer** — runs for substantial documented behavior or authority changes, before final review when both run. Catches drift between the final code and its specifications, decisions, procedures, codebase docs, and findings.
-- **final-reviewer** — runs for a substantial branch when composition or end-to-end value could change the merge decision. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
+- **docs-reviewer** — runs for substantial documented behavior or authority changes, before final review when both run. Catches drift between the final code and its specifications, decisions, procedures, and findings.
+- **final-reviewer** — runs for a substantial change (a branch, or a range of commits on `main`) when composition or end-to-end value could change the merge decision. Catches what only shows up with every commit in front of you: a design that drifted, a contract half-updated, an abstraction that later commits made pointless.
 - **fallback-runner** — an inspection-only escape hatch, not a seventh specialist. Use it only when a reviewer cannot launch or complete because its provider, quota, session, or pinned model is unavailable. Give it that reviewer's instructions verbatim, the concrete task context, and an explicit alternate model; report the substitution. It is not a retry for findings you dislike.
 
 ### Which model runs each specialist
@@ -79,9 +75,9 @@ The installer prints the resolved assignments and saves them under `.pandino/mod
 
 ### If you already have an AGENTS.md
 
-Keep your existing `AGENTS.md`. The installer places conflicts in `.pandino/merge/` for review and rebuilds that folder every run. Merge the selected candidates, then delete `.pandino/merge/`; keep `.pandino/snippets/` for optional sections refreshed by the installer.
+Keep your existing `AGENTS.md`. Pandino owns the part above the project marker (`<!-- Project-specific sections go below this line ... -->`); your rules go below it. The installer stages a differing core in `.pandino/merge/` for review and rebuilds that folder every run. Merge the candidates, then delete `.pandino/merge/`.
 
-The grilling skill is the exception: its local copy is refetched from upstream every time. If it already exists globally, Pandino leaves it there and adds no project copy.
+Installs from before the playbooks had governance, continuity, and parallel-agent sections appended after `<!-- pandino:... -->` markers, plus a `.pandino/snippets/` folder. The installer removes both; the playbooks and session skills replace them.
 
 ## Install with an AI agent
 
@@ -92,21 +88,17 @@ Install Pandino (https://github.com/wtfzambo/pandino) into this repository.
 
 1. Read https://raw.githubusercontent.com/wtfzambo/pandino/main/README.md, then this repo's own instruction files — at least AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, and any existing .pi/agents/.
 
-2. Ask me up to four questions first, and wait for my answers:
-   - Set up Backlog.md? Recommended — it is what lets agents remember anything between sessions, and Pandino's session-continuity section needs it. Tell me you will install the backlog command if it is missing.
-   - Add the notes on running agents in parallel? Only if I plan to. Default no.
-   - Add the i-have-adhd skill, for replies that lead with the next action? It activates when I type /i-have-adhd. Default no; reuse pi's global copy without a local question or install when available.
-   - Which editors should get the helpers? pi, Claude Code, opencode, Codex — whichever I actually use.
+2. Ask me which editors should get the helpers (pi, Claude Code, opencode, Codex: whichever I actually use), and wait for my answer. Pandino requires Backlog.md; if the backlog command is missing, tell me you will install it with npm i -g backlog.md.
 
-3. Run the installer with my answers: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` if I said yes to everything, `--no-input` if I said no to everything. Mixed answers: use --no-input and do the accepted parts yourself. If I want Backlog.md and the command is missing, install it first (npm i -g backlog.md).
+3. Run the installer: `curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- . --yes` for all four editors, `--no-input` for pi only. For another mix, run it with --no-input and set up the remaining editors by re-running it interactively or as in step 6.
 
-4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Then delete .pandino/merge/, but keep .pandino/snippets/.
+4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Keep this repo's own rules below the project marker. Then delete .pandino/merge/.
 
-5. Check what I accepted actually landed: backlog/ exists, AGENTS.md has Backlog's own block plus <!-- pandino:document-governance --> and <!-- pandino:session-continuity -->, plus <!-- pandino:parallel-agents --> if I asked for it. Add accepted missing sections from .pandino/snippets/ yourself. Add document governance and session continuity only with Backlog.md because they describe workflows this repo runs through Backlog.
+5. Check that it landed: backlog/ exists, AGENTS.md has the playbook index, the project marker, and Backlog's own block, .pandino/playbooks/ exists, and .agents/skills/ holds pandino-pickup and pandino-handoff.
 
 6. For an editor other than pi, select it in the installer or write the same seven helpers where that tool looks for them. Copy the instructions verbatim, pin the six specialists, and leave `fallback-runner` unpinned. For a tool without subagents, tell me that the workflow will run as one agent taking each role in turn.
 
-7. Inspect the complete diff yourself. Verify that your tool can see the seven helpers and the grilling skill, the six specialists have model pins, `fallback-runner` has none, and this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
+7. Inspect the complete diff yourself. Verify that your tool can see the seven helpers and the session skills, the six specialists have model pins, `fallback-runner` has none, and this repo's normal checks pass. Then show me the diff and a short summary of what you kept, replaced, added, adapted, and could not resolve.
 
 Treat this installation separately from a Pandino implementation slice. Use `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` only on my explicit request. Route an installation conflict affecting product behavior, security, or team workflow to me for approval; otherwise resolve obvious duplication directly after the step-2 questions.
 ```
@@ -123,13 +115,13 @@ When `.pandino/check-update` exists, run it first:
 
 It compares the exact commit in `.pandino/install.json` with upstream `main` and never writes either file. Exit `0` means the recorded kit is current. Resolve any existing `.pandino/merge/` candidates directly; otherwise report the kit as current and finish. Reinstall a current kit only on an explicit request. Exit `1` means an update is available, so continue below. Exit `2` means the installed revision is missing, null, or malformed, or upstream `main` is unavailable or malformed; continue with the normal update flow. A missing checker is expected for older installations and also continues with that flow. For a local checkout commit not published in the official repository, the exact status SHAs remain useful, but the GitHub comparison link may not resolve. The manifest identifies the kit used by the latest successful installer run only; it does not say that files in `.pandino/merge/` have been reconciled.
 
-`.pandino/check-update` only reports status and does not apply updates. To apply one, re-run the latest installer from the repository you want to update and select the same editors and optional features you already use:
+`.pandino/check-update` only reports status and does not apply updates. To apply one, re-run the latest installer from the repository you want to update and select the same editors you already use:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
 ```
 
-The installer adds missing files, leaves identical files alone, reuses the specialist assignments in `.pandino/models.json`, and refreshes generated snippets and local skills. Conflicting `AGENTS.md` and Pi agent definitions are staged in a rebuilt `.pandino/merge/`; other selected harness translations are regenerated directly. Review and merge the staging directory, preserve any project-specific rules visible in the final diff, then delete `.pandino/merge/`. An update is a semantic merge, not a package replacement.
+The installer adds missing files, leaves identical files alone, reuses the specialist assignments in `.pandino/models.json`, and rewrites the playbooks and session skills. Conflicting `AGENTS.md` and Pi agent definitions are staged in a rebuilt `.pandino/merge/`; other selected harness translations are regenerated directly. Review and merge the staging directory, preserve any project-specific rules visible in the final diff, then delete `.pandino/merge/`. An update is a semantic merge, not a package replacement.
 
 For that reason, the safest update interface is an agent working inside a clean target repository:
 
@@ -137,10 +129,10 @@ For that reason, the safest update interface is an agent working inside a clean 
 Update Pandino (https://github.com/wtfzambo/pandino) in this repository.
 
 1. Run `.pandino/check-update` when it exists. With exit 0 and no `.pandino/merge/`, report the kit as current and finish; reinstall only on my explicit request. With exit 0 and `.pandino/merge/` candidates, proceed directly to step 4 and resolve them. With exit 1, continue. With exit 2 or a missing checker, continue because this installation may be older or have an unknown revision.
-2. Read the latest Pandino README and this repository's current instruction files, agent definitions, `.pandino/models.json`, and enabled optional sections.
-3. Unless step 1 found a current kit with `.pandino/merge/` candidates, re-run the latest Pandino installer, selecting the editors and options this repository already uses.
+2. Read the latest Pandino README and this repository's current instruction files, agent definitions, and `.pandino/models.json`.
+3. Unless step 1 found a current kit with `.pandino/merge/` candidates, re-run the latest Pandino installer, selecting the editors this repository already uses.
 4. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
-5. Delete `.pandino/merge/` after resolving it, but keep `.pandino/snippets/`.
+5. Delete `.pandino/merge/` after resolving it.
 6. Inspect the complete diff yourself. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
 7. Treat this update separately from a Pandino implementation slice. Use `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` only on my explicit request. Route an update conflict affecting product behavior, security, or team workflow to me for approval.
 8. Report what was added, updated, preserved, or left unresolved. Commit or push only on my request.
@@ -154,19 +146,26 @@ To test unpublished Pandino changes, run a local checkout's installer instead of
 
 ## How the workflow runs
 
-One agent plans and coordinates. Start with the smallest observable slice and apply one necessity test to every action: keep it when the slice needs it to complete correctly and verify proportionately. Match evidence to the artifact's use and consequences and follow [Verification by purpose](AGENTS.md#verification-by-purpose). `fallback-runner` remains an inspection-only escape hatch for an unavailable reviewer.
+`AGENTS.md` holds the rules that apply on every turn: how code is written, how prose is written, how agents behave, and when work is done. Everything else is a playbook the agent reads when its index line says the work calls for it, so a quick question carries none of the review policy and a branch-wide change carries all of it.
 
-1. Read the real code and research only the current slice. When uncertain external behavior blocks it, use the cheapest authoritative source or direct probe. Ask before expanding the plan or starting future-slice work.
-2. The main agent implements small, short fixes directly. For substantial work, it makes and verifies the first edit that proves the approach, then gives the implementer the bounded approved plan, a map of relevant files and what matters in each, rejected approaches with reasons, the landed edit and its verification, and the remaining steps with their checks. Use grilling on request or when an unresolved user-owned product choice blocks the slice.
-3. For substantial changes, run relevant reviewers near the end of a logical slice: taste and spec when independent implementation or scope review helps; test when relevant behavior or evidence changes warrant it; docs for substantial documented behavior or authority changes; final when whole-branch composition or end-to-end risk could change the merge decision. Run docs before final when both apply.
-4. Treat findings as evidence and keep research, deliverables, and maintenance artifacts within the agreed scope. Fix valid in-scope proportionate findings. Give incorrect, duplicate, out-of-scope, or disproportionate findings a checkable reason tied to shipped behavior, contracts, repository risk, or proportionate evidence. Ask the user only for a real remaining product, scope, or risk choice. Give every must-fix an explicit outcome, and obtain user acceptance before merge with a valid unresolved must-fix.
-5. Read the diff, run proportionate checks, and trace the affected path when needed. Once the current criteria pass, remove dispensable work and stop.
+| Playbook | Read when |
+|---|---|
+| [workflow](.pandino/playbooks/workflow.md) | planning substantial implementation, handing it to the implementer, or closing it |
+| [review](.pandino/playbooks/review.md) | launching reviewers or deciding their findings |
+| [reviewing](.pandino/playbooks/reviewing.md) | working as a reviewer; it fixes the report format |
+| [design](.pandino/playbooks/design.md) | designing new modules or interfaces, and checking code for red flags |
+| [testing](.pandino/playbooks/testing.md) | writing or reviewing tests, or choosing how to verify |
+| [debugging](.pandino/playbooks/debugging.md) | fixing a bug or an unexplained failure |
+| [writing](.pandino/playbooks/writing.md) | writing documentation, decisions, playbooks, or commit messages |
+| [docs](.pandino/playbooks/docs.md) | changing documented behavior or recording a decision or finding |
 
-Review mandates and incremental follow-ups follow [Bounded reviews](AGENTS.md#bounded-reviews); the [current policy](backlog/docs/specs/doc-3%20-%20Bounded-review-policy.md) documents budgets, exhaustion, and runtime limits. Pi enforces reviewer turn allowances, while other harnesses receive the instructions without a promised native cap. Existing Pi installations adopt the new limits through the [normal update flow](#update-an-existing-installation), including reconciliation of agent merge candidates.
+The workflow in short: one agent plans and coordinates, starts from the smallest observable slice, and keeps an action only when the slice needs it. Small fixes are done directly. Substantial work starts with a sketch of types and signatures plus failing tests on the requirement's invariants, which the user sees in the plan; the implementer makes them pass. Relevant reviewers run once near the end, in a fixed report format, within turn budgets the [bounded review policy](backlog/docs/specs/doc-3%20-%20Bounded-review-policy.md) describes. When the user corrects the same kind of mistake twice, the Corrections table in `AGENTS.md` turns it into a proposal to enforce it in code, types, lint, or a test.
 
-Run standalone or whole-repository audits as report-only work until implementation is requested. The coordinator synthesizes useful findings and waits for the user before changing scope or creating work.
+A project adds its own rules and playbooks below the project marker in `AGENTS.md`; files under `.pandino/` are rewritten on every install. The [decision behind this layout](backlog/decisions/decision-9%20-%20Split-instructions-into-an-always-on-core-and-on-demand-playbooks.md) records what was rejected and why.
 
-The installer pins the configured model for each role — see [which model runs each specialist](#which-model-runs-each-specialist). Historical [benchmarks](NOTES.md) informed earlier routing. Current operator choices and available-model fallbacks are documented in the [routing specification](backlog/docs/specs/doc-4%20-%20Specialist-model-routing.md).
+Run standalone or whole-repository audits as report-only work until implementation is requested.
+
+The installer pins the configured model for each role; see [which model runs each specialist](#which-model-runs-each-specialist).
 
 ## When Pandino meets your existing rules
 
@@ -180,25 +179,11 @@ Yours win where it matters:
 6. Drop references to tools and files the merged setup no longer has.
 7. Decide it yourself when the order above makes it obvious. Ask when the choice affects the product, security, or how the team works.
 
-## Optional snippets
-
-`.pandino/snippets/` holds sections that do not suit every repo, so they are copied but not applied. Add the ones that fit to your `AGENTS.md`.
-
-Edit them there, not in `.pandino/snippets/` — that folder is rewritten on every install.
-
-**Document governance** and **session continuity** ship with Backlog.md and never without it. Governance routes current specifications, procedures, decisions, tasks, codebase explanations, and durable falsified hypotheses without creating an empty `FINDINGS.md`; session continuity describes a workflow that needs Backlog to exist.
-
-**Parallel agents** is for when you actually run several at once: build the shared parts first, keep each agent in its own worktree, and watch the gaps between what each was told to do. Skip it otherwise.
-
 ## Also worth having
 
-The installer offers [i-have-adhd](https://github.com/ayghri/i-have-adhd) per repo. If you want it everywhere instead, install it once at global scope:
-
-```bash
-npx skills add ayghri/i-have-adhd --global --skill i-have-adhd
-```
-
-Pandino detects the global copy and does not ask for or install a local duplicate. It is off by default either way: nothing changes until you type `/i-have-adhd`.
+- [grilling](https://github.com/mattpocock/skills) stress-tests a plan by asking you one round of questions at a time. Pandino's workflow uses it when you ask or when a product choice blocks the work; install it globally once and the installer adds no project copy.
+- [i-have-adhd](https://github.com/ayghri/i-have-adhd) shapes replies to lead with the next action. Install it globally with `npx skills add ayghri/i-have-adhd --global --skill i-have-adhd` and turn it on with `/i-have-adhd`.
+- `experimental/parallel.md` in this repository has untested notes on running several agents at once. Copy it into a project and list it below the project marker to try it.
 
 ## Deliberately not here
 

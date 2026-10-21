@@ -3,13 +3,13 @@ id: doc-3
 title: Bounded review policy
 type: specification
 created_date: '2026-09-28 16:03'
-updated_date: '2026-09-28 16:06'
+updated_date: '2026-10-21 16:16'
 ---
 # Bounded review policy
 
 ## Scope and roles
 
-Reviews support a decision about our changes and their consequences. Taste owns code quality, spec owns requested behavior, test owns evidence quality, docs owns documentation drift, and final owns whole-branch composition and end-to-end behavior. Existing conditional review triggers and model assignments remain unchanged. The portable instructions implementing this policy ship in `AGENTS.md` and `agents/*-reviewer.md`.
+Reviews support a decision about our changes and their consequences. Taste owns code quality, spec owns requested behavior, test owns evidence quality, docs owns documentation drift, and final owns the composition and end-to-end behavior of the change as a whole, which is either a branch against its base or a range of commits on `main`. Existing conditional review triggers and model assignments remain unchanged. The portable instructions implementing this policy ship in two playbooks and the agent definitions: `.pandino/playbooks/review.md` for the orchestrator who launches reviewers and decides findings, `.pandino/playbooks/reviewing.md` for every reviewer, and `agents/*-reviewer.md` for each role.
 
 ## Mandate and conclusion
 
@@ -29,11 +29,19 @@ Scripted workflow launches inherit the selected custom agent limit, but their `a
 
 The existing Pi translator preserves reviewer frontmatter. Other harness translators distribute the instructions but do not translate `max_turns` to native enforcement. On those harnesses the budget is an instruction unless a native limit has been verified and configured. User approval for increases is also an orchestration instruction, not a runner permission gate. Existing installations adopt changes through the normal installer and merge-candidate process.
 
+## Report format and cost record
+
+Every reviewer reports in the structure defined in `reviewing.md`: a verdict, findings by severity with a certainty label and a role-specific field, what works well, and a coverage section listing checks run, unverified areas, turns used against the budget, and timed-out commands. The orchestrator appends each review's turns, wall-clock minutes, and timed-out commands to the task notes. Pandino sets no baseline for these numbers; they let the operator decide whether budgets or reviewers need to change.
+
+## Command timeouts (experimental)
+
+Reviewers run every command with a timeout of at most two minutes, and a timed-out command counts as a blocked check. Together with the turn budget this is an experimental mitigation: a turn budget leaves a long single command and an unproductive line of inquiry unbounded, and neither rule detects a stuck reviewer while it runs. Deadlines and a heartbeat remain the subject of the paused deadline spike (TASK-24).
+
 ## Exhaustion and blocked checks
 
 At exhaustion deliver a provisional verdict with evidence, demonstrated defects, plausible risks, and incomplete coverage distinguished explicitly. Severity is separate from certainty. Essential missing evidence can justify withholding approval; marginal unknowns do not automatically become must-fixes or new investigations. Request an extension only for a concrete question whose answer could change the decision. If execution is truncated without a verdict, the orchestrator labels the review incomplete.
 
-For one environmental harness/test blocker allow the initial attempt and one retry justified by a diagnosis, then switch promptly to narrower or manual evidence. State what the alternative proves and what remains unverified. This does not waive shipping-code regression requirements in the testing evidence policy.
+For one environmental harness/test blocker, including a timed-out command, allow the initial attempt and one retry justified by a diagnosis, then switch promptly to narrower or manual evidence. State what the alternative proves and what remains unverified. This does not waive shipping-code regression requirements in the testing evidence policy.
 
 ## References
 

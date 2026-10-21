@@ -3,13 +3,13 @@ id: doc-1
 title: Testing evidence policy
 type: specification
 created_date: '2026-08-19 18:04'
-updated_date: '2026-09-28 22:20'
+updated_date: '2026-10-21 16:16'
 ---
 # Testing evidence policy
 
 ## Purpose and applicability
 
-Verification depth follows the decision the artifact must support. Apply [Verification by purpose](../../../AGENTS.md#verification-by-purpose) before choosing test scope or requesting regression protection. Software-delivery standards apply to code intended to ship or be relied on operationally. Exploratory artifacts are complete when they answer their stated question: a rendered screenshot and visual inspection suffice for a visual choice; behavioral exploration needs only a focused check or probe of the behavior being explored. Explicit user requirements and safety constraints apply throughout. Promotion into shipping code brings the delivery standards below into scope.
+Verification depth follows the decision the artifact must support. The Definition of done in `AGENTS.md` states the rule, and the testing playbook (`.pandino/playbooks/testing.md`) carries it into test scope and regression protection. Software-delivery standards apply to code intended to ship or be relied on operationally. Exploratory artifacts are complete when they answer their stated question: a rendered screenshot and visual inspection suffice for a visual choice; behavioral exploration needs only a focused check or probe of the behavior being explored. Explicit user requirements and safety constraints apply throughout. Promotion into shipping code brings the delivery standards below into scope.
 
 For shipping code, tests are maintained evidence for observable product promises. During exploration, let checks follow the question being explored; protect stable behavior as it becomes part of the product.
 
@@ -25,6 +25,10 @@ For shipping code, tests are maintained evidence for observable product promises
 A test earns its place only when it protects an observable promise whose breakage we would call a bug, adds protection beyond cheaper tooling or a stronger test, derives its expectation from an independent source of truth, and would fail under a plausible defect. Prefer an independent expected value, documented contract, fixture from the real boundary, or simple hand-derived result.
 
 Rely on static analysis, type checking, compilation, linting, and existence checks for the claims they already prove. For a reproducible bug in shipping code, write the regression test before fixing the bug. Consider a concrete plausible mutation when deciding whether a test protects the claimed promise.
+
+## Invariants first
+
+For substantial shipping work, the planner writes the requirement's observable invariants as failing tests against a sketch of the interface before implementation begins; the implementer makes them pass and may add tests. Their expectations exist before the code, so they are independent of it. Each test is judged with two imagined edits: it must fail when the behavior breaks and keep passing when only the internals change.
 
 ## Conditional test review
 
