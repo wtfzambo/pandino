@@ -47,7 +47,7 @@ It asks which editors to set up, then shows the model each specialist will run o
 |---|---|
 | `AGENTS.md` | repo root — the rules every agent reads on every turn, an index of playbooks, and a project section with a Corrections table |
 | playbooks | `.pandino/playbooks/` — how-to guides agents read when the index says the work calls for them: workflow, review, reviewing, design, testing, debugging, writing, docs. Rewritten on every install |
-| session skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it. Invoke them by name or let the index trigger them |
+| skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it, `pandino-update` updates this kit. Invoke them by name or let the index trigger them |
 | the seven helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — six specialists with a model pinned, plus the unpinned fallback-runner |
 | `models.json` | `.pandino/` — which model each role runs on, per editor. Edit it and re-run to change them |
 | `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
@@ -94,7 +94,7 @@ Install Pandino (https://github.com/wtfzambo/pandino) into this repository.
 
 4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Keep this repo's own rules below the project marker. Then delete .pandino/merge/.
 
-5. Check that it landed: backlog/ exists, AGENTS.md has the playbook index, the project marker, and Backlog's own block, .pandino/playbooks/ exists, and .agents/skills/ holds pandino-pickup and pandino-handoff.
+5. Check that it landed: backlog/ exists, AGENTS.md has the playbook index, the project marker, and Backlog's own block, .pandino/playbooks/ exists, and .agents/skills/ holds pandino-pickup, pandino-handoff and pandino-update.
 
 6. For an editor other than pi, select it in the installer or write the same seven helpers where that tool looks for them. Copy the instructions verbatim, pin the six specialists, and leave `fallback-runner` unpinned. For a tool without subagents, tell me that the workflow will run as one agent taking each role in turn.
 
@@ -121,21 +121,12 @@ It compares the exact commit in `.pandino/install.json` with upstream `main` and
 curl -fsSL https://raw.githubusercontent.com/wtfzambo/pandino/main/install.sh | bash -s -- .
 ```
 
-The installer adds missing files, leaves identical files alone, reuses the specialist assignments in `.pandino/models.json`, and rewrites the playbooks and session skills. Conflicting `AGENTS.md` and Pi agent definitions are staged in a rebuilt `.pandino/merge/`; other selected harness translations are regenerated directly. Review and merge the staging directory, preserve any project-specific rules visible in the final diff, then delete `.pandino/merge/`. An update is a semantic merge, not a package replacement.
+The installer adds missing files, leaves identical files alone, reuses the specialist assignments in `.pandino/models.json`, and rewrites the playbooks and skills. Conflicting `AGENTS.md` and Pi agent definitions are staged in a rebuilt `.pandino/merge/`; other selected harness translations are regenerated directly. Review and merge the staging directory, preserve any project-specific rules visible in the final diff, then delete `.pandino/merge/`. An update is a semantic merge, not a package replacement.
 
-For that reason, the safest update interface is an agent working inside a clean target repository:
+For that reason, let an agent run the update inside a clean target repository. Installations from this version on include the skill `pandino-update`, which holds the whole procedure, so asking the agent to "update Pandino" is enough. For an older installation without the skill, give the agent this prompt; the installer then adds the skill for next time:
 
 ```txt
-Update Pandino (https://github.com/wtfzambo/pandino) in this repository.
-
-1. Run `.pandino/check-update` when it exists. With exit 0 and no `.pandino/merge/`, report the kit as current and finish; reinstall only on my explicit request. With exit 0 and `.pandino/merge/` candidates, proceed directly to step 4 and resolve them. With exit 1, continue. With exit 2 or a missing checker, continue because this installation may be older or have an unknown revision.
-2. Read the latest Pandino README and this repository's current instruction files, agent definitions, and `.pandino/models.json`.
-3. Unless step 1 found a current kit with `.pandino/merge/` candidates, re-run the latest Pandino installer, selecting the editors this repository already uses.
-4. Merge every candidate in `.pandino/merge/` into the corresponding existing file. Preserve project-specific product, security, build, and team rules; take Pandino's updated generic workflow where the two do not conflict.
-5. Delete `.pandino/merge/` after resolving it.
-6. Inspect the complete diff yourself. Verify that all seven helpers are available in each selected editor, the six specialists retain explicit model pins, `fallback-runner` has no model pin, and the repository's normal checks pass.
-7. Treat this update separately from a Pandino implementation slice. Use `implementer`, `taste-reviewer`, `spec-reviewer`, `test-reviewer`, `docs-reviewer`, or `final-reviewer` only on my explicit request. Route an update conflict affecting product behavior, security, or team workflow to me for approval.
-8. Report what was added, updated, preserved, or left unresolved. Commit or push only on my request.
+Update Pandino in this repository by following https://raw.githubusercontent.com/wtfzambo/pandino/main/.agents/skills/pandino-update/SKILL.md
 ```
 
 To test unpublished Pandino changes, run a local checkout's installer instead of the `curl` command:

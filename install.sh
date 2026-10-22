@@ -574,12 +574,12 @@ fi
 install_session_skills() {
     local skills_dir="$1" name
     [ "$kit_dir/.agents/skills" -ef "$skills_dir" ] && return 0
-    for name in pandino-pickup pandino-handoff; do
+    for name in pandino-pickup pandino-handoff pandino-update; do
         rm -rf "$skills_dir/$name"
         mkdir -p "$skills_dir"
         cp -R "$kit_dir/.agents/skills/$name" "$skills_dir/$name"
     done
-    say installed "$green" "$skills_dir/ ${dim}(pandino-pickup, pandino-handoff)${reset}"
+    say installed "$green" "$skills_dir/ ${dim}(pandino-pickup, pandino-handoff, pandino-update)${reset}"
 }
 install_session_skills "$target/.agents/skills"
 # Claude Code reads project skills only from .claude/skills.
@@ -713,7 +713,7 @@ recap ".pandino/install.json" " — the source revision from this successful ins
 recap ".pandino/check-update" " — manually checks whether upstream main changed"
 recap "AGENTS.md" " — the always-on rules and the index of playbooks"
 recap ".pandino/playbooks/" " — how-to guides agents read when the work calls for them"
-recap ".agents/skills/" " — pandino-pickup and pandino-handoff, to resume and hand over sessions"
+recap ".agents/skills/" " — pandino-pickup and pandino-handoff to resume and hand over sessions, pandino-update to update this kit"
 for harness in $picked_keys; do
     case "$harness" in
         pi)       recap ".pi/agents/" " — six pinned specialists: implementer, taste-reviewer, spec-reviewer, docs-reviewer, test-reviewer, final-reviewer; unpinned fallback-runner" ;;

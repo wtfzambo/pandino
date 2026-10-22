@@ -92,6 +92,7 @@ Before work that a line below covers, read the named file in full and follow it.
 - Writing or editing documentation, specifications, decisions, README, playbooks, or multi-line commit messages: `.pandino/playbooks/writing.md`.
 - Changing documented behavior, making a choice worth recording, or disproving a plausible hypothesis: `.pandino/playbooks/docs.md`.
 - Ending a session or handing work over: skill `pandino-handoff` (`.agents/skills/pandino-handoff/SKILL.md`).
+- Updating Pandino in this repository: skill `pandino-update` (`.agents/skills/pandino-update/SKILL.md`).
 
 The project section below the project marker may add rules to any playbook and list the project's own playbooks with their triggers; follow those lines as well. When one kind of work keeps recurring in a project, write a playbook for it outside `.pandino/`, which the installer overwrites, and add its trigger line there.
 
