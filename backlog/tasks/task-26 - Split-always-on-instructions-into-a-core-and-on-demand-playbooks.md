@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-20 16:05'
+updated_date: '2026-10-22 11:09'
 labels:
   - instructions
   - installer
@@ -42,3 +42,9 @@ Out of scope: product context against off-topic research (TASK-21), shipping Pan
 - [ ] #4 A fresh install and an update of an existing install both produce the new layout, and the installer tests pass
 - [ ] #5 README, the affected specifications and a new decision describe the new layout and why it was chosen
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-21: at the operator's request, model recommendations moved to GPT-6.1 Sol (implementer, test review, final fallback), and saved superseded models (GPT-5.6, GPT-6 Sol, Claude 5, DeepSeek V4 Flash, GLM 5.2) are now re-resolved on install so updates move existing repos to the current generation; doc-4 and README updated. Smoke check on GPT-6.1 Sol with the new instructions: test-python-defects 4/5 must-fix, 2/2 minor, 0 false positives (same as GPT-6 Sol); adversarial-config and python-median pass. A live call confirmed GPT-6.1 Sol, GPT-6 Astra, GPT-6 Luna, DeepSeek V4.1 Flash and Opus 5.5 respond in pi.
+<!-- SECTION:NOTES:END -->
