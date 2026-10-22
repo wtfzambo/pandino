@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-22 18:03'
+updated_date: '2026-10-22 18:31'
 labels:
   - continuity
   - handoff
@@ -22,13 +22,15 @@ WHERE WE LEFT OFF
 
 Final routing, recorded in decision-10 and doc-4: GPT-6.1 Sol medium for implementation, DeepSeek V4.1 Flash high for taste/spec/docs review, GPT-6.1 Sol high for test review, Claude Opus 5.5 medium for final review. Claude Code keeps the `sonnet` and `opus` aliases so its agents follow the newest model of each family. Evidence for keeping Sol on test review: bench/review/results/sol61-flash41-test-review.md (Flash recommended deleting useful tests at least six times), plus the Astra and Haiku reports in the same folder. The deadline wrapper bench/run_with_timeout.py is verified on macOS; the operator declined Linux checks because the benchmark only runs on this Mac.
 
+After the merge, the pandino-update skill was added and pushed (TASK-29, commit bcc54a0): installed next to pandino-pickup and pandino-handoff, it holds the update procedure, so a downstream agent only needs "update Pandino". Older installations without the skill use the one-line prompt in README.md under "Update an existing installation".
+
 AGENTS.md gained an Agent behavior rule at the operator's request: solve problems that occurred or that the requirement names, and state hypothetical ones as limits rather than investigating them.
 
 Downstream projects (dogoscope, speak-like-you-eat) still run the old Pandino layout and were not updated. tmp-carrot is abandoned. /tmp/slye-probe is a removable local worktree of speak-like-you-eat.
 
 WHAT'S NEXT
 1. Ask the operator what to work on next. Open candidates: the benchmark redesign (TASK-28), product context against off-topic research (TASK-21), Pi packaging (TASK-25), paused cross-harness review supervision (TASK-24), the parked explain-repo skill (DRAFT-1).
-2. Update downstream projects only when the operator asks, using the update prompt in README.md under "Update an existing installation".
+2. Update downstream projects only when the operator asks. They predate the skill, so give their agent the one-line prompt from README.md; the update installs pandino-update for next time.
 
 WAITING ON / GATED BY
 As of 2026-10-22, nothing blocks. Further Haiku benchmark runs would need an approved containment boundary first (FINDINGS.md).
