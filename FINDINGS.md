@@ -1,5 +1,15 @@
 # Falsified hypotheses
 
+## 2026-10-22. Numeric equality does not establish integer-cent boundaries
+
+**Hypothesis:** Integer annotations and equality with literal totals make runtime integer checks on results and boundary arguments redundant.
+
+**Evidence:** Python accepts `9000.0 == 9000`. In the booking benchmark, converting only a confirmation result to `float(total)` fails two original cases but passes all 15 after the result type guard is removed. Separate probes converting only a repository or mailer argument also pass after their boundary guards are removed while the result remains an integer.
+
+**Consequence:** Judge each observable boundary independently. An annotation or equal numeric value does not guarantee its runtime representation. Proposed test deletions need a counterexample check before receiving credit for reducing excess.
+
+**References:** [Focused test-review comparison](bench/review/results/sol61-flash41-test-review.md), the benchmark deadline and reviewer comparison (TASK-27).
+
 ## 2026-10-22. A Pi reviewer deadline must also stop detached tool groups
 
 **Hypothesis:** Terminating the reviewer's process group stops the commands it launched.

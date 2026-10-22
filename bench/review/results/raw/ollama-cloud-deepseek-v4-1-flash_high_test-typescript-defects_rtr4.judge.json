@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 2,
+  "notes": "All five must-fix items (including compound 3 and 4) and both minor items matched; the two error-identity findings (repository/payment failure propagation) are not planted and contradict the ground truth's stated non-planted protections, counting as false positives."
+}

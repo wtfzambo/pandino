@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed must-fix 5 (successful-path confirm/save order unobserved); the isinstance-trio excess finding contradicts ground truth's intentional int-shape assertions, counting as a false positive."
+}

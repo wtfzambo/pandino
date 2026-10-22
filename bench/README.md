@@ -39,6 +39,8 @@ The code each run produced is reconstructed from the transcripts by `extract_art
 
 ## Reviewer benchmark (`bench/review/`)
 
+Launch reports cover the [focused Sol 6.1 versus Flash 4.1 test-review comparison](review/results/sol61-flash41-test-review.md) and the [earlier mixed-load timing pilot](review/results/sol61-flash41-timing.md).
+
 Each task is a git repo built on the fly: `base/` is committed, `changed/` is copied on top as the uncommitted working diff — exactly the scope the reviewer prompt defines. The task-name prefix selects `taste`, `spec`, or `test`.
 
 | task | what it probes |
@@ -54,13 +56,13 @@ Each task is a git repo built on the fly: `base/` is committed, `changed/` is co
 | `test-python-defects` | five must-fix gaps in member-price boundaries, independent totals, invalid-input errors, returned booking IDs, and successful save-before-send ordering; plus two minor excess groups |
 | `test-python-clean` | independent Python booking totals, invalid-input/no-side-effect, and confirmation-ID/order evidence with no necessary findings |
 | `test-typescript-defects` | five must-fix gaps in bulk boundaries, independent totals, invalid-input errors, persisted transaction IDs, and returned order IDs; plus two minor excess groups |
-| `test-typescript-clean` | independent TypeScript order totals, invalid-input/no-side-effect, and async boundary/ID evidence with no necessary findings |
+| `test-typescript-clean` | intended clean control with independent totals and boundary/ID evidence; direct probes exposed unbounded waits and missing error-cause protection |
 
-Scoring is not string matching: `judge.py` sends the review plus the task's `expected.md` ground truth to a judge model (`anthropic/claude-fable-5` by default, `BENCH_JUDGE_MODEL` to override; pick one that is not a contestant). It records must-fix defects found, minor excess found, and false positives; older tasks without severity headings treat all numbered defects as must-fix. Judge verdicts land next to the raw transcripts (`*.judge.json`) for manual spot-checking. The automatic judge is advisory: Fable language judging repeatedly returned HTTP 429, no substitute was used, and [`results/manual-audit.md`](review/results/manual-audit.md) is the final authority.
+Scoring is not string matching: `judge.py` sends the review plus the task's `expected.md` ground truth to a judge model (`anthropic/claude-fable-5` by default, `BENCH_JUDGE_MODEL` to override; pick one that is not a contestant). It records must-fix defects found, minor excess found, and false positives; older tasks without severity headings treat all numbered defects as must-fix. Judge verdicts land next to the raw transcripts (`*.judge.json`) for manual spot-checking. Automatic judgments are advisory. Fable language judging returned HTTP 429 during earlier launches. [`results/manual-audit.md`](review/results/manual-audit.md) records the historical language-screen audit; each newer launch report states its own adjudication coverage and oracle conflicts.
 
 `./run_all.sh` is the prescribed initial original-task screen: all twelve test-review candidates, `test-defects`, `test-integration`, and `test-no-test`, one run each at `high`. It removes previous `role=test` rows before the screen but preserves the historical taste/spec rows. Do not use it as a blind repeated matrix. Run language screens and finalist repeats directly with `./run_one.sh <model> <task> <run> <thinking>` after inspecting verdicts; repeat only configurations whose results can change routing until each finalist task combination has three total runs. The raw filename and CSV include the thinking level, and `python3 summarize.py` groups by model, thinking level, and task. The Python language tasks' `base/run_tests.sh` direct runners use `python3 -m pytest -q`; the TypeScript ones use `node --test orders.test.ts`.
 
-Current `role=test` CSV scores are manually audited; automatic judge output is advisory, and future `run_all.sh` screens may add automatic scores pending audit.
+The CSV retains each launch's recorded scores, including automatic scores. Use the matching launch report to interpret them; the focused test-review report verifies counterexamples and preserves the failed attempt that has no CSV score.
 
 Run the initial screen with `./run_all.sh`, then `python3 summarize.py`. Before paid runs, mutation-audit the oracle. If a reviewer exposes a genuine fixture gap, correct the fixture and rerun stale contestant artifacts rather than scoring the finding as noise.
 

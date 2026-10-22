@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "Clean diff; both minor findings (duplicate ValueError tests, repeated int assertions) contradict ground truth's intentional independent evidence, so each is a false positive."
+}

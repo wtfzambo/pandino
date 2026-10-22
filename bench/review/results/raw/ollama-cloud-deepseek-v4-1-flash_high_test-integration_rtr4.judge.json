@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "Ground truth is clean; the minor finding requesting an extra fixture/test case is exactly the excess the ground truth disallows, so it counts as a false positive."
+}
