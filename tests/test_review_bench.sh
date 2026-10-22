@@ -68,6 +68,7 @@ chmod +x "$tmp_dir/bin/pi"
 
 export PATH="$tmp_dir/bin:$PATH"
 export PI_ARGS="$tmp_dir/pi-args.txt"
+unset BENCH_JUDGE_MODEL
 if ! bash "$bench_dir/run_one.sh" fake/provider test-no-test 99 medium; then
     echo "FAIL: non-Ollama benchmark did not exit successfully" >&2
     exit 1
@@ -121,6 +122,8 @@ if len(calls) != 2:
 contestant, judge = calls
 if judge[judge.index("--mode") + 1] != "text":
     raise SystemExit(f"second invocation was not the judge: {judge}")
+if judge[judge.index("--model") + 1] != "anthropic/claude-opus-5-5":
+    raise SystemExit(f"unexpected default judge model: {judge}")
 for flag, value in [
     ("--mode", "json"),
     ("--model", "fake/provider"),
