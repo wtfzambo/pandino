@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "All must-fix and minor items were found. Item 3 counts because both parts appear (the swallowed placeOrder(0) catch and the untyped calculateTotal(-1) throws), though the second is filed as minor. Item 4 counts because the review says dropping transactionId leaves every test green. Both minor-excess items are filed as must-fix but are still identified. One false positive: the claim that the payment and repository failure tests don't check error identity, which the ground truth lists as protected rejection propagation."
+}

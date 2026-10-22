@@ -317,3 +317,10 @@ openai/gpt-6-astra,test,test-python-defects,ar3,4,5,0,85,75786,1907,0.386650,0,h
 openai/gpt-6-astra,test,test-python-clean,ar3,0,0,0,70,63387,1633,0.254720,0,high,0,0
 openai/gpt-6-astra,test,test-typescript-defects,ar3,5,5,0,48,35715,1049,0.202240,0,high,2,2
 openai/gpt-6-astra,test,test-typescript-clean,ar3,0,0,0,37,39353,666,0.177998,0,high,0,0
+anthropic/claude-haiku-5-5,test,test-defects,hr1,4,5,0,59,79724,12395,0.009092,0,high,2,2
+anthropic/claude-haiku-5-5,test,test-integration,hr1,0,0,0,29,57150,5637,0.004872,0,high,0,0
+anthropic/claude-haiku-5-5,test,test-no-test,hr1,0,0,0,11,53769,1825,0.002744,0,high,0,0
+anthropic/claude-haiku-5-5,test,test-python-defects,hr1,3,5,1,97,170527,19542,0.014021,0,high,1,2
+anthropic/claude-haiku-5-5,test,test-python-clean,hr1,0,0,5,85,193306,15855,0.012110,0,high,0,0
+anthropic/claude-haiku-5-5,test,test-typescript-defects,hr1,5,5,1,76,84445,15489,0.010483,0,high,2,2
+anthropic/claude-haiku-5-5,test,test-typescript-clean,hr1,0,0,2,86,87649,16857,0.011277,0,high,0,0

@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "The review correctly calls the doc-only diff clean and says no automated test is needed. The unverified claim is flagged only as out of scope, not as a finding."
+}

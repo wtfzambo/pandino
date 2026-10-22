@@ -4,13 +4,15 @@ Measures which models fit Pandino agent roles on this machine through headless P
 
 ## How it works
 
-Every run is one headless Pi invocation, isolated from the local setup:
+Each run starts one headless Pi invocation with the following flags.
 
 ```
 pi -p --no-session --no-context-files --no-extensions --no-skills --mode json \
    --model <model> --thinking <level> \
    --append-system-prompt <role-prompt> "<task prompt>"
 ```
+
+The temporary workdir separates fixtures. Reviewers retain normal bash access to the host filesystem and processes; the workdir and read-only instructions provide no operating-system containment. The [Haiku screen](review/results/haiku55-test-review.md) was stopped after an executed cleanup targeted processes by command text and paths through a shared `/tmp` glob.
 
 - The role prompt is the agent's markdown from `agents/`, frontmatter stripped. Each `bench/review/prompts/<role>.md` is a deterministic copy of `agents/<role>-reviewer.md`; regenerate it with `awk '/^---$/{n++; next} n>=2' agents/<role>-reviewer.md > bench/review/prompts/<role>.md`. `run_one.sh` refuses a review run when the copy differs.
 - The task runs in a temp workdir seeded with the task's files plus the kit `AGENTS.md` and `.pandino/playbooks/`. `--no-context-files` keeps pi from loading `AGENTS.md` on its own, because `pi-subagents` strips it from specialists too: the model sees only what its role prompt tells it to read, as in a real Pandino repo.
@@ -39,7 +41,7 @@ The code each run produced is reconstructed from the transcripts by `extract_art
 
 ## Reviewer benchmark (`bench/review/`)
 
-Launch reports cover the [Astra 6 test-review follow-up](review/results/astra6-flash41-test-review.md), the [focused Sol 6.1 versus Flash 4.1 test-review comparison](review/results/sol61-flash41-test-review.md) and the [earlier mixed-load timing pilot](review/results/sol61-flash41-timing.md).
+Launch reports cover the [incomplete Haiku 5.5 screen and safety stop](review/results/haiku55-test-review.md), the [Astra 6 test-review follow-up](review/results/astra6-flash41-test-review.md), the [focused Sol 6.1 versus Flash 4.1 test-review comparison](review/results/sol61-flash41-test-review.md) and the [earlier mixed-load timing pilot](review/results/sol61-flash41-timing.md).
 
 Each task is a git repo built on the fly: `base/` is committed, `changed/` is copied on top as the uncommitted working diff — exactly the scope the reviewer prompt defines. The task-name prefix selects `taste`, `spec`, or `test`.
 

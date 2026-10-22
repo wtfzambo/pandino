@@ -1,5 +1,15 @@
 # Falsified hypotheses
 
+## 2026-10-22. A temporary review repository provides fixture separation, not host containment
+
+**Hypothesis:** A temporary benchmark repository and read-only reviewer instructions confine candidate writes and cleanup to its own files and processes.
+
+**Evidence:** During the Haiku 5.5 TypeScript-clean attempt `hr2`, tool call `toolu_01X2nb7qHx13gczREwuYZMzt` executed `pkill -f "node --test orders.test.ts"` and a deletion loop over `/tmp/mut.*`, returning exit status 0. These selectors cover a shared host namespace. Earlier calls executed temporary-file mutations despite the canonical role's explicit prohibition. The orchestrator stopped the launch by signaling its verified supervisor and confirmed no matching benchmark processes remained.
+
+**Consequence:** Treat the workdir as fixture separation. Bash retains normal host permissions, and role instructions depend on model compliance. Approve and verify an explicit containment boundary before further Haiku screening, and limit cleanup to verified owned paths and processes. All 66 frozen source inputs remained unchanged, but there was no pre-cleanup inventory to establish whether the broad selectors also affected unrelated resources.
+
+**References:** [Haiku screen and safety stop](bench/review/results/haiku55-test-review.md), the benchmark deadline and reviewer comparison (TASK-27), `agents/test-reviewer.md`, `bench/review/run_one.sh`.
+
 ## 2026-10-22. Numeric equality does not establish integer-cent boundaries
 
 **Hypothesis:** Integer annotations and equality with literal totals make runtime integer checks on results and boundary arguments redundant.

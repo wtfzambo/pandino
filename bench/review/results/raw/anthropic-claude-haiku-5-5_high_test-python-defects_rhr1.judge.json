@@ -1,0 +1,14 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Found: the threshold boundary at 4, the broad pytest.raises(Exception), and the unasserted booking_id. Missed item 2, wrongly claiming a price change would still fail even though expectations track SEAT_PRICE_CENTS. Missed item 5, wrongly claiming the call-order mutant is caught. Minor 1 is incomplete: it flags the existence check but suggests keeping the type-hints check. The isinstance-as-excess finding is a false positive, since those assertions intentionally guard the runtime int contract. The removed 2-seat fixture note reflects a real loss of the literal example, so it is not counted as a false positive."
+}

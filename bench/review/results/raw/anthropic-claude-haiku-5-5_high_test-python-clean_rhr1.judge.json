@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 5,
+  "notes": "Ground truth is clean. All five findings are false positives: two rest on contrived value-specific mutants (the 2-seat surcharge and 2.0 acceptance), two flag the intentional int checks as excess (and wrongly claim that equality rejects 2500.0), and one is a naming nit about the bool case."
+}
