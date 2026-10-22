@@ -3,7 +3,7 @@ id: doc-4
 title: Specialist model routing
 type: specification
 created_date: '2026-09-28 22:19'
-updated_date: '2026-10-22 11:14'
+updated_date: '2026-10-22 18:01'
 ---
 # Specialist model routing
 
@@ -17,13 +17,13 @@ These are the operator-selected defaults from 2026-09-29 (TASK-19), with GPT-6.1
 | Codex | GPT-6.1 Sol · medium | GPT-6 Luna · high | GPT-6.1 Sol · high | GPT-6 Astra · medium |
 | Claude Code | sonnet alias · medium | opus alias · high | sonnet alias · high | opus alias · medium |
 
-The writer and test reviewer deliberately share Sol with different effort settings; on Claude Code, which offers only aliases, Sonnet takes Sol's place in both roles. Their responsibilities and sessions remain separate; different effort is not model diversity. Claude Code aliases resolve to the versions available to the account, rather than an explicit 5.5 pin.
+The writer and test reviewer deliberately share Sol with different effort settings; on Claude Code, Sonnet takes Sol's place in both roles. Their responsibilities and sessions remain separate; different effort is not model diversity. Claude Code receives the `sonnet` and `opus` aliases rather than full model IDs, so each agent follows the newest version of that family available to the account.
 
 ## Configuration ownership and fallbacks
 
 `models.sh` owns ordered recommendations and agent-to-role mapping. `agents/*.md` owns canonical effort: medium for implementation/final review and high for routine/test review. `harnesses.sh` translates these into native agent definitions.
 
-Automatic recommendations omit superseded generations: GPT-5.x, GPT-6 Sol, Claude Opus/Sonnet 5, DeepSeek V4 Flash and GLM 5.2. GLM 5.3 replaces its older fallback entry. Kimi is an operator-selected exception: keep K2.6 followed by K2.7 Code, excluding K3 because its operation in the user setup is uncertain. Catalogue presence alone does not verify runtime availability. DeepSeek V4 Pro remains eligible because the inspected catalogue has no newer Pro successor; Claude Code keeps the current `opus` and `sonnet` aliases. Removing a recommendation does not invalidate an explicitly saved model choice or rewrite historical benchmark records (TASK-20).
+Automatic recommendations omit superseded generations: GPT-5.x, GPT-6 Sol, Claude Opus/Sonnet 5, DeepSeek V4 Flash and GLM 5.2. GLM 5.3 replaces its older fallback entry. Kimi is an operator-selected exception: keep K2.6 followed by K2.7 Code, excluding K3 because its operation in the user setup is uncertain. Catalogue presence alone does not verify runtime availability. DeepSeek V4 Pro remains eligible because the inspected catalogue has no newer Pro successor. Removing a recommendation does not invalidate an explicitly saved model choice or rewrite historical benchmark records (TASK-20).
 
 `.pandino/models.json` stores the selected model for each harness and role (`implementer`, `reviewer`, `test`, `final`). Saved choices win over recommendations, including a separately chosen test model, unless the saved model is on the superseded list in `models.sh` (GPT-5.6 Terra, Sol and Luna, GPT-6 Sol, Claude Opus 5 and Sonnet 5, DeepSeek V4 Flash, GLM 5.2). A superseded saved model is resolved again on the next install, and the recap names what replaced it, so updating Pandino moves existing installations to the current generation. To keep an older model deliberately, pin one that is not on that list, or edit the generated agent file and resolve the staged merge candidate.
 
@@ -37,4 +37,4 @@ These fields express the requested effort through native configuration. Actual s
 
 ## Evidence and rationale
 
-The earlier test-review benchmark found Sol 13/15 defects versus Flash 8/15 and favored high over medium effort. That historical result explains the separate test-review role; it does not establish the performance of Sol 6 or Flash 4.1. TASK-19 records catalogue probes, native format evidence and verification for this routing change. Decision-8 records the operator routing choice; decision-2 remains historical rationale for separate test review.
+On 2026-10-22 a focused test-review comparison ran seven cases three times at high effort. GPT-6.1 Sol matched 39/45 seeded problems and completed every attempt with no verified harmful recommendation; DeepSeek V4.1 Flash matched 42/45 but recommended deleting useful tests at least six times and timed out once. GPT-6 Astra matched Sol's 39/45; an incomplete Haiku 5.5 screen matched 12/15 in its only round. The [focused report](../../../bench/review/results/sol61-flash41-test-review.md) holds the evidence. Decision-10 records keeping Sol for test review and the Claude Code aliases; decision-8 records the earlier operator routing choice; decision-2 remains historical rationale for separate test review.

@@ -70,6 +70,7 @@ How to write documents, decisions, playbooks, and commit messages: `.pandino/pla
 ## Agent behavior
 
 - Work from the smallest observable slice satisfying the requirement; match research, checks, and evidence to the artifact's real use and consequences, whatever vocabulary its domain uses. Research and delegate only that slice; ask before expanding an approved plan or starting future-slice work.
+- Solve problems that have occurred or that the requirement names. Leave a hypothetical one (another platform, an unobserved failure mode, a scale nobody reached) unverified, state it as a limit in one line when it matters, and take it up when it appears.
 - Apply this necessity test to research, extra agents, artifacts, reviewer fixes, and optional work: keep an action only when the slice needs it to complete correctly and verify proportionately. Remove unshipped or unrequested artifacts that create audit or maintenance work outside the requirement. Prefer targeted changes over broad rewrites; keep the repository runnable after each slice.
 - Understand existing code and the relevant external API before editing; trace the real flow. State verified facts and label assumptions or uncertainty explicitly. When uncertain external behavior blocks the slice, resolve it via the cheapest authoritative source or direct probe.
 - Treat a request to pause or stop, or a direction question, as a workflow interrupt: stop active work, steer active agents to stop, and answer first.

@@ -1,11 +1,11 @@
 ---
 id: TASK-26
 title: Split always-on instructions into a core and on-demand playbooks
-status: In Progress
+status: Done
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-22 11:09'
+updated_date: '2026-10-22 18:02'
 labels:
   - instructions
   - installer
@@ -36,15 +36,23 @@ Out of scope: product context against off-topic research (TASK-21), shipping Pan
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every rule in today's `AGENTS.md` and the seven agent definitions has a recorded new home or an explicit reason for removal
-- [ ] #2 In a target repository, an agent given a matching task opens the playbook its index trigger names, as shown by a headless pi probe
-- [ ] #3 The specialist benchmark shows no regression against the current instructions
-- [ ] #4 A fresh install and an update of an existing install both produce the new layout, and the installer tests pass
-- [ ] #5 README, the affected specifications and a new decision describe the new layout and why it was chosen
+- [x] #1 Every rule in today's `AGENTS.md` and the seven agent definitions has a recorded new home or an explicit reason for removal
+- [x] #2 In a target repository, an agent given a matching task opens the playbook its index trigger names, as shown by a headless pi probe
+- [x] #3 The specialist benchmark shows no regression against the current instructions
+- [x] #4 A fresh install and an update of an existing install both produce the new layout, and the installer tests pass
+- [x] #5 README, the affected specifications and a new decision describe the new layout and why it was chosen
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-10-21: at the operator's request, model recommendations moved to GPT-6.1 Sol (implementer, test review, final fallback), and saved superseded models (GPT-5.6, GPT-6 Sol, Claude 5, DeepSeek V4 Flash, GLM 5.2) are now re-resolved on install so updates move existing repos to the current generation; doc-4 and README updated. Smoke check on GPT-6.1 Sol with the new instructions: test-python-defects 4/5 must-fix, 2/2 minor, 0 false positives (same as GPT-6 Sol); adversarial-config and python-median pass. A live call confirmed GPT-6.1 Sol, GPT-6 Astra, GPT-6 Luna, DeepSeek V4.1 Flash and Opus 5.5 respond in pi.
+
+2026-10-22 closure. AC #1: TASK-26.1 inventory. AC #2: TASK-26.6 probe, Opus 5.5 and GPT-6 Sol 6/6, Flash 5/6 accepted by the operator. AC #3: agents-variants on all 16 tasks, no task worse. AC #4: bash tests/test_install.sh passes on this commit, covering fresh install and update of an old layout. AC #5: README, doc-1, doc-3, doc-4 and decision-9 describe the layout; decision-10 records the final routing. Added an Agent behavior rule at the operator's request: solve problems that occurred or that the requirement names, and state hypothetical ones as limits.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Split the always-on AGENTS.md into a core with a trigger index, eight playbooks under .pandino/playbooks/ and the pandino-pickup/pandino-handoff skills. The installer requires Backlog, installs the new layout, removes legacy snippets and stages conflicting merges. Specialists read the core plus their role playbooks. Verified with a six-prompt trigger probe, an all-task benchmark comparison against the old instructions with no regression, the installer suite, and taste/spec/test/docs/final reviews with every must-fix resolved. Model recommendations moved to GPT-6.1 Sol, with superseded saved choices re-resolved on install.
+<!-- SECTION:FINAL_SUMMARY:END -->

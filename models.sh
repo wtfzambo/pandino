@@ -30,7 +30,7 @@ agent_role() {
 
 # Ordered operator choices per role. NOTES.md records historical benchmarks;
 # current routing is an operator choice. Superseded generations are omitted.
-# Claude Code offers only aliases, so Sonnet stands in where others get Sol.
+# Claude Code gets family aliases, so Sonnet stands in where others get Sol.
 # Pro retains its dated and bare IDs because it has no listed successor.
 # Kimi stays on K2.6/K2.7 Code at the operator's request; K3 is not adopted.
 role_preferences() {

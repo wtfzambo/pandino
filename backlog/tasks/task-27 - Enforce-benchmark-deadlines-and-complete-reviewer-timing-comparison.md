@@ -1,11 +1,11 @@
 ---
 id: TASK-27
 title: Enforce benchmark deadlines and complete reviewer timing comparison
-status: In Progress
+status: Done
 assignee:
   - '@zambo'
 created_date: '2026-10-22 14:36'
-updated_date: '2026-10-22 17:19'
+updated_date: '2026-10-22 18:02'
 labels:
   - benchmark
 dependencies: []
@@ -22,7 +22,7 @@ The reviewer timing comparison stalled for almost three hours when two TypeScrip
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A benchmark review deadline terminates the reviewer and its ordinary descendant processes on macOS and Linux, preserving timeout as a failed incomplete run.
+- [x] #1 A benchmark review deadline terminates the reviewer and its ordinary descendant processes on the benchmark machine, preserving timeout as a failed incomplete run.
 - [x] #2 Regression checks demonstrate normal completion, timeout of a hung process tree, and cancellation cleanup without paid model calls.
 - [x] #3 Complete three repetitions per review case for both models with bounded concurrency and report duration, quality, and failures with measurement limitations.
 - [x] #4 Explain current implementer routing and pstack model diversity using repository sources; leave reviewer defaults for the operator decision.
@@ -86,4 +86,12 @@ clean
 - Checked: all seven completed reviews, role and documentation guidance, current routing specification, 26 report links, all first-round seeded comparator scores, seven new high-effort CSV rows and raw judgments, 66 frozen input hashes, local counterprobes, five deadline regressions and whitespace/process checks.
 - Unverified: the other 14 Haiku outcomes, which were interrupted or unstarted; unrelated cleanup impact without a prior namespace inventory; Linux execution. These limits are explicit rather than inferred as successful outcomes.
 - Turns: 5 of 20 for the direct review, followed by local prose corrections; timed-out reviewer checks: none.
+
+2026-10-22 closure. The operator scoped the deadline promise to the machine that runs the benchmark and declined a Linux check: the wrapper is benchmark-only, runs on the operator's Mac, and a Linux difference will be handled if it ever appears. AC #1 rewritten accordingly. Evidence on macOS: five regressions pass (status/output, hung tree, cancellation, detached tool timeout, detached cancellation after parent exit), and the real Flash tr5 timeout returned 124 with no surviving descendants. Routing outcome recorded in decision-10: Sol 6.1 stays test reviewer, Flash stays routine reviewer, Claude Code keeps aliases.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Replaced the absent timeout executable with bench/run_with_timeout.py, which stops the reviewer and its descendant process groups at the deadline or on cancellation and returns 124 on timeout; all three benchmark runners use it. Verified with five regression tests and a real 600-second Flash timeout on macOS. Compared test reviewers on seven cases: Sol 6.1 39/45 with no harmful advice, Flash 4.1 42/45 with at least six disproved test-deletion recommendations and one timeout, Astra 39/45, Haiku 5.5 12/15 before a safety stop. Reports live in bench/review/results/. Routing stays Sol for test review (decision-10).
+<!-- SECTION:FINAL_SUMMARY:END -->
