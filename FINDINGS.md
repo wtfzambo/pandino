@@ -1,5 +1,15 @@
 # Falsified hypotheses
 
+## 2026-10-22. A Pi reviewer deadline must also stop detached tool groups
+
+**Hypothesis:** Terminating the reviewer's process group stops the commands it launched.
+
+**Evidence:** Pi coding agent 1.3.0 starts its bash tool with `detached: process.platform !== "win32"` in `dist/core/tools/bash.js`. Two TypeScript mutation probes survived the interrupted timing benchmark in their own process groups. The detached-tool regression in `tests/test_bench_timeout.py` failed under group-only cleanup and passes when the wrapper discovers descendant groups before terminating the reviewer.
+
+**Consequence:** The benchmark wrapper captures and stops descendant groups on timeout and cancellation. This covers attached descendants that create a separate group, including Pi tools. It does not promise cleanup of processes that deliberately reparent themselves before discovery.
+
+**References:** The benchmark deadline fix and reviewer timing comparison (TASK-27), `bench/run_with_timeout.py`, `tests/test_bench_timeout.py`.
+
 ## 2026-09-29 — OpenCode GPT-6 effort needs an explicit reasoning capability override
 
 **Hypothesis:** Setting `reasoningEffort: medium` or `high` on an OpenCode GPT-6 agent is sufficient to serialize the requested effort.

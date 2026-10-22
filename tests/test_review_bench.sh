@@ -9,6 +9,7 @@ bench_dir="$tmp_dir/bench/review"
 mkdir -p "$bench_dir/prompts" "$bench_dir/tasks" "$bench_dir/results/raw" "$tmp_dir/bench/implementer" \
     "$tmp_dir/agents" "$tmp_dir/bin"
 cp "$repo_dir/bench/review/run_one.sh" "$bench_dir/run_one.sh"
+cp "$repo_dir/bench/run_with_timeout.py" "$tmp_dir/bench/run_with_timeout.py"
 cp "$repo_dir/bench/review/judge.py" "$bench_dir/judge.py"
 for role in taste spec test; do
     cp "$repo_dir/bench/review/prompts/$role.md" "$bench_dir/prompts/$role.md"

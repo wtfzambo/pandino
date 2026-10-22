@@ -74,7 +74,7 @@ fi
 
 start=$(date +%s)
 pi_status=0
-(cd "$work" && timeout 600 pi -p --no-session --no-context-files --no-extensions "${extra[@]+"${extra[@]}"}" --no-skills \
+(cd "$work" && python3 "$bench_dir/../run_with_timeout.py" 600 pi -p --no-session --no-context-files --no-extensions "${extra[@]+"${extra[@]}"}" --no-skills \
     --mode json --model "$model" --thinking "$thinking" \
     --append-system-prompt "$system_prompt" \
     "$prompt") > "$raw_dir/$slug.jsonl" 2> "$raw_dir/$slug.err" || pi_status=$?
