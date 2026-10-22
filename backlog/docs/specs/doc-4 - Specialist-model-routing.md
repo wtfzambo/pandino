@@ -3,7 +3,7 @@ id: doc-4
 title: Specialist model routing
 type: specification
 created_date: '2026-09-28 22:19'
-updated_date: '2026-10-22 11:07'
+updated_date: '2026-10-22 11:14'
 ---
 # Specialist model routing
 
@@ -15,15 +15,15 @@ These are the operator-selected defaults from 2026-09-29 (TASK-19), with GPT-6.1
 |---|---|---|---|---|
 | Pi / OpenCode | GPT-6.1 Sol · medium | DeepSeek V4.1 Flash · high | GPT-6.1 Sol · high | Claude Opus 5.5 · medium |
 | Codex | GPT-6.1 Sol · medium | GPT-6 Luna · high | GPT-6.1 Sol · high | GPT-6 Astra · medium |
-| Claude Code | sonnet alias · medium | opus alias · high | opus alias · high | opus alias · medium |
+| Claude Code | sonnet alias · medium | opus alias · high | sonnet alias · high | opus alias · medium |
 
-The writer and test reviewer deliberately share Sol with different effort settings. Their responsibilities and sessions remain separate; different effort is not model diversity. Claude Code aliases resolve to the versions available to the account, rather than an explicit 5.5 pin.
+The writer and test reviewer deliberately share Sol with different effort settings; on Claude Code, which offers only aliases, Sonnet takes Sol's place in both roles. Their responsibilities and sessions remain separate; different effort is not model diversity. Claude Code aliases resolve to the versions available to the account, rather than an explicit 5.5 pin.
 
 ## Configuration ownership and fallbacks
 
 `models.sh` owns ordered recommendations and agent-to-role mapping. `agents/*.md` owns canonical effort: medium for implementation/final review and high for routine/test review. `harnesses.sh` translates these into native agent definitions.
 
-Automatic recommendations omit superseded generations: GPT-5.x, Claude Opus/Sonnet 5, DeepSeek V4 Flash and GLM 5.2. GPT-6 Sol stays only as the fallback after GPT-6.1 Sol for catalogues that do not offer 6.1 yet. GLM 5.3 replaces its older fallback entry. Kimi is an operator-selected exception: keep K2.6 followed by K2.7 Code, excluding K3 because its operation in the user setup is uncertain. Catalogue presence alone does not verify runtime availability. DeepSeek V4 Pro remains eligible because the inspected catalogue has no newer Pro successor; Claude Code keeps the current `opus` and `sonnet` aliases. Removing a recommendation does not invalidate an explicitly saved model choice or rewrite historical benchmark records (TASK-20).
+Automatic recommendations omit superseded generations: GPT-5.x, GPT-6 Sol, Claude Opus/Sonnet 5, DeepSeek V4 Flash and GLM 5.2. GLM 5.3 replaces its older fallback entry. Kimi is an operator-selected exception: keep K2.6 followed by K2.7 Code, excluding K3 because its operation in the user setup is uncertain. Catalogue presence alone does not verify runtime availability. DeepSeek V4 Pro remains eligible because the inspected catalogue has no newer Pro successor; Claude Code keeps the current `opus` and `sonnet` aliases. Removing a recommendation does not invalidate an explicitly saved model choice or rewrite historical benchmark records (TASK-20).
 
 `.pandino/models.json` stores the selected model for each harness and role (`implementer`, `reviewer`, `test`, `final`). Saved choices win over recommendations, including a separately chosen test model, unless the saved model is on the superseded list in `models.sh` (GPT-5.6 Terra, Sol and Luna, GPT-6 Sol, Claude Opus 5 and Sonnet 5, DeepSeek V4 Flash, GLM 5.2). A superseded saved model is resolved again on the next install, and the recap names what replaced it, so updating Pandino moves existing installations to the current generation. To keep an older model deliberately, pin one that is not on that list, or edit the generated agent file and resolve the staged merge candidate.
 

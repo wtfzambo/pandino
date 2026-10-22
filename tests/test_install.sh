@@ -49,6 +49,7 @@ if [ "$1" = "--list-models" ]; then
     echo 'openai-codex  gpt-5.6-sol'
     echo 'openai-codex  gpt-6-astra'
     echo 'openai-codex  gpt-6-sol'
+    echo 'openai-codex  gpt-6.1-sol'
     echo 'openai-codex  gpt-6-luna'
     echo 'ollama-cloud  deepseek-v4.1-flash'
     echo 'anthropic     claude-opus-5-5'
@@ -149,13 +150,13 @@ mkdir "$fresh_target"
 bash "$repo_dir/install.sh" "$fresh_target" --no-input > "$tmp_dir/fresh.out"
 
 # Current operator routing must win even when older models remain available.
-grep -qx 'model: openai-codex/gpt-6-sol' "$fresh_target/.pi/agents/implementer.md"
+grep -qx 'model: openai-codex/gpt-6.1-sol' "$fresh_target/.pi/agents/implementer.md"
 grep -qx 'thinking: medium' "$fresh_target/.pi/agents/implementer.md"
 for agent in taste-reviewer spec-reviewer docs-reviewer; do
     grep -qx 'model: ollama-cloud/deepseek-v4.1-flash' "$fresh_target/.pi/agents/$agent.md"
     grep -qx 'thinking: high' "$fresh_target/.pi/agents/$agent.md"
 done
-grep -qx 'model: openai-codex/gpt-6-sol' "$fresh_target/.pi/agents/test-reviewer.md"
+grep -qx 'model: openai-codex/gpt-6.1-sol' "$fresh_target/.pi/agents/test-reviewer.md"
 grep -qx 'thinking: high' "$fresh_target/.pi/agents/test-reviewer.md"
 grep -qx 'model: anthropic/claude-opus-5-5' "$fresh_target/.pi/agents/final-reviewer.md"
 grep -qx 'thinking: medium' "$fresh_target/.pi/agents/final-reviewer.md"
@@ -715,7 +716,7 @@ mkdir "$pin_target"
 cat > "$tmp_dir/bin/opencode" <<'STUB'
 #!/bin/sh
 [ "$1" = models ] || exit 1
-printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol opencode/gpt-6-sol opencode/gpt-6-luna openai/deepseek-v4-flash opencode/deepseek-v4.1-flash openai/claude-opus-5 opencode/claude-opus-5-5 opencode/gpt-6-astra
+printf '%s\n' openai/gpt-5.6-terra openai/gpt-5.6-sol opencode/gpt-6-sol opencode/gpt-6.1-sol opencode/gpt-6-luna openai/deepseek-v4-flash opencode/deepseek-v4.1-flash openai/claude-opus-5 opencode/claude-opus-5-5 opencode/gpt-6-astra
 STUB
 cat > "$tmp_dir/bin/codex" <<'STUB'
 #!/bin/sh
@@ -729,7 +730,7 @@ chmod +x "$tmp_dir/bin/opencode" "$tmp_dir/bin/codex" "$tmp_dir/bin/claude"
 pin_home="$tmp_dir/pin-home"
 mkdir -p "$pin_home/.codex"
 cat > "$pin_home/.codex/models_cache.json" <<'JSON'
-{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "gpt-6-astra"}, {"slug": "gpt-6-sol"}, {"slug": "gpt-6-luna"}, {"slug": "codex-auto-review"}]}
+{"models": [{"slug": "gpt-5.6-sol"}, {"slug": "gpt-5.6-terra"}, {"slug": "gpt-6-astra"}, {"slug": "gpt-6-sol"}, {"slug": "gpt-6.1-sol"}, {"slug": "gpt-6-luna"}, {"slug": "codex-auto-review"}]}
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins.out"
 
@@ -797,14 +798,14 @@ for agent in taste-reviewer spec-reviewer docs-reviewer; do
     grep -qx 'model: opencode/deepseek-v4.1-flash' "$pin_target/.opencode/agent/$agent.md"
     grep -qx 'model = "gpt-6-luna"' "$pin_target/.codex/agents/$agent.toml"
 done
-grep -qx 'model: opencode/gpt-6-sol' "$pin_target/.opencode/agent/implementer.md"
-grep -qx 'model: opencode/gpt-6-sol' "$pin_target/.opencode/agent/test-reviewer.md"
+grep -qx 'model: opencode/gpt-6.1-sol' "$pin_target/.opencode/agent/implementer.md"
+grep -qx 'model: opencode/gpt-6.1-sol' "$pin_target/.opencode/agent/test-reviewer.md"
 grep -qx 'reasoningEffort: medium' "$pin_target/.opencode/agent/implementer.md"
 grep -qx 'reasoningEffort: high' "$pin_target/.opencode/agent/test-reviewer.md"
 for agent in implementer test-reviewer; do
     grep -qx 'forceReasoning: true' "$pin_target/.opencode/agent/$agent.md"
 done
-grep -qx 'model: openai-codex/gpt-6-sol' "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx 'model: openai-codex/gpt-6.1-sol' "$pin_target/.pi/agents/test-reviewer.md"
 grep -qx 'model: anthropic/claude-opus-5-5' "$pin_target/.pi/agents/final-reviewer.md"
 grep -qx 'thinking: medium' "$pin_target/.pi/agents/final-reviewer.md"
 grep -qx 'model: opencode/claude-opus-5-5' "$pin_target/.opencode/agent/final-reviewer.md"
@@ -820,11 +821,12 @@ grep -qx 'model = "gpt-6-astra"' "$pin_target/.codex/agents/final-reviewer.toml"
 grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/implementer.toml"
 grep -qx 'model_reasoning_effort = "high"' "$pin_target/.codex/agents/test-reviewer.toml"
 grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/final-reviewer.toml"
-grep -qx 'model = "gpt-6-sol"' "$pin_target/.codex/agents/implementer.toml"
-grep -qx 'model = "gpt-6-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
-# Claude Code takes subscription aliases.
+grep -qx 'model = "gpt-6.1-sol"' "$pin_target/.codex/agents/implementer.toml"
+grep -qx 'model = "gpt-6.1-sol"' "$pin_target/.codex/agents/test-reviewer.toml"
+# Claude Code takes subscription aliases: Sonnet where others get Sol.
 grep -qx 'model: sonnet' "$pin_target/.claude/agents/implementer.md"
-for agent in taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer; do
+grep -qx 'model: sonnet' "$pin_target/.claude/agents/test-reviewer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer final-reviewer; do
     grep -qx 'model: opus' "$pin_target/.claude/agents/$agent.md"
 done
 grep -qx 'effort: medium' "$pin_target/.claude/agents/implementer.md"
@@ -836,7 +838,7 @@ if grep -q '^effort:' "$pin_target/.claude/agents/fallback-runner.md"; then
 fi
 # Excluded recommendations are skipped even when the catalogue still lists them.
 . "$repo_dir/models.sh"
-excluded_catalog=$'gpt-5.6-terra\ngpt-5.6-sol\ngpt-5.6-luna\ngpt-5.6\nclaude-sonnet-5\nclaude-opus-5\ndeepseek-v4-flash:0731\ndeepseek-v4-flash\nglm-5.2\nkimi-k3'
+excluded_catalog=$'gpt-5.6-terra\ngpt-5.6-sol\ngpt-5.6-luna\ngpt-5.6\ngpt-6-sol\nclaude-sonnet-5\nclaude-opus-5\ndeepseek-v4-flash:0731\ndeepseek-v4-flash\nglm-5.2\nkimi-k3'
 for role in implementer reviewer test final; do
     if resolve_role_model "$excluded_catalog" "$role" > /dev/null; then
         echo "FAIL: $role recommended an excluded model" >&2
@@ -850,10 +852,15 @@ done
 [ "$(resolve_role_model $'ollama-cloud/kimi-k3\nollama-cloud/kimi-k2.7-code' reviewer)" = 'ollama-cloud/kimi-k2.7-code' ]
 [ "$(resolve_role_model $'gpt-5.6-sol\ndeepseek-v4-pro:0813' test)" = 'deepseek-v4-pro:0813' ]
 [ "$(resolve_role_model $'claude-opus-5\ngpt-6-astra' final)" = 'gpt-6-astra' ]
-# GPT-6.1 Sol leads where offered; GPT-6 Sol remains the fallback.
+# GPT-6.1 Sol replaces GPT-6 Sol outright; Claude Code gets Sonnet in its place.
 [ "$(resolve_role_model $'openai/gpt-6-sol\nopenai/gpt-6.1-sol' implementer)" = 'openai/gpt-6.1-sol' ]
-[ "$(resolve_role_model $'openai/gpt-6-sol\nopenai/gpt-6.1-sol' test)" = 'openai/gpt-6.1-sol' ]
-[ "$(resolve_role_model $'openai/gpt-6-sol' implementer)" = 'openai/gpt-6-sol' ]
+if resolve_role_model $'openai/gpt-6-sol' implementer > /dev/null; then
+    echo "FAIL: GPT-6 Sol is still recommended" >&2
+    exit 1
+fi
+[ "$(resolve_role_model $'fable\nopus\nsonnet\nhaiku' implementer)" = 'sonnet' ]
+[ "$(resolve_role_model $'fable\nopus\nsonnet\nhaiku' test)" = 'sonnet' ]
+[ "$(resolve_role_model $'fable\nopus\nsonnet\nhaiku' final)" = 'opus' ]
 # A hosted review pipeline is not a model to pin.
 if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
     echo "FAIL: Codex output includes codex-auto-review" >&2
@@ -888,9 +895,9 @@ pi_row = next(
 )
 models = re.split(r"\s{2,}", pi_row.strip())[1:]
 expected = [
-    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6.1-sol",
     "ollama-cloud/deepseek-v4.1-flash",
-    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6.1-sol",
     "anthropic/claude-opus-5-5",
 ]
 if models != expected:
@@ -908,7 +915,7 @@ with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-upgrade.out"
-grep -qx "model: openai-codex/gpt-6-sol" "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx "model: openai-codex/gpt-6.1-sol" "$pin_target/.pi/agents/test-reviewer.md"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if set(d['pi']) == {'implementer', 'reviewer', 'test', 'final'} else 1)" \
     "$pin_target/.pandino/models.json"
 
