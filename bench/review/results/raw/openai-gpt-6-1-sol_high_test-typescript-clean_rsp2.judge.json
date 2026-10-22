@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "Clean diff; the error-identity must-fix and duplicate-test minor contradict ground truth (wording/identity pinning not required, both happy paths intentional), so both are false positives."
+}

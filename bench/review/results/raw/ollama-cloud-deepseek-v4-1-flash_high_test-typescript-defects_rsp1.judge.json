@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "All five must-fix items matched including both compound groups; both minor excess items found (listed as must-fix/excess in review); the hang-on-missing-save note is a genuine unlisted concern, not a false positive."
+}

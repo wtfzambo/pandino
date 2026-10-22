@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "All four planted defects found (reverse double-negation covered via the third finding); the duplicate-computation finding is real, but the test-coverage and named-type minors are not planted and not clear defects."
+}

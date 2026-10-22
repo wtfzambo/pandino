@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "All five must-fix groups found (both error-type components and all three save paths covered); both minor items found (source-text check reported as must-fix but same defect); extra findings duplicate listed groups, no false positives."
+}

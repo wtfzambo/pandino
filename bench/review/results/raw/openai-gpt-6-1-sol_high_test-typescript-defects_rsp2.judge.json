@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Item 4 only partially matched: the review notes the missing saved transactionId for both success paths but omits the repository-rejection path named as a required component of that compound group."
+}

@@ -1,0 +1,27 @@
+## Verdict
+changes needed
+
+## Findings
+### must-fix
+
+- `report.py:23-34` | demonstrated defect | The body is a `reduce(lambda acc, kv: acc + [kv], ...)` that rebuilds the sorted list element by element — a pass-through that is quadratic and exactly equal to `list(sorted(...))` (verified: 0 mismatches over 1,200 random inputs). The trailing `if rows else []` is dead because `sum_by_category([]).items()` is already empty, and the guard sits at the end of the expression where it does not read as a guard. | Return `[category for category, _ in sorted(totals.items(), key=...)]` with no `reduce` and no empty-input conditional. | `design.md` — Cleverer than the problem; Pass-through
+- `report.py:17-19,29-30` | plausible risk | `key_fn`, `reverse`, and `tie_breaker` are never passed by any caller; `tie_breaker` is provably ignored (`top_categories(ties, tie_breaker=lambda s: "zzz")` returns the same list). The `reverse` coupling is also asymmetric: with `key_fn=None`, the key already encodes `-amount`, so `reverse=not reverse` makes `reverse=False` return ties in reverse alphabetical order (`['c','b','a']` for the tied fixture) rather than reversing order alone. | Delete all three parameters and sort once by `(-amount, category)`; if a caller ever needs another order, add it then. | `design.md` — Speculative generality; `AGENTS.md` Modules and ordering "Remove dead code, speculative extension points"
+- `report.py:21-22` | plausible risk | The comment "Fold the totals into a sorted slice, then unzip the category names back out of the pairs in one expression" explains and excuses a clever construct in our own code; it is neither an external constraint, an accepted scale limit, nor a license, and the code explains itself once rewritten. | Delete the comment with the rewrite. | `AGENTS.md` Plain code — comment allowed only for external constraint, scale limit, or license
+- `report.py:37-49` | demonstrated defect | `format_summary` nests the happy path two levels deep behind `if rows:` and `if totals:` with two identical `else: return ""` branches. Both guards are dead: `totals` is non-empty whenever `rows` is (each row inserts a key), and `if category in totals` (line 43) can never be false since the names come from `totals` keys. | Guard-clause the single real case and join the lines directly: `totals = sum_by_category(rows)`, then `return "\n".join(...)` — empty input yields `""` for free. | `design.md` — Deep nesting (happy path hidden in branches); `AGENTS.md` "let impossible states fail fast rather than adding defensive layers"
+
+### minor
+
+- `report.py:16,34` | plausible risk | `limit` defaults to 3, a threshold no production caller uses: the only caller, `format_summary:42`, passes `limit=len(totals)` to neutralize it. Negative values silently drop from the end (`top_categories(rows, limit=-1) == ['rent']`). | Drop `limit` and slice only if a caller needs truncation. | `AGENTS.md` Constants — name domain thresholds near the behavior they govern; `design.md` — Speculative generality
+- `report.py:39,42` | plausible risk | `format_summary` sums the rows, then calls `top_categories(rows, ...)`, which sums them again: two owners of the same totals and duplicate work. | Pass the already-computed totals into the ordering step so one call produces one sorted list. | `design.md` — Split ownership; Shallow module
+- `report.py:4` | plausible risk | On Python 3.12 (`python3 -V`) the plain spelling is `collections.abc.Callable`; `typing.Callable` is a deprecated alias. | Use `from collections.abc import Callable`, or drop the import with the parameters. | `AGENTS.md` Types and contracts
+- `report.py:14-49` | plausible risk | Added callers sit after their callees (`sum_by_category` → `top_categories` → `format_summary`), inverting the stated module order. | Order `format_summary`, `top_categories`, `sum_by_category` so the entrypoint reads first. | `AGENTS.md` Modules and ordering — "place callers before callees"
+- `test_report.py:9-13` | incomplete coverage | The ordering contract's tie-break (alphabetical on equal amounts) is untested, and `limit` truncation is untested, so a break in either passes. | Add one tied-amount fixture with two categories of equal total. | `AGENTS.md` Definition of done — meaningful behavior is tested; `.pandino/playbooks/testing.md` "Break the behavior"
+
+## Good
+- `sum_by_category` is reused rather than reimplemented, and the expected report text in the test is taken by hand from the contract (descending by amount, two decimals) instead of from the code under test.
+- Test assertions stay on the public results; nothing pins internal calls or ordering.
+
+## Coverage
+- Checked: `python3 -B test_report.py` → `test_report: PASS` (exit 0, no `__pycache__` written, repo unchanged); equivalence probe of the `reduce`/guard rewrite over 1,200 generated inputs → 0 mismatches for both `top_categories` and `format_summary`; behavioral probes for `reverse`, `key_fn`, `tie_breaker`, `limit` (`0`, `1`, `-1`), ties, empty rows, single zero-amount row, and a six-category summary.
+- Unverified: formatter, linter, and type checker — `ruff`, `mypy`, `black`, `pyright`, `flake8` are all absent and the repo has no `pyproject.toml`/`setup.cfg`/`mypy.ini`, so their rules were judged by reading; whether the agreed intent includes `limit`/`key_fn` is `spec-reviewer`'s call.
+- Turns: 6 of 8; timed-out commands: none (`timeout` is not installed on this host, so I ran `python3 -B` with the tool timeout instead).

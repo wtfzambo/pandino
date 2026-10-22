@@ -1,0 +1,13 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 4,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All four planted defects found at the correct locations; extra minor nits (tie-break naming, Callable import, c/kv names) are real defensible issues in the described code, not false positives."
+}

@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 2,
+  "notes": "Clean diff; review's two minor findings contradict ground truth (bool rejection and int assertions are intentional, load-bearing), so both count as false positives."
+}

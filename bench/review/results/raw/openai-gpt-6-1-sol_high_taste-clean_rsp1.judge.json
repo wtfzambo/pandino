@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 1,
+  "notes": "Clean diff correctly given zero must-fix findings, but the minor docstring finding is actionable against a clean ground truth, so it counts as one false positive."
+}

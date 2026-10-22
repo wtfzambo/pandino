@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 1,
+  "notes": "Missed success-path save-vs-confirmation ordering (item 5); the minor finding against the intentional runtime int-shape assertions is a false positive."
+}

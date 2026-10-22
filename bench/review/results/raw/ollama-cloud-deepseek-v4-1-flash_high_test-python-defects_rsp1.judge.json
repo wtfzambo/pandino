@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "notes": "Missed successful-confirmation call-order gap (item 5); fractional match issue reported within a must-fix finding but counted; isinstance-int noise finding contradicts intended runtime-shape assertions, counted as false positive.",
+  "false_positives": 1
+}

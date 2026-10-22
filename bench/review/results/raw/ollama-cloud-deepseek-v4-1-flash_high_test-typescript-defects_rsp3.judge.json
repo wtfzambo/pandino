@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "All five must-fix items found (item 3's two components split across must-fix and minor sections), both minor excess items found; the error-identity propagation note is a genuine unlisted weakness, not a false positive."
+}

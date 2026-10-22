@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "All five must-fix items found (one review finding covers compound items 4 and 5; the swallowed-catch finding covers both components of item 3); both minor items found; no false positives."
+}

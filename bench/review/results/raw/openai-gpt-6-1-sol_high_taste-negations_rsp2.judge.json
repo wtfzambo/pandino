@@ -1,0 +1,12 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3
+  ],
+  "defects_total": 3,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "All three planted defects found (items 1-2 bundled in one finding, item 3 as rename); control comment correctly praised, no false positives."
+}
