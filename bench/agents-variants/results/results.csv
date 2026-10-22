@@ -109,3 +109,6 @@ pre-task26,python-median,implementer,openai/gpt-6-sol,w1,,,,,,1,35,35194,577,0.0
 pre-task26,ts-duration,implementer,openai/gpt-6-sol,w1,,,,,,1,48,41457,949,0.037108,0,high
 pre-task26,shell-wordfreq,implementer,openai/gpt-6-sol,w1,,,,,,1,56,39736,1235,0.049889,0,high
 pre-task26,test-typescript-defects,test,openai/gpt-6-sol,w1,5,5,0,2,2,,58,35310,1908,0.047306,0,high
+task26,adversarial-config,implementer,openai/gpt-6.1-sol,s61,,,,,,1,21,12455,278,0.014314,0,high
+task26,python-median,implementer,openai/gpt-6.1-sol,s61,,,,,,1,38,33659,604,0.026907,0,high
+task26,test-python-defects,test,openai/gpt-6.1-sol,s61,4,5,0,2,2,,61,44810,2068,0.049257,0,high

@@ -16,8 +16,8 @@ slug="${variant}_${task}_r${run}"
 # Production routing from .pandino/models.json, pinned here so a run is reproducible.
 model_taste="ollama-cloud/deepseek-v4.1-flash"
 model_spec="ollama-cloud/deepseek-v4.1-flash"
-model_test="openai/gpt-6-sol"
-model_implementer="openai/gpt-6-sol"
+model_test="openai/gpt-6.1-sol"
+model_implementer="openai/gpt-6.1-sol"
 
 if [[ ! -f "$agents_file" ]]; then
     echo "unknown variant: $variant" >&2
