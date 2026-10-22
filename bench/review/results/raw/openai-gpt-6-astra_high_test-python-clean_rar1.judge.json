@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is clean with zero planted items; the review reports no must-fix or minor findings and its Good notes are consistent, so there are no false positives."
+}

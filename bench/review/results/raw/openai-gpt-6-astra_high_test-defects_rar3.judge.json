@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed #5: the review never flags that schedule_retry lacks a negative (non-retryable status) assertion; its mutation note targets retryable_status, not the scheduling boundary."
+}

@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed item 5, the unobserved save-before-mail order on the success path; Coverage wrongly claims ordering was probed, and both components of minor 1 were named."
+}

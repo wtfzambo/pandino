@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Found items 1-4 and both minor groups. Missed item 5, the unobserved successful-path save/send order: the review only mentions an ordering probe under Coverage and never raises it as a finding."
+}

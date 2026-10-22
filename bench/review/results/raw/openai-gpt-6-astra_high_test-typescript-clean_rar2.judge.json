@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Ground truth is clean and the review returned a clean verdict with no must-fix or minor findings; the Good and Coverage notes are not actionable findings."
+}

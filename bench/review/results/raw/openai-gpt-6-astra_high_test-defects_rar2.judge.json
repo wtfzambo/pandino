@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed #5: the review never flags that schedule_retry is tested only with 503 and needs a negative assertion (e.g. status 400) at the scheduling boundary; its 400 finding is about the bash `!` masking instead."
+}

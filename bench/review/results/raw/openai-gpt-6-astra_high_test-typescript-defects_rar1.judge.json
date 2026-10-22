@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "The review found every planted item and had no false positives; it merged must-fix items 4 (transactionId missing from the save event) and 5 (truthy orderId) into one finding that still names both."
+}

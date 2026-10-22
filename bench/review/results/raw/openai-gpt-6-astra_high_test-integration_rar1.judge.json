@@ -1,0 +1,8 @@
+{
+  "defects_found": [],
+  "defects_total": 0,
+  "minor_found": [],
+  "minor_total": 0,
+  "false_positives": 0,
+  "notes": "Review correctly judged the diff clean, reported no must-fix or minor findings, and called the single integration test proportionate without asking for extra unit or e2e tests."
+}

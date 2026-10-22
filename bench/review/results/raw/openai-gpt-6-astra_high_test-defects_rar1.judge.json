@@ -1,0 +1,16 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Missed #5: the missing negative schedule_retry assertion for non-retryable statuses. The combined minor finding identifies the file-existence, type-hint, source-text and exact-wording checks separately, so both #6 and #7 count."
+}

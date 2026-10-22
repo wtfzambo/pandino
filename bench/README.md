@@ -39,7 +39,7 @@ The code each run produced is reconstructed from the transcripts by `extract_art
 
 ## Reviewer benchmark (`bench/review/`)
 
-Launch reports cover the [focused Sol 6.1 versus Flash 4.1 test-review comparison](review/results/sol61-flash41-test-review.md) and the [earlier mixed-load timing pilot](review/results/sol61-flash41-timing.md).
+Launch reports cover the [Astra 6 test-review follow-up](review/results/astra6-flash41-test-review.md), the [focused Sol 6.1 versus Flash 4.1 test-review comparison](review/results/sol61-flash41-test-review.md) and the [earlier mixed-load timing pilot](review/results/sol61-flash41-timing.md).
 
 Each task is a git repo built on the fly: `base/` is committed, `changed/` is copied on top as the uncommitted working diff — exactly the scope the reviewer prompt defines. The task-name prefix selects `taste`, `spec`, or `test`.
 
