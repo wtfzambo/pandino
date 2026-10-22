@@ -1,0 +1,1 @@
+No automated-test findings. The only uncommitted change is an explanatory sentence in `docs/release-runbook.md:3`; it changes no executable behavior or test infrastructure, so no new automated evidence is needed.

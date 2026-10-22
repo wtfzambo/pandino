@@ -1,0 +1,15 @@
+{
+  "defects_found": [
+    1,
+    3,
+    4
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    6,
+    7
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Review's test_rejections.sh finding describes exception-masking by '!', not the set -e non-exit on a failed negation (GT2), and misses the schedule_retry negative-boundary gap (GT5); its '!' concern is a real defect so not a false positive."
+}

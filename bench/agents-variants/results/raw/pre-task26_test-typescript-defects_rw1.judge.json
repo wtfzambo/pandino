@@ -1,0 +1,17 @@
+{
+  "defects_found": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "defects_total": 5,
+  "minor_found": [
+    1,
+    2
+  ],
+  "minor_total": 2,
+  "false_positives": 0,
+  "notes": "Review captures all planted must-fix items (boundary 10, production constant, both error-type check components, missing transactionId, hardcodable orderId) plus both minor excesses, with no false positives."
+}
