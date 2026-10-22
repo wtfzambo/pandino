@@ -836,7 +836,7 @@ if grep -q '^effort:' "$pin_target/.claude/agents/fallback-runner.md"; then
 fi
 # Excluded recommendations are skipped even when the catalogue still lists them.
 . "$repo_dir/models.sh"
-excluded_catalog=$'gpt-5.6-terra\ngpt-5.6-sol\ngpt-5.6\nclaude-sonnet-5\nclaude-opus-5\ndeepseek-v4-flash:0731\ndeepseek-v4-flash\nglm-5.2\nkimi-k3'
+excluded_catalog=$'gpt-5.6-terra\ngpt-5.6-sol\ngpt-5.6-luna\ngpt-5.6\nclaude-sonnet-5\nclaude-opus-5\ndeepseek-v4-flash:0731\ndeepseek-v4-flash\nglm-5.2\nkimi-k3'
 for role in implementer reviewer test final; do
     if resolve_role_model "$excluded_catalog" "$role" > /dev/null; then
         echo "FAIL: $role recommended an excluded model" >&2
@@ -850,6 +850,10 @@ done
 [ "$(resolve_role_model $'ollama-cloud/kimi-k3\nollama-cloud/kimi-k2.7-code' reviewer)" = 'ollama-cloud/kimi-k2.7-code' ]
 [ "$(resolve_role_model $'gpt-5.6-sol\ndeepseek-v4-pro:0813' test)" = 'deepseek-v4-pro:0813' ]
 [ "$(resolve_role_model $'claude-opus-5\ngpt-6-astra' final)" = 'gpt-6-astra' ]
+# GPT-6.1 Sol leads where offered; GPT-6 Sol remains the fallback.
+[ "$(resolve_role_model $'openai/gpt-6-sol\nopenai/gpt-6.1-sol' implementer)" = 'openai/gpt-6.1-sol' ]
+[ "$(resolve_role_model $'openai/gpt-6-sol\nopenai/gpt-6.1-sol' test)" = 'openai/gpt-6.1-sol' ]
+[ "$(resolve_role_model $'openai/gpt-6-sol' implementer)" = 'openai/gpt-6-sol' ]
 # A hosted review pipeline is not a model to pin.
 if grep -rq "codex-auto-review" "$pin_target/.codex/"; then
     echo "FAIL: Codex output includes codex-auto-review" >&2
@@ -908,46 +912,62 @@ grep -qx "model: openai-codex/gpt-6-sol" "$pin_target/.pi/agents/test-reviewer.m
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if set(d['pi']) == {'implementer', 'reviewer', 'test', 'final'} else 1)" \
     "$pin_target/.pandino/models.json"
 
-# Saved choices remain authoritative even after removal from recommendations.
-# Rewriting the pin updates Pandino-owned output without staging a conflict.
+# Saved choices of current models remain authoritative, including ones that
+# are not the recommendation. Rewriting the pin updates Pandino-owned output
+# without staging a conflict.
 python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
-saved["pi"]["reviewer"] = "anthropic/claude-sonnet-5"
-saved["pi"]["test"] = "ollama-cloud/glm-5.2"
-saved["pi"]["final"] = "anthropic/claude-opus-5"
-saved["opencode"]["final"] = "openai/claude-opus-5"
-saved["codex"]["final"] = "gpt-5.6-sol"
+saved["pi"]["reviewer"] = "anthropic/claude-sonnet-5-5"
+saved["pi"]["test"] = "ollama-cloud/glm-5.3"
+saved["pi"]["final"] = "openai-codex/gpt-6-astra"
+saved["opencode"]["final"] = "opencode/kimi-k2.6"
+saved["codex"]["final"] = "gpt-6-luna"
 saved["pi"]["fallback-runner"] = "ollama-cloud/fallback-model"
 saved["pi"]["unknown"] = "ollama-cloud/unknown-model"
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
 HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins2.out"
-grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/taste-reviewer.md"
-grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/spec-reviewer.md"
-grep -qx "model: anthropic/claude-sonnet-5" "$pin_target/.pi/agents/docs-reviewer.md"
-grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/test-reviewer.md"
-# Saved final choices win over the current recommendation.
-grep -qx 'model: anthropic/claude-opus-5' "$pin_target/.pi/agents/final-reviewer.md"
-grep -qx 'model: openai/claude-opus-5' "$pin_target/.opencode/agent/final-reviewer.md"
-grep -qx 'model = "gpt-5.6-sol"' "$pin_target/.codex/agents/final-reviewer.toml"
+grep -qx "model: anthropic/claude-sonnet-5-5" "$pin_target/.pi/agents/taste-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5-5" "$pin_target/.pi/agents/spec-reviewer.md"
+grep -qx "model: anthropic/claude-sonnet-5-5" "$pin_target/.pi/agents/docs-reviewer.md"
+grep -qx "model: ollama-cloud/glm-5.3" "$pin_target/.pi/agents/test-reviewer.md"
+grep -qx 'model: openai-codex/gpt-6-astra' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'model: opencode/kimi-k2.6' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'model = "gpt-6-luna"' "$pin_target/.codex/agents/final-reviewer.toml"
 if grep -Eq '^(reasoningEffort:|effort:)' "$pin_target/.opencode/agent/final-reviewer.md"; then
     echo 'FAIL: effort field leaked into an unsupported saved OpenCode model' >&2
     exit 1
 fi
 grep -qx 'model_reasoning_effort = "medium"' "$pin_target/.codex/agents/final-reviewer.toml"
 if grep -q '^forceReasoning:' "$pin_target/.opencode/agent/final-reviewer.md"; then
-    echo 'FAIL: saved OpenCode fallback has forceReasoning' >&2
+    echo 'FAIL: saved OpenCode Kimi pin has forceReasoning' >&2
     exit 1
 fi
 for agent in implementer taste-reviewer spec-reviewer docs-reviewer final-reviewer fallback-runner; do
-    if grep -qx "model: ollama-cloud/glm-5.2" "$pin_target/.pi/agents/$agent.md"; then
+    if grep -qx "model: ollama-cloud/glm-5.3" "$pin_target/.pi/agents/$agent.md"; then
         echo "FAIL: saved test model pinned $agent" >&2
         exit 1
     fi
 done
+
+# A saved superseded model is replaced by the current recommendation, and the
+# recap names the replacement.
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+with open(sys.argv[1]) as f:
+    saved = json.load(f)
+saved["pi"]["implementer"] = "openai-codex/gpt-5.6-terra"
+saved["pi"]["reviewer"] = "ollama-cloud/deepseek-v4-flash:0731"
+with open(sys.argv[1], "w") as f:
+    json.dump(saved, f, indent=2)
+JSON
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-superseded.out"
+grep -qx "model: ollama-cloud/deepseek-v4.1-flash" "$pin_target/.pi/agents/taste-reviewer.md"
+grep -F "pi reviewer: deepseek-v4-flash:0731 replaced by deepseek-v4.1-flash" "$tmp_dir/pins-superseded.out" > /dev/null
+grep -F "pi implementer: gpt-5.6-terra replaced by" "$tmp_dir/pins-superseded.out" > /dev/null
 if grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"; then
     echo "FAIL: hand-edited fallback-runner has a model pin" >&2
     exit 1

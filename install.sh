@@ -316,16 +316,22 @@ esac
 models_file="$target/.pandino/models.json"
 model_notes=()
 
-# Anything already chosen wins over the recommendation.
+# Anything already chosen wins over the recommendation, except a superseded
+# model: that one is resolved again, and the recap says what replaced it.
 if [ -f "$models_file" ]; then
     while IFS='=' read -r key value; do
-        [ -n "$key" ] && printf -v "model_$key" '%s' "$value"
+        [ -n "$key" ] || continue
+        if superseded_models | grep -qxF "${value##*/}"; then
+            printf -v "replaced_$key" '%s' "$value"
+        else
+            printf -v "model_$key" '%s' "$value"
+        fi
     done < <(read_saved_models "$models_file")
 fi
 
 # Fill in whichever of one harness's four roles is still unset.
 resolve_harness_models() {
-    local harness="$1" catalog role var first resolved
+    local harness="$1" catalog role var first resolved old
     catalog="$(harness_catalog "$harness")"
     if [ -z "$catalog" ]; then
         model_notes+=("$harness: could not read its model list, its agents follow the main model")
@@ -339,6 +345,10 @@ resolve_harness_models() {
             continue
         fi
         printf -v "$var" '%s' "$resolved"
+        old="replaced_${harness}_${role}"
+        if [ -n "${!old-}" ] && [ "${!old}" != "$resolved" ]; then
+            model_notes+=("$harness $role: ${!old##*/} replaced by ${resolved##*/}")
+        fi
         # Only a catalogue spanning providers could have carried the first
         # choice; Claude Code's aliases and Codex's own slugs never would, so
         # reporting a substitution there would be noise.

@@ -29,27 +29,35 @@ agent_role() {
 }
 
 # Ordered operator choices per role. NOTES.md records historical benchmarks;
-# current routing is an operator choice. Superseded generations are omitted;
+# current routing is an operator choice. Superseded generations are omitted,
+# except GPT-6 Sol as the fallback where GPT-6.1 Sol is not offered yet.
 # Pro retains its dated and bare IDs because it has no listed successor.
 # Kimi stays on K2.6/K2.7 Code at the operator's request; K3 is not adopted.
 role_preferences() {
     case "$1" in
         implementer)
-            printf '%s\n' gpt-6-sol claude-sonnet-5-5 sonnet
+            printf '%s\n' gpt-6.1-sol gpt-6-sol claude-sonnet-5-5 sonnet
             ;;
         reviewer)
             printf '%s\n' deepseek-v4.1-flash glm-5.3 kimi-k2.6 kimi-k2.7-code \
                 claude-sonnet-5-5 opus sonnet gpt-6-luna
             ;;
         test)
-            printf '%s\n' gpt-6-sol claude-sonnet-5-5 opus sonnet \
+            printf '%s\n' gpt-6.1-sol gpt-6-sol claude-sonnet-5-5 opus sonnet \
                 deepseek-v4-pro:0813 deepseek-v4-pro deepseek-v4.1-flash glm-5.3
             ;;
         final)
             printf '%s\n' claude-opus-5-5 opus gpt-6-astra \
-                gpt-6-sol claude-sonnet-5-5 sonnet
+                gpt-6.1-sol gpt-6-sol claude-sonnet-5-5 sonnet
             ;;
     esac
+}
+
+# Models a newer recommendation replaces, by bare id. A saved choice of one of
+# these is re-resolved on the next install; any other saved choice is kept.
+superseded_models() {
+    printf '%s\n' gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna gpt-6-sol \
+        claude-opus-5 claude-sonnet-5 deepseek-v4-flash deepseek-v4-flash:0731 glm-5.2
 }
 
 # The saved assignment, as "<harness>_<role>=<model>" lines. A hand-edited file

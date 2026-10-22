@@ -91,7 +91,7 @@ write_opencode_agent() {
         echo "mode: subagent"
         [ -n "$model" ] && echo "model: $model"
         case "${model##*/}" in
-            gpt-6-*)
+            gpt-6-*|gpt-6.*)
                 echo "reasoningEffort: $(agent_thinking "$src")"
                 echo "forceReasoning: true"
                 ;;
