@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@zambo'
 created_date: '2026-10-20 16:04'
-updated_date: '2026-10-21 22:45'
+updated_date: '2026-10-22 10:36'
 labels: []
 dependencies:
   - TASK-26.5
@@ -88,6 +88,8 @@ Final review (claude-opus-5-5 medium; 9 min / 25 turns, reported 26 of 40): must
 Every must-fix has a disposition. Open for the operator: the always-on core is 1,322 words against the agreed 'about 1,100' (TASK-26.2 AC #2), total +28%.
 
 AC #1 caveat: each run opened the expected file on Opus 5.5 and GPT-6 Sol; DeepSeek V4.1 Flash missed debugging.md on the bug-fix prompt, accepted by the operator on 2026-10-21 because the main agent runs on a model the operator chooses.
+
+2026-10-21 completion of AC #2: the earlier comparison covered 6 of 16 tasks. The remaining 10 ran once per variant (run w1, same harness, production models, --no-context-files): spec-clean, test-integration, test-no-test and test-python-clean 0 false positives in both; test-defects 3/5 must-fix and 2/2 minor in both; test-typescript-defects 5/5 and 2/2 in both; test-typescript-clean 2 false positives before, 1 after; implementer python-median, ts-duration and shell-wordfreq pass in both. No task got worse on any of the 16.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
