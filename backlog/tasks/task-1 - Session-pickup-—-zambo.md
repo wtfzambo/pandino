@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-21 22:45'
+updated_date: '2026-10-22 15:01'
 labels:
   - continuity
   - handoff
@@ -18,18 +18,21 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-21. Branch `task-26-skills-and-playbooks` (local only, not pushed), from main 74f889b; tree clean after the commit holding this snapshot. TASK-26 (split always-on AGENTS.md into a core plus on-demand playbooks and session skills) is implemented and verified: subtasks 26.1-26.6 Done. Trigger probe, benchmark rerun on repaired fixtures (no regression), and taste, spec, test, docs and final reviews are recorded in TASK-26.6 notes with costs; every must-fix fixed, final correction check clean. TASK-26 itself stays In Progress until the operator decides the two items below. Probe worktree /tmp/slye-probe (speak-like-you-eat, local branch pandino-probe-task26, never pushed) can be removed with `git -C ~/mystuff/01_projects/speak-like-you-eat worktree remove --force /tmp/slye-probe && git -C ~/mystuff/01_projects/speak-like-you-eat branch -D pandino-probe-task26`. DRAFT-1 holds parked ideas (explain-the-repo skill, pstack /correct, independent design candidates).
+2026-10-22. Branch task-26-skills-and-playbooks at 1ab5603 before this snapshot commit, local only, with no merge or push. Tree clean before replacing this snapshot. Core/playbook split (TASK-26) remains implemented; the operator approved merge after model updates, then paused for reviewer timing and routing exploration. Latest defaults use GPT-6.1 Sol medium for implementation and high for test review, with no Sol 6 fallback. Routine reviewers remain DeepSeek V4.1 Flash high and final review Opus 5.5 medium. Claude Code currently uses the sonnet alias for implementation/test, not an explicit 5.5 pin. Saved superseded models are migrated by the installer. Downstream projects were not updated. Do not resume tmp-carrot.
+
+The benchmark deadline fix and timing comparison (TASK-27) landed in 67fb083 and 1ab5603. All three benchmark runners now use bench/run_with_timeout.py, with tested process-tree cleanup including detached Pi bash groups. Five regressions, review smoke, installer suite and report links pass on macOS. Linux execution remains unverified, so TASK-27 AC #1 is unchecked; other criteria checked. The pass-through /tmp/tshim/timeout was removed. The comparison report is bench/review/results/sol61-flash41-timing.md. It contains 72 completed reviews (three samples per case/model), with two original Flash attempts interrupted and replaced. The first two rounds had up to 24 concurrent reviews; the third ran one per provider. The third reverses the earlier speed ranking, with median Sol 61s and Flash 43s, and Flash faster in 11/12 cases but one 198s outlier. Only one full low-concurrency round exists, so do not pool samples into a stable winner. Judge 429 failures leave 12 reviews unscored. Valid docstring warnings and a reproduced unbounded TypeScript wait show oracle conflicts, so automatic false-positive counts are advisory. No benchmark processes remain. Pstack source checked against upstream eb4db2b; normal code writer Grok, hardest work Opus, adversarial review panel Opus/Grok, arena cross-judge prefers another family.
 
 WHAT'S NEXT
-1. Operator decision: accept the always-on core at 1,322 words (agreed about 1,100) and total +28%, or trim. `backlog task view TASK-26.6 --plain`.
-2. Operator decision: merge task-26-skills-and-playbooks into main and push. Then check TASK-26 acceptance criteria and set it Done.
-3. After merge, update downstream installs (dogoscope, speak-like-you-eat, tmp-carrot) with the normal update flow in README.
+1. Discuss routing options with the operator using bench/review/results/sol61-flash41-timing.md. Keep reviewer defaults unchanged until a choice is made. The fixture benchmark does not measure the incremental value of reviewing a same-family writer.
+2. Before merge, resolve the earlier request for explicit Sonnet 5.5 on Claude Code. Current code emits an alias; current official Claude subagent docs accept full model IDs (https://code.claude.com/docs/en/sub-agents). Keep routine/final model choices separate from the two Sol replacement roles.
+3. Finish acceptance and branch integration for the core/playbook split (TASK-26) and model updates, then merge/push under the existing authorization once the current routing discussion is settled. Do not ask again about word-count estimates.
+4. The separate benchmark redesign (TASK-28) is To Do, with accepted scope and repetition policy still open. Do not silently implement it or run another full matrix. The paused cross-harness review deadline investigation (TASK-24) remains separate from the benchmark timeout fix.
 
 WAITING ON / GATED BY
-As of 2026-10-21, the operator on items 1 and 2. TASK-21 (product context against off-topic research), TASK-24 (paused review deadlines, now also holding the orchestrator and heartbeat idea) and TASK-25 (pi package) remain out of scope.
+As of 2026-10-22, operator choice on reviewer routing and whether another controlled comparison is worth running. No new reviewer model adopted. No Linux runtime validation this session. Broader benchmark scoring/coverage changes belong to TASK-28. TASK-21 product context and TASK-25 Pi package remain outside this slice.
 
 VERIFY
-`git status -sb` clean on task-26-skills-and-playbooks; `git log --oneline -3` shows a8663b8 or later; `bash tests/test_install.sh` prints PASS; `PATH=/tmp/tshim:$PATH bash tests/test_review_bench.sh` prints PASS (macOS lacks coreutils timeout; /tmp/tshim/timeout is a pass-through shim: `#!/bin/sh` / `shift` / `exec "$@"`).
+Run git status -sb and git log --oneline -5. Run python3 tests/test_bench_timeout.py, bash tests/test_review_bench.sh and bash tests/test_install.sh directly, with no timeout shim. Read backlog task view TASK-27 --plain and backlog task view TASK-28 --plain. Read bench/review/results/sol61-flash41-timing.md for evidence and limits. The temporary continuation progress log is /tmp/pandino-speed-progress.log; durable results are committed in the report and raw review files.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
