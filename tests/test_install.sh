@@ -238,6 +238,27 @@ bash "$self_kit/install.sh" "$self_kit" --no-input > "$tmp_dir/self.out"
 diff -r "$repo_dir/.pandino/playbooks" "$self_kit/.pandino/playbooks" > /dev/null
 diff -r "$repo_dir/.agents/skills" "$self_kit/.agents/skills" > /dev/null
 
+# The kit's own Corrections rows stay in the kit: a fresh install gets the
+# table header only.
+row_kit="$tmp_dir/row-kit"
+copy_kit "$row_kit"
+"$python_bin" - "$row_kit/AGENTS.md" <<'PY'
+import sys
+path = sys.argv[1]
+text = open(path).read()
+text = text.replace("|---|---|\n", "|---|---|\n| Kit-only correction. | prose |\n", 1)
+open(path, "w").write(text)
+PY
+grep -qF 'Kit-only correction.' "$row_kit/AGENTS.md"
+row_target="$tmp_dir/row-target"
+mkdir "$row_target"
+bash "$row_kit/install.sh" "$row_target" --no-input > "$tmp_dir/row.out"
+grep -qxF '| Rule | Enforced by |' "$row_target/AGENTS.md"
+if grep -qF 'Kit-only correction.' "$row_target/AGENTS.md"; then
+    echo "FAIL: the kit's Corrections rows reached a fresh install" >&2
+    exit 1
+fi
+
 # A copied kit is still installable, but it has no checkout HEAD to record.
 non_git_kit="$tmp_dir/non-git-kit"
 copy_kit "$non_git_kit"

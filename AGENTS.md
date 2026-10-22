@@ -112,6 +112,7 @@ Mistakes the user has corrected, one row per kind of mistake. See Agent behavior
 
 | Rule | Enforced by |
 |---|---|
+| Raise a deviation from an agreed estimate (word counts, percentages, budgets) with the user only when it changes a decision; report it in task notes otherwise. | prose |
 
 <!-- BACKLOG.MD GUIDELINES START -->
 <!-- backlog.md-instructions-version: 1.48.0 -->

@@ -501,11 +501,10 @@ core_only() {
         | trim_trailing_blank_lines
 }
 
-# The project section a fresh AGENTS.md starts with: the marker and the empty
-# Corrections table, up to Backlog's own block.
+# The project section a fresh AGENTS.md starts with: the marker and the
+# Corrections table up to its header, so the kit's own rows stay in the kit.
 project_template() {
-    awk '/<!-- BACKLOG.MD GUIDELINES/ { exit } found || /<!-- Project-specific/ { found = 1; print }' "$1" \
-        | trim_trailing_blank_lines
+    awk 'found || /<!-- Project-specific/ { found = 1; print } found && /^\|---/ { exit }' "$1"
 }
 
 # An agent file without its model pin, so two of them can be compared for
