@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-14 20:55'
+updated_date: '2026-11-14 21:12'
 labels:
   - continuity
   - handoff
@@ -18,7 +18,7 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-14. Pandino is on main. Commit e64fde6 (models.json keeps model and effort per agent, TASK-31 Done) plus this pickup commit are pushed to origin/main. The tree is still dirty with an earlier session's uncommitted work, deliberately left alone: the review-value audit of one SLYE session (TASK-30), reviewer must-fix and operator-decision reporting (TASK-23.1, decision-11) with edits to .pandino/playbooks/review.md, .pandino/playbooks/reviewing.md, AGENTS.md, agents/spec-reviewer.md, doc-3, bench/review/judge.py and bench/review/prompts/spec.md. Nobody has authorized committing those.
+2026-11-14. Pandino is on main, pushed to origin/main. TASK-31 (models.json keeps model and effort per agent) and TASK-32 (SnitchBro routing adopted as per-agent model and effort pairs in models.sh, decision-13) are Done. The tree is still dirty with an earlier session's uncommitted work, deliberately left alone: the review-value audit of one SLYE session (TASK-30), reviewer must-fix and operator-decision reporting (TASK-23.1, decision-11) with edits to .pandino/playbooks/review.md, .pandino/playbooks/reviewing.md, AGENTS.md, agents/spec-reviewer.md, doc-3, bench/review/judge.py and bench/review/prompts/spec.md. Nobody has authorized committing those.
 
 This session started as a routing discussion opened from SnitchBro (~/mystuff/01_projects/quitcorn). The operator pinned GPT-6.1 Sol and Terra there for cost: implementer Sol medium, docs Terra low, spec and taste Terra medium, test Sol high, final Sol max. Decided: final review stays on Sol even though the implementer is Sol (operator choice, cost); no cost profiles; no model-family rule. Implemented TASK-31: .pandino/models.json now holds {model, effort} per agent per harness and is the one operator-edited file; agent files are generated. Role-keyed files migrate; hand-edited Pi efforts are adopted and reported; rejected efforts are reported and defaulted. Rules live in doc-4 (Saved assignments) and decision-12. Review was skipped at operator request. Kit defaults in agents/*.md are unchanged (medium implementer/final, high others); SnitchBro's efforts are its own and are not Pandino defaults.
 

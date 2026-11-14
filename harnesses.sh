@@ -10,7 +10,7 @@
 #   codex        .codex/agents/       TOML: name, description, model, developer_instructions
 #
 # The body is copied verbatim every time; only its wrapper differs. Each writer
-# takes the model this harness resolved for that agent's role and pins it.
+# takes the model and effort this harness resolved for that agent and pins them.
 # fallback-runner is unpinned so the orchestrator must select its model at call time.
 
 # Body of a kit agent file: everything after the closing frontmatter fence.

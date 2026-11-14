@@ -311,103 +311,91 @@ esac
 
 # Without a pinned model each harness spawns subagents on the orchestrator's
 # own model, so the reviewers are the same model as the writer. Resolve one
-# model per agent from what each picked harness can actually run, remembering
-# earlier answers so a re-run does not undo a hand-edited choice. Effort is
-# saved alongside the model; an agent without a saved effort takes the kit's.
+# model and effort per agent from what each picked harness can actually run,
+# remembering earlier answers so a re-run does not undo a hand-edited choice.
 models_file="$target/.pandino/models.json"
 model_notes=()
 
 # Anything already chosen wins over the recommendation, except a superseded
 # model: that one is resolved again, and the recap says what replaced it. An
-# effort the harness does not accept is reported and replaced by the default.
+# effort the harness does not accept is reported and dropped, so the agent
+# takes the effort its preferences pair with the model.
 if [ -f "$models_file" ]; then
     while IFS=$'\t' read -r harness agent value effort; do
         [ -n "$harness" ] || continue
         if superseded_models | grep -qxF "${value##*/}"; then
             printf -v "$(assignment_var replaced "$harness" "$agent")" '%s' "$value"
-        else
-            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$value"
+            continue
         fi
+        printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$value"
         [ -n "$effort" ] || continue
         if harness_efforts "$harness" | grep -qxF "$effort"; then
             printf -v "$(assignment_var effort "$harness" "$agent")" '%s' "$effort"
         else
-            model_notes+=("$harness $agent: effort $effort is not accepted, using $(agent_thinking "$kit_dir/agents/$agent.md")")
+            model_notes+=("$harness $agent: effort $effort is not accepted, using the recommended one")
         fi
     done < <(read_saved_models "$models_file")
 fi
 
-# The pinned agents that draw from one recommendation list.
-role_agents() {
-    local agent
-    for agent in $(pinned_agents); do
-        [ "$(agent_role "$agent")" = "$1" ] && printf '%s\n' "$agent"
-    done
-    return 0
-}
-
-# Fill in whichever of one harness's agents is still without a model. Agents
-# sharing a recommendation list are resolved together, so a note is said once.
+# Fill in whichever of one harness's agents is still without a model, taking
+# the first preferred model and effort that harness can run.
 resolve_harness_models() {
-    local harness="$1" catalog role agent var first resolved old unset
+    local harness="$1" catalog agent var first choice old
     catalog="$(harness_catalog "$harness")"
     if [ -z "$catalog" ]; then
         model_notes+=("$harness: could not read its model list, its agents follow the main model")
         return 0
     fi
-    for role in implementer reviewer test final; do
-        unset=()
-        old=""
-        for agent in $(role_agents "$role"); do
-            var="$(assignment_var model "$harness" "$agent")"
-            [ -n "${!var-}" ] && continue
-            unset+=("$agent")
-            var="$(assignment_var replaced "$harness" "$agent")"
-            [ -n "${!var-}" ] && old="${!var}"
-        done
-        [ "${#unset[@]}" -gt 0 ] || continue
-        if ! resolved="$(resolve_role_model "$catalog" "$role")"; then
-            model_notes+=("$harness $role: nothing recommended is available, it follows the main model")
+    for agent in $(pinned_agents); do
+        var="$(assignment_var model "$harness" "$agent")"
+        [ -n "${!var-}" ] && continue
+        if ! choice="$(resolve_agent_choice "$catalog" "$agent")"; then
+            model_notes+=("$harness $agent: nothing recommended is available, it follows the main model")
             continue
         fi
-        for agent in "${unset[@]}"; do
-            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$resolved"
-        done
-        if [ -n "$old" ] && [ "$old" != "$resolved" ]; then
-            model_notes+=("$harness $role: ${old##*/} replaced by ${resolved##*/}")
+        printf -v "$var" '%s' "${choice% *}"
+        printf -v "$(assignment_var effort "$harness" "$agent")" '%s' "${choice##* }"
+        old="$(assignment_var replaced "$harness" "$agent")"
+        if [ -n "${!old-}" ] && [ "${!old}" != "${choice% *}" ]; then
+            model_notes+=("$harness $agent: ${!old##*/} replaced by $(basename "${choice% *}")")
         fi
         # Only a catalogue spanning providers could have carried the first
         # choice; Claude Code's aliases and Codex's own slugs never would, so
         # reporting a substitution there would be noise.
         case "$catalog" in */*) ;; *) continue ;; esac
-        first="$(role_preferences "$role" | head -1)"
-        case "$resolved" in
+        first="$(agent_preferences "$agent" | head -1)"
+        first="${first% *}"
+        case "${choice% *}" in
             *"$first") ;;
-            *) model_notes+=("$harness $role: $first unavailable, using ${resolved##*/}") ;;
+            *) model_notes+=("$harness $agent: $first unavailable, using $(basename "${choice% *}")") ;;
         esac
     done
     return 0
 }
 
-# Every pinned agent without a saved effort takes the kit's canonical one. An
-# installed Pi agent from before models.json held effort keeps its own, so the
-# first run does not silently reset a hand-edited level; the recap names any
-# that differ from the kit.
-fill_default_efforts() {
-    local harness agent var installed
+# A saved model without a saved effort takes the effort its preferences pair
+# with it, or the kit default for a model outside them. An installed Pi agent
+# from before models.json held effort keeps its own, so the first run does not
+# silently reset a hand-edited level; the recap names any it kept.
+fill_missing_efforts() {
+    local harness agent model_var var installed paired
     for harness in $picked_keys; do
         for agent in $(pinned_agents); do
+            model_var="$(assignment_var model "$harness" "$agent")"
             var="$(assignment_var effort "$harness" "$agent")"
-            [ -n "${!var-}" ] && continue
+            [ -n "${!model_var-}" ] && [ -z "${!var-}" ] || continue
+            paired="$(preferred_effort "$agent" "${!model_var}")"
+            [ -n "$paired" ] || paired="$(agent_thinking "$kit_dir/agents/$agent.md")"
             installed="$target/.pi/agents/$agent.md"
             if [ "$harness" = pi ] && [ -f "$installed" ] \
+                && grep -qxF "model: ${!model_var}" "$installed" \
                 && harness_efforts pi | grep -qxF "$(agent_thinking "$installed")"
             then
                 printf -v "$var" '%s' "$(agent_thinking "$installed")"
-                [ "${!var}" = "$(agent_thinking "$kit_dir/agents/$agent.md")" ] \
+                [ "${!var}" = "$paired" ] \
                     || model_notes+=("pi $agent: kept installed effort ${!var}; set it in models.json to change it")
             else
-                printf -v "$var" '%s' "$(agent_thinking "$kit_dir/agents/$agent.md")"
+                printf -v "$var" '%s' "$paired"
             fi
         done
     done
@@ -431,11 +419,12 @@ print_model_matrix() {
     done
 }
 
-# Reassign one harness's models by hand, one pick per recommendation list. Each role offers the models
-# Pandino would consider for it; a role nothing recommended could fill offers
-# the whole catalogue, so an unusual setup is still one prompt, not a restart.
+# Reassign one harness's agents by hand. Each agent offers the model and effort
+# pairs Pandino would consider for it; an agent nothing recommended could fill
+# offers the whole catalogue at the kit's effort, so an unusual setup is still
+# one prompt, not a restart.
 customize_models() {
-    local harness role agent catalog cand opts=() list=()
+    local harness agent catalog cand opts=() list=()
     for harness in $picked_keys; do list+=("$harness:$harness"); done
     printf '\n  %sWhich editor?%s\n\n' "$grey" "$reset" > /dev/tty
     pick_list one "${list[@]}"
@@ -443,23 +432,22 @@ customize_models() {
     [ -n "$harness" ] || return 0
 
     catalog="$(harness_catalog "$harness")"
-    for role in implementer reviewer test final; do
+    for agent in $(pinned_agents); do
         opts=()
         while IFS= read -r cand; do
-            [ -n "$cand" ] && opts+=("$cand:${cand##*/}")
-        done < <(role_candidates "$catalog" "$role")
+            [ -n "$cand" ] && opts+=("${cand/ /|}:$(basename "${cand% *}") · ${cand##* }")
+        done < <(agent_candidates "$catalog" "$agent")
         if [ "${#opts[@]}" -eq 0 ]; then
             while IFS= read -r cand; do
-                [ -n "$cand" ] && opts+=("$cand:$cand")
+                [ -n "$cand" ] && opts+=("$cand|$(agent_thinking "$kit_dir/agents/$agent.md"):$cand")
             done < <(printf '%s\n' "$catalog")
         fi
         [ "${#opts[@]}" -gt 0 ] || continue
-        printf '\n  %s%s%s\n\n' "$grey" "$role" "$reset" > /dev/tty
+        printf '\n  %s%s%s\n\n' "$grey" "$agent" "$reset" > /dev/tty
         pick_list one "${opts[@]}"
         [ -n "$picked" ] || continue
-        for agent in $(role_agents "$role"); do
-            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$picked"
-        done
+        printf -v "$(assignment_var model "$harness" "$agent")" '%s' "${picked%|*}"
+        printf -v "$(assignment_var effort "$harness" "$agent")" '%s' "${picked##*|}"
     done
     return 0
 }
@@ -469,7 +457,7 @@ for harness in $picked_keys; do
     resolve_harness_models "$harness"
 done
 spinner_stop
-fill_default_efforts
+fill_missing_efforts
 
 # Show the whole assignment at once: four pickers in a row would be a worse
 # question than the one it answers.

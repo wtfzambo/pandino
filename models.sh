@@ -15,42 +15,42 @@
 #   codex     ~/.codex/models_cache.json  bare slug
 #   claude    fixed aliases            fable, opus, sonnet, haiku
 
-# Which recommendation list an agent draws from. Taste, spec, and docs reviewers
-# share the reviewer list; test review has its own. An agent file path or a
-# bare agent name both work.
-agent_role() {
-    case "$(basename "$1" .md)" in
-        implementer)     echo implementer ;;
-        test-reviewer)   echo test ;;
-        final-reviewer)  echo final ;;
-        fallback-runner) echo fallback-runner ;;
-        *)               echo reviewer ;;
+# Ordered operator choices per agent, one "<model> <effort>" tuple per line.
+# Each harness takes the first tuple whose model its catalogue carries, so an
+# effort always travels with the model it was chosen for. NOTES.md records
+# historical benchmarks; current routing is an operator choice. Superseded
+# generations are omitted. Claude Code gets family aliases, so Sonnet stands
+# in where others get Sol. Pro retains its dated and bare IDs because it has
+# no listed successor. Kimi stays on K2.6/K2.7 Code at the operator's request;
+# K3 is not adopted.
+agent_preferences() {
+    case "$1" in
+        implementer)
+            printf '%s\n' 'gpt-6.1-sol medium' 'claude-sonnet-5-5 medium' 'sonnet medium'
+            ;;
+        taste-reviewer|spec-reviewer)
+            printf '%s\n' 'gpt-6.1-terra medium'
+            _routine_review_fallbacks
+            ;;
+        docs-reviewer)
+            printf '%s\n' 'gpt-6.1-terra low'
+            _routine_review_fallbacks
+            ;;
+        test-reviewer)
+            printf '%s\n' 'gpt-6.1-sol high' 'claude-sonnet-5-5 high' 'sonnet high' 'opus high' \
+                'deepseek-v4-pro:0813 high' 'deepseek-v4-pro high' 'deepseek-v4.1-flash high' 'glm-5.3 high'
+            ;;
+        final-reviewer)
+            printf '%s\n' 'gpt-6.1-sol max' 'claude-opus-5-5 medium' 'opus medium' 'gpt-6-astra medium' \
+                'claude-sonnet-5-5 medium' 'sonnet medium'
+            ;;
     esac
 }
 
-# Ordered operator choices per role. NOTES.md records historical benchmarks;
-# current routing is an operator choice. Superseded generations are omitted.
-# Claude Code gets family aliases, so Sonnet stands in where others get Sol.
-# Pro retains its dated and bare IDs because it has no listed successor.
-# Kimi stays on K2.6/K2.7 Code at the operator's request; K3 is not adopted.
-role_preferences() {
-    case "$1" in
-        implementer)
-            printf '%s\n' gpt-6.1-sol claude-sonnet-5-5 sonnet
-            ;;
-        reviewer)
-            printf '%s\n' deepseek-v4.1-flash glm-5.3 kimi-k2.6 kimi-k2.7-code \
-                claude-sonnet-5-5 opus sonnet gpt-6-luna
-            ;;
-        test)
-            printf '%s\n' gpt-6.1-sol claude-sonnet-5-5 sonnet opus \
-                deepseek-v4-pro:0813 deepseek-v4-pro deepseek-v4.1-flash glm-5.3
-            ;;
-        final)
-            printf '%s\n' claude-opus-5-5 opus gpt-6-astra \
-                gpt-6.1-sol claude-sonnet-5-5 sonnet
-            ;;
-    esac
+# Taste, spec and docs review share these choices after their first one.
+_routine_review_fallbacks() {
+    printf '%s\n' 'deepseek-v4.1-flash high' 'glm-5.3 high' 'kimi-k2.6 high' 'kimi-k2.7-code high' \
+        'claude-sonnet-5-5 high' 'opus high' 'sonnet high' 'gpt-6-luna high'
 }
 
 # Models a newer recommendation replaces, by bare id. A saved choice of one of
@@ -190,31 +190,44 @@ PY
     esac
 }
 
-# Every model from this role's preferences that the catalogue carries, best
-# first, spelled the way that catalogue spells it. A preference is matched on
-# its bare id, so one list serves every provider a user might have it under.
-role_candidates() {
-    local catalog="$1" role="$2" want hit
-    while IFS= read -r want; do
+# Every tuple from this agent's preferences whose model the catalogue carries,
+# best first, as "<model> <effort>" with the model spelled the way that
+# catalogue spells it. A preference is matched on its bare id, so one list
+# serves every provider a user might have it under.
+agent_candidates() {
+    local catalog="$1" agent="$2" want effort hit
+    while read -r want effort; do
         [ -n "$want" ] || continue
         hit="$(printf '%s\n' "$catalog" | awk -v w="$want" '
             $0 == w { print; exit }
             index($0, "/") && substr($0, index($0, "/") + 1) == w { print; exit }
         ')"
-        [ -n "$hit" ] && printf '%s\n' "$hit"
+        [ -n "$hit" ] && printf '%s %s\n' "$hit" "$effort"
     done <<EOF
-$(role_preferences "$role")
+$(agent_preferences "$agent")
 EOF
     return 0
 }
 
-# The best available model for this role. Fails when none of them is. The
-# whole list is read rather than piped through head, which would close the
-# pipe under the producer and print a broken-pipe warning.
-resolve_role_model() {
+# The best available tuple for this agent. Fails when none is. The whole list
+# is read rather than piped through head, which would close the pipe under the
+# producer and print a broken-pipe warning.
+resolve_agent_choice() {
     local all best
-    all="$(role_candidates "$1" "$2")"
+    all="$(agent_candidates "$1" "$2")"
     best="${all%%$'\n'*}"
     [ -n "$best" ] || return 1
     printf '%s\n' "$best"
+}
+
+# The effort this agent's preferences pair with a model, or nothing when the
+# model is not among them.
+preferred_effort() {
+    local agent="$1" model="${2##*/}" want effort
+    while read -r want effort; do
+        [ "$want" = "$model" ] && { printf '%s\n' "$effort"; return 0; }
+    done <<EOF
+$(agent_preferences "$agent")
+EOF
+    return 0
 }
