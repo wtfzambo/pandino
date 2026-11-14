@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-10-22 18:31'
+updated_date: '2026-11-14 20:55'
 labels:
   - continuity
   - handoff
@@ -18,25 +18,22 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-10-22. The core/playbook split (TASK-26) and the benchmark deadline and reviewer comparison (TASK-27) are Done. Branch task-26-skills-and-playbooks is merged into main by fast-forward and pushed to origin as the last action of this session. Tree clean.
+2026-11-14. Pandino is on main. Commit e64fde6 (models.json keeps model and effort per agent, TASK-31 Done) plus this pickup commit are pushed to origin/main. The tree is still dirty with an earlier session's uncommitted work, deliberately left alone: the review-value audit of one SLYE session (TASK-30), reviewer must-fix and operator-decision reporting (TASK-23.1, decision-11) with edits to .pandino/playbooks/review.md, .pandino/playbooks/reviewing.md, AGENTS.md, agents/spec-reviewer.md, doc-3, bench/review/judge.py and bench/review/prompts/spec.md. Nobody has authorized committing those.
 
-Final routing, recorded in decision-10 and doc-4: GPT-6.1 Sol medium for implementation, DeepSeek V4.1 Flash high for taste/spec/docs review, GPT-6.1 Sol high for test review, Claude Opus 5.5 medium for final review. Claude Code keeps the `sonnet` and `opus` aliases so its agents follow the newest model of each family. Evidence for keeping Sol on test review: bench/review/results/sol61-flash41-test-review.md (Flash recommended deleting useful tests at least six times), plus the Astra and Haiku reports in the same folder. The deadline wrapper bench/run_with_timeout.py is verified on macOS; the operator declined Linux checks because the benchmark only runs on this Mac.
+This session started as a routing discussion opened from SnitchBro (~/mystuff/01_projects/quitcorn). The operator pinned GPT-6.1 Sol and Terra there for cost: implementer Sol medium, docs Terra low, spec and taste Terra medium, test Sol high, final Sol max. Decided: final review stays on Sol even though the implementer is Sol (operator choice, cost); no cost profiles; no model-family rule. Implemented TASK-31: .pandino/models.json now holds {model, effort} per agent per harness and is the one operator-edited file; agent files are generated. Role-keyed files migrate; hand-edited Pi efforts are adopted and reported; rejected efforts are reported and defaulted. Rules live in doc-4 (Saved assignments) and decision-12. Review was skipped at operator request. Kit defaults in agents/*.md are unchanged (medium implementer/final, high others); SnitchBro's efforts are its own and are not Pandino defaults.
 
-After the merge, the pandino-update skill was added and pushed (TASK-29, commit bcc54a0): installed next to pandino-pickup and pandino-handoff, it holds the update procedure, so a downstream agent only needs "update Pandino". Older installations without the skill use the one-line prompt in README.md under "Update an existing installation".
-
-AGENTS.md gained an Agent behavior rule at the operator's request: solve problems that occurred or that the requirement names, and state hypothetical ones as limits rather than investigating them.
-
-Downstream projects (dogoscope, speak-like-you-eat) still run the old Pandino layout and were not updated. tmp-carrot is abandoned. /tmp/slye-probe is a removable local worktree of speak-like-you-eat.
+Earlier-session context still valid: TASK-30 found reviews have demonstrable value but uneven efficiency; how to make that reliable is an open discussion.
 
 WHAT'S NEXT
-1. Ask the operator what to work on next. Open candidates: the benchmark redesign (TASK-28), product context against off-topic research (TASK-21), Pi packaging (TASK-25), paused cross-harness review supervision (TASK-24), the parked explain-repo skill (DRAFT-1).
-2. Update downstream projects only when the operator asks. They predate the skill, so give their agent the one-line prompt from README.md; the update installs pandino-update for next time.
+1. Update SnitchBro to the new Pandino with the pandino-update skill; confirm its models.json converts to per-agent entries keeping docs low and final max, and that only spec-reviewer is staged if the uncommitted spec-reviewer edit is still unpushed.
+2. Ask the operator whether to commit the earlier session's uncommitted work (TASK-23.1, decision-11, TASK-30) or keep it parked.
+3. Resume the review-efficiency discussion from TASK-30 only when the operator asks.
 
 WAITING ON / GATED BY
-As of 2026-10-22, nothing blocks. Further Haiku benchmark runs would need an approved containment boundary first (FINDINGS.md).
+Operator authorization for committing the earlier uncommitted work. OpenCode effort levels are assumed equal to Codex's (low to max); unverified against a live OpenCode.
 
 VERIFY
-git status -sb shows main in sync with origin/main. git log --oneline -3. backlog task view 26 --plain and backlog task view 27 --plain both show Done. bash tests/test_install.sh, bash tests/test_review_bench.sh and python3 tests/test_bench_timeout.py pass.
+git status -sb; git log --oneline -3; bash tests/test_install.sh; backlog task view TASK-31 --plain.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
