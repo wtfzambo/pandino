@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-14 21:12'
+updated_date: '2026-11-14 21:37'
 labels:
   - continuity
   - handoff
@@ -18,22 +18,24 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-14. Pandino is on main, pushed to origin/main. TASK-31 (models.json keeps model and effort per agent) and TASK-32 (SnitchBro routing adopted as per-agent model and effort pairs in models.sh, decision-13) are Done. The tree is still dirty with an earlier session's uncommitted work, deliberately left alone: the review-value audit of one SLYE session (TASK-30), reviewer must-fix and operator-decision reporting (TASK-23.1, decision-11) with edits to .pandino/playbooks/review.md, .pandino/playbooks/reviewing.md, AGENTS.md, agents/spec-reviewer.md, doc-3, bench/review/judge.py and bench/review/prompts/spec.md. Nobody has authorized committing those.
+2026-11-14 (local CET). Pandino is on main; reviewer severity work committed as d7ff8fb on top of ca35e1a and pushed to origin/main together with this pickup. Tree clean after the push.
 
-This session started as a routing discussion opened from SnitchBro (~/mystuff/01_projects/quitcorn). The operator pinned GPT-6.1 Sol and Terra there for cost: implementer Sol medium, docs Terra low, spec and taste Terra medium, test Sol high, final Sol max. Decided: final review stays on Sol even though the implementer is Sol (operator choice, cost); no cost profiles; no model-family rule. Implemented TASK-31: .pandino/models.json now holds {model, effort} per agent per harness and is the one operator-edited file; agent files are generated. Role-keyed files migrate; hand-edited Pi efforts are adopted and reported; rejected efforts are reported and defaulted. Rules live in doc-4 (Saved assignments) and decision-12. Review was skipped at operator request. Kit defaults in agents/*.md are unchanged (medium implementer/final, high others); SnitchBro's efforts are its own and are not Pandino defaults.
+Committed in d7ff8fb with operator authorization: reviewer must-fix and operator-decision reporting (TASK-23.1, Done, rationale in decision-11). Must-fix now means breaking behavior that works today or leaving an in-scope requirement unmet; style and readability are minor; open product, scope and support choices go under a new user decision heading that does not affect the verdict, and the orchestrator brings them to the operator before building any. Changed .pandino/playbooks/reviewing.md, .pandino/playbooks/review.md step 4, agents/spec-reviewer.md and bench/review/prompts/spec.md, the bounded review policy (doc-3), bench/review/judge.py (a planted defect counts under any heading; an invented user decision is a false positive), and a new AGENTS.md Corrections row (name a repository item by what it is before its ID). Also committed: the review-value audit of one SLYE session (TASK-30), which motivated it. No live benchmark was run; whether this reduces discarded work is unobserved.
 
-Earlier-session context still valid: TASK-30 found reviews have demonstrable value but uneven efficiency; how to make that reliable is an open discussion.
+Earlier on 2026-11-14 another session landed TASK-31 (models.json keeps model and effort per agent, decision-12) and TASK-32 (SnitchBro GPT-6.1 routing as per-agent pairs, decision-13). SnitchBro (~/mystuff/01_projects/quitcorn) pins Sol/Terra: implementer Sol medium, docs Terra low, spec and taste Terra medium, test Sol high, final Sol max. Kit defaults in agents/*.md are unchanged.
+
+The operator replies in Italian; repository artifacts stay in English.
 
 WHAT'S NEXT
-1. Update SnitchBro to the new Pandino with the pandino-update skill; confirm its models.json converts to per-agent entries keeping docs low and final max, and that only spec-reviewer is staged if the uncommitted spec-reviewer edit is still unpushed.
-2. Ask the operator whether to commit the earlier session's uncommitted work (TASK-23.1, decision-11, TASK-30) or keep it parked.
-3. Resume the review-efficiency discussion from TASK-30 only when the operator asks.
+1. Update SnitchBro to this Pandino with the pandino-update skill, run from ~/mystuff/01_projects/quitcorn. Confirm its models.json converts to per-agent entries keeping docs low and final max, and that spec-reviewer and the review playbooks pick up the d7ff8fb changes.
+2. When the operator has run a real delivery under this kit, and only when asked, retrace that session like TASK-30 to see whether delta reviews, the must-fix definition and user decisions reduced discarded work.
+3. The rest of blocking-finding calibration (TASK-23: uncertain risks, explicitly deferred checks, worked examples) stays parked until the operator asks.
 
 WAITING ON / GATED BY
-Operator authorization for committing the earlier uncommitted work. OpenCode effort levels are assumed equal to Codex's (low to max); unverified against a live OpenCode.
+Operator direction for the SnitchBro update. OpenCode effort levels are assumed equal to Codex's (low to max), unverified against a live OpenCode. Further Haiku benchmark runs still require an approved containment boundary per FINDINGS.md.
 
 VERIFY
-git status -sb; git log --oneline -3; bash tests/test_install.sh; backlog task view TASK-31 --plain.
+git status -sb; git log --oneline -3; bash tests/test_review_bench.sh; bash tests/test_install.sh; backlog task view TASK-23.1 --plain.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
