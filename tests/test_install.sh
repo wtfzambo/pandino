@@ -869,10 +869,14 @@ fi
 
 # The assignment is saved, and the matrix is printed once with everything else.
 [ -f "$pin_target/.pandino/models.json" ]
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['opencode']['final'] == 'opencode/claude-opus-5-5' else 1)" \
-    "$pin_target/.pandino/models.json"
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
-    "$pin_target/.pandino/models.json"
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+saved = json.load(open(sys.argv[1]))
+agents = {"implementer", "taste-reviewer", "spec-reviewer", "docs-reviewer", "test-reviewer", "final-reviewer"}
+assert all(set(entries) == agents for entries in saved.values()), saved
+assert saved["opencode"]["final-reviewer"] == {"model": "opencode/claude-opus-5-5", "effort": "medium"}
+assert saved["pi"]["docs-reviewer"] == {"model": "ollama-cloud/deepseek-v4.1-flash", "effort": "high"}
+JSON
 grep -F "Models each specialist will run on:" "$tmp_dir/pins.out" > /dev/null
 python3 - "$tmp_dir/pins.out" <<'PY'
 import re
@@ -884,40 +888,107 @@ start = next(
     index for index, line in enumerate(lines)
     if "Models each specialist will run on:" in line
 )
-header = next(line for line in lines[start + 1:] if line.strip())
-headers = re.split(r"\s{2,}", header.strip())
-if headers != ["implementer", "reviewers", "test review", "final"]:
-    raise SystemExit(f"unexpected model matrix header: {headers}")
-
-pi_row = next(
-    line for line in lines[start + 1:]
-    if re.split(r"\s{2,}", line.strip())[0] == "· pi"
-)
-models = re.split(r"\s{2,}", pi_row.strip())[1:]
-expected = [
-    "openai-codex/gpt-6.1-sol",
-    "ollama-cloud/deepseek-v4.1-flash",
-    "openai-codex/gpt-6.1-sol",
-    "anthropic/claude-opus-5-5",
-]
-if models != expected:
-    raise SystemExit(f"unexpected Pi model matrix row: {models}")
+rows = {}
+harness = None
+for line in lines[start + 1:]:
+    if line.strip().startswith("· "):
+        harness = line.strip()[2:]
+        continue
+    if harness is None or not line.strip():
+        if harness:
+            break
+        continue
+    name, rest = line.split(None, 1)
+    rows[(harness, name)] = rest.strip()
+expected = {
+    ("pi", "implementer"): "openai-codex/gpt-6.1-sol · medium",
+    ("pi", "taste-reviewer"): "ollama-cloud/deepseek-v4.1-flash · high",
+    ("pi", "test-reviewer"): "openai-codex/gpt-6.1-sol · high",
+    ("pi", "final-reviewer"): "anthropic/claude-opus-5-5 · medium",
+}
+for key, value in expected.items():
+    if rows.get(key) != value:
+        raise SystemExit(f"unexpected model matrix row {key}: {rows.get(key)}")
 PY
 grep -F "fallback-runner has no default and requires a call-time model" "$tmp_dir/pins.out" > /dev/null
 
-# A saved three-role assignment gains the resolved test model on the next run.
+# A legacy role-keyed file without test review migrates to per-agent entries:
+# reviewer expands to its three agents, the missing test model is resolved,
+# and every effort takes the kit default.
+cat > "$pin_target/.pandino/models.json" <<'JSON'
+{"pi": {"implementer": "openai-codex/gpt-6.1-sol", "reviewer": "ollama-cloud/glm-5.3", "final": "openai-codex/gpt-6-astra"},
+ "claude": {"implementer": "sonnet", "reviewer": "opus", "test": "sonnet", "final": "opus"},
+ "opencode": {"implementer": "opencode/gpt-6.1-sol", "reviewer": "opencode/deepseek-v4.1-flash", "test": "opencode/gpt-6.1-sol", "final": "opencode/claude-opus-5-5"},
+ "codex": {"implementer": "gpt-6.1-sol", "reviewer": "gpt-6-luna", "test": "gpt-6.1-sol", "final": "gpt-6-astra"}}
+JSON
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-upgrade.out"
+grep -qx "model: openai-codex/gpt-6.1-sol" "$pin_target/.pi/agents/test-reviewer.md"
+for agent in taste-reviewer spec-reviewer docs-reviewer; do
+    grep -qx "model: ollama-cloud/glm-5.3" "$pin_target/.pi/agents/$agent.md"
+done
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+saved = json.load(open(sys.argv[1]))
+assert set(saved["pi"]) == {"implementer", "taste-reviewer", "spec-reviewer", "docs-reviewer", "test-reviewer", "final-reviewer"}, saved["pi"]
+assert saved["pi"]["spec-reviewer"] == {"model": "ollama-cloud/glm-5.3", "effort": "high"}
+assert saved["pi"]["final-reviewer"] == {"model": "openai-codex/gpt-6-astra", "effort": "medium"}
+JSON
+
+# A Pi effort edited by hand before models.json held effort is adopted, not reset.
 python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
-del saved["pi"]["test"]
+saved["pi"] = {"implementer": saved["pi"]["implementer"]["model"], "reviewer": saved["pi"]["taste-reviewer"]["model"],
+               "test": saved["pi"]["test-reviewer"]["model"], "final": saved["pi"]["final-reviewer"]["model"]}
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
-HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-upgrade.out"
-grep -qx "model: openai-codex/gpt-6.1-sol" "$pin_target/.pi/agents/test-reviewer.md"
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if set(d['pi']) == {'implementer', 'reviewer', 'test', 'final'} else 1)" \
+sed -i.bak 's/^thinking: medium$/thinking: xhigh/' "$pin_target/.pi/agents/final-reviewer.md"
+rm -f "$pin_target/.pi/agents/final-reviewer.md.bak"
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-adopt.out"
+grep -qx 'thinking: xhigh' "$pin_target/.pi/agents/final-reviewer.md"
+grep -F "pi final-reviewer: kept installed effort xhigh" "$tmp_dir/pins-adopt.out" > /dev/null
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['final-reviewer']['effort'] == 'xhigh' else 1)" \
     "$pin_target/.pandino/models.json"
+
+# Saved efforts are applied per agent in every harness and survive a re-run
+# without staging the Pi agents as conflicts. An effort the harness does not
+# accept is reported and replaced by the kit default.
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+with open(sys.argv[1]) as f:
+    saved = json.load(f)
+for harness in saved:
+    saved[harness]["docs-reviewer"]["effort"] = "low"
+    saved[harness]["final-reviewer"]["effort"] = "max"
+saved["pi"]["spec-reviewer"]["effort"] = "ultra"
+with open(sys.argv[1], "w") as f:
+    json.dump(saved, f, indent=2)
+JSON
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-effort.out"
+grep -qx 'thinking: low' "$pin_target/.pi/agents/docs-reviewer.md"
+grep -qx 'thinking: max' "$pin_target/.pi/agents/final-reviewer.md"
+grep -qx 'thinking: high' "$pin_target/.pi/agents/spec-reviewer.md"
+grep -qx 'thinking: high' "$pin_target/.pi/agents/taste-reviewer.md"
+grep -qx 'effort: max' "$pin_target/.claude/agents/final-reviewer.md"
+grep -qx 'effort: low' "$pin_target/.claude/agents/docs-reviewer.md"
+grep -qx 'effort: max' "$pin_target/.opencode/agent/final-reviewer.md"
+grep -qx 'reasoningEffort: low' "$pin_target/.opencode/agent/docs-reviewer.md"
+grep -qx 'model_reasoning_effort = "max"' "$pin_target/.codex/agents/final-reviewer.toml"
+grep -qx 'model_reasoning_effort = "low"' "$pin_target/.codex/agents/docs-reviewer.toml"
+grep -F "pi spec-reviewer: effort ultra is not accepted, using high" "$tmp_dir/pins-effort.out" > /dev/null
+[ ! -e "$pin_target/.pandino/merge/agents/final-reviewer.md" ]
+[ ! -e "$pin_target/.pandino/merge/agents/docs-reviewer.md" ]
+HOME="$pin_home" bash "$repo_dir/install.sh" "$pin_target" --yes > "$tmp_dir/pins-effort2.out"
+grep -qx 'thinking: max' "$pin_target/.pi/agents/final-reviewer.md"
+[ ! -e "$pin_target/.pandino/merge/agents/final-reviewer.md" ]
+python3 - "$pin_target/.pandino/models.json" <<'JSON'
+import json, sys
+saved = json.load(open(sys.argv[1]))
+assert saved["pi"]["final-reviewer"]["effort"] == "max"
+assert saved["pi"]["spec-reviewer"]["effort"] == "high"
+JSON
 
 # Saved choices of current models remain authoritative, including ones that
 # are not the recommendation. Rewriting the pin updates Pandino-owned output
@@ -926,12 +997,13 @@ python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
-saved["pi"]["reviewer"] = "anthropic/claude-sonnet-5-5"
-saved["pi"]["test"] = "ollama-cloud/glm-5.3"
-saved["pi"]["final"] = "openai-codex/gpt-6-astra"
-saved["opencode"]["final"] = "opencode/kimi-k2.6"
-saved["codex"]["final"] = "gpt-6-luna"
-saved["pi"]["fallback-runner"] = "ollama-cloud/fallback-model"
+for agent in ("taste-reviewer", "spec-reviewer", "docs-reviewer"):
+    saved["pi"][agent]["model"] = "anthropic/claude-sonnet-5-5"
+saved["pi"]["test-reviewer"]["model"] = "ollama-cloud/glm-5.3"
+saved["pi"]["final-reviewer"]["model"] = "openai-codex/gpt-6-astra"
+saved["opencode"]["final-reviewer"] = {"model": "opencode/kimi-k2.6", "effort": "medium"}
+saved["codex"]["final-reviewer"] = {"model": "gpt-6-luna", "effort": "medium"}
+saved["pi"]["fallback-runner"] = {"model": "ollama-cloud/fallback-model", "effort": "high"}
 saved["pi"]["unknown"] = "ollama-cloud/unknown-model"
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
@@ -966,8 +1038,9 @@ python3 - "$pin_target/.pandino/models.json" <<'JSON'
 import json, sys
 with open(sys.argv[1]) as f:
     saved = json.load(f)
-saved["pi"]["implementer"] = "openai-codex/gpt-5.6-terra"
-saved["pi"]["reviewer"] = "ollama-cloud/deepseek-v4-flash:0731"
+saved["pi"]["implementer"]["model"] = "openai-codex/gpt-5.6-terra"
+for agent in ("taste-reviewer", "spec-reviewer", "docs-reviewer"):
+    saved["pi"][agent]["model"] = "ollama-cloud/deepseek-v4-flash:0731"
 with open(sys.argv[1], "w") as f:
     json.dump(saved, f, indent=2)
 JSON
@@ -979,7 +1052,7 @@ if grep -q '^model: ' "$pin_target/.pi/agents/fallback-runner.md"; then
     echo "FAIL: hand-edited fallback-runner has a model pin" >&2
     exit 1
 fi
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(set(roles) == {'implementer', 'reviewer', 'test', 'final'} for roles in d.values()) else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if all(len(entries) == 6 and 'fallback-runner' not in entries for entries in d.values()) else 1)" \
     "$pin_target/.pandino/models.json"
 [ ! -e "$pin_target/.pandino/merge/agents/taste-reviewer.md" ]
 [ ! -e "$pin_target/.pandino/merge/agents/test-reviewer.md" ]
@@ -1071,7 +1144,7 @@ grep -qx "model: ollama-cloud/glm-5.3" "$custom_target/.pi/agents/spec-reviewer.
 grep -qx "model: anthropic/claude-sonnet-5-5" "$custom_target/.pi/agents/implementer.md"
 grep -qx "model: anthropic/claude-sonnet-5-5" "$custom_target/.pi/agents/test-reviewer.md"
 grep -qx "model: openai-codex/gpt-6-astra" "$custom_target/.pi/agents/final-reviewer.md"
-python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['reviewer'] == 'ollama-cloud/glm-5.3' else 1)" \
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d['pi']['docs-reviewer']['model'] == 'ollama-cloud/glm-5.3' else 1)" \
     "$custom_target/.pandino/models.json"
 
 if find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .; then

@@ -311,43 +311,70 @@ esac
 
 # Without a pinned model each harness spawns subagents on the orchestrator's
 # own model, so the reviewers are the same model as the writer. Resolve one
-# model per role from what each picked harness can actually run, remembering
-# earlier answers so a re-run does not undo a hand-edited choice.
+# model per agent from what each picked harness can actually run, remembering
+# earlier answers so a re-run does not undo a hand-edited choice. Effort is
+# saved alongside the model; an agent without a saved effort takes the kit's.
 models_file="$target/.pandino/models.json"
 model_notes=()
 
 # Anything already chosen wins over the recommendation, except a superseded
-# model: that one is resolved again, and the recap says what replaced it.
+# model: that one is resolved again, and the recap says what replaced it. An
+# effort the harness does not accept is reported and replaced by the default.
 if [ -f "$models_file" ]; then
-    while IFS='=' read -r key value; do
-        [ -n "$key" ] || continue
+    while IFS=$'\t' read -r harness agent value effort; do
+        [ -n "$harness" ] || continue
         if superseded_models | grep -qxF "${value##*/}"; then
-            printf -v "replaced_$key" '%s' "$value"
+            printf -v "$(assignment_var replaced "$harness" "$agent")" '%s' "$value"
         else
-            printf -v "model_$key" '%s' "$value"
+            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$value"
+        fi
+        [ -n "$effort" ] || continue
+        if harness_efforts "$harness" | grep -qxF "$effort"; then
+            printf -v "$(assignment_var effort "$harness" "$agent")" '%s' "$effort"
+        else
+            model_notes+=("$harness $agent: effort $effort is not accepted, using $(agent_thinking "$kit_dir/agents/$agent.md")")
         fi
     done < <(read_saved_models "$models_file")
 fi
 
-# Fill in whichever of one harness's four roles is still unset.
+# The pinned agents that draw from one recommendation list.
+role_agents() {
+    local agent
+    for agent in $(pinned_agents); do
+        [ "$(agent_role "$agent")" = "$1" ] && printf '%s\n' "$agent"
+    done
+    return 0
+}
+
+# Fill in whichever of one harness's agents is still without a model. Agents
+# sharing a recommendation list are resolved together, so a note is said once.
 resolve_harness_models() {
-    local harness="$1" catalog role var first resolved old
+    local harness="$1" catalog role agent var first resolved old unset
     catalog="$(harness_catalog "$harness")"
     if [ -z "$catalog" ]; then
         model_notes+=("$harness: could not read its model list, its agents follow the main model")
         return 0
     fi
     for role in implementer reviewer test final; do
-        var="model_${harness}_${role}"
-        if [ -n "${!var-}" ]; then continue; fi
+        unset=()
+        old=""
+        for agent in $(role_agents "$role"); do
+            var="$(assignment_var model "$harness" "$agent")"
+            [ -n "${!var-}" ] && continue
+            unset+=("$agent")
+            var="$(assignment_var replaced "$harness" "$agent")"
+            [ -n "${!var-}" ] && old="${!var}"
+        done
+        [ "${#unset[@]}" -gt 0 ] || continue
         if ! resolved="$(resolve_role_model "$catalog" "$role")"; then
             model_notes+=("$harness $role: nothing recommended is available, it follows the main model")
             continue
         fi
-        printf -v "$var" '%s' "$resolved"
-        old="replaced_${harness}_${role}"
-        if [ -n "${!old-}" ] && [ "${!old}" != "$resolved" ]; then
-            model_notes+=("$harness $role: ${!old##*/} replaced by ${resolved##*/}")
+        for agent in "${unset[@]}"; do
+            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$resolved"
+        done
+        if [ -n "$old" ] && [ "$old" != "$resolved" ]; then
+            model_notes+=("$harness $role: ${old##*/} replaced by ${resolved##*/}")
         fi
         # Only a catalogue spanning providers could have carried the first
         # choice; Claude Code's aliases and Codex's own slugs never would, so
@@ -362,47 +389,53 @@ resolve_harness_models() {
     return 0
 }
 
-# One row per harness under a shared header, columns padded to their widest
-# value. Model ids run long and differ per harness, so a label before every
-# value (implementer x, reviewer y) is unreadable at four harnesses.
-print_model_matrix() {
-    local harness role var value
-    local -a roles=(implementer reviewer test final)
-    local -a headers=(implementer reviewers "test review" final)
-    local -a widths=(11 9 11 5)
-    local i
-
+# Every pinned agent without a saved effort takes the kit's canonical one. An
+# installed Pi agent from before models.json held effort keeps its own, so the
+# first run does not silently reset a hand-edited level; the recap names any
+# that differ from the kit.
+fill_default_efforts() {
+    local harness agent var installed
     for harness in $picked_keys; do
-        for i in "${!roles[@]}"; do
-            role="${roles[$i]}"
-            var="model_${harness}_${role}"
-            value="${!var:-main model}"
-            [ "${#value}" -gt "${widths[$i]}" ] && widths[$i]="${#value}"
+        for agent in $(pinned_agents); do
+            var="$(assignment_var effort "$harness" "$agent")"
+            [ -n "${!var-}" ] && continue
+            installed="$target/.pi/agents/$agent.md"
+            if [ "$harness" = pi ] && [ -f "$installed" ] \
+                && harness_efforts pi | grep -qxF "$(agent_thinking "$installed")"
+            then
+                printf -v "$var" '%s' "$(agent_thinking "$installed")"
+                [ "${!var}" = "$(agent_thinking "$kit_dir/agents/$agent.md")" ] \
+                    || model_notes+=("pi $agent: kept installed effort ${!var}; set it in models.json to change it")
+            else
+                printf -v "$var" '%s' "$(agent_thinking "$kit_dir/agents/$agent.md")"
+            fi
         done
-    done
-
-    printf '  %s    %-9s ' "$grey" ""
-    for i in "${!headers[@]}"; do
-        printf '%-*s  ' "${widths[$i]}" "${headers[$i]}"
-    done
-    printf '%s\n' "$reset"
-
-    for harness in $picked_keys; do
-        printf '  %s  · %s%-9s ' "$grey" "$reset" "$harness"
-        for i in "${!roles[@]}"; do
-            role="${roles[$i]}"
-            var="model_${harness}_${role}"
-            printf '%-*s  ' "${widths[$i]}" "${!var:-main model}"
-        done
-        printf '\n'
     done
 }
 
-# Reassign one harness's four roles by hand. Each role offers the models
+# One block per harness, one row per agent with its model and effort. Model ids
+# run long and differ per harness, so six columns side by side are unreadable.
+print_model_matrix() {
+    local harness agent model_var effort_var
+    for harness in $picked_keys; do
+        printf '  %s  · %s%s\n' "$grey" "$reset" "$harness"
+        for agent in $(pinned_agents); do
+            model_var="$(assignment_var model "$harness" "$agent")"
+            effort_var="$(assignment_var effort "$harness" "$agent")"
+            if [ -n "${!model_var-}" ]; then
+                printf '      %-15s %s · %s\n' "$agent" "${!model_var}" "${!effort_var-}"
+            else
+                printf '      %-15s main model\n' "$agent"
+            fi
+        done
+    done
+}
+
+# Reassign one harness's models by hand, one pick per recommendation list. Each role offers the models
 # Pandino would consider for it; a role nothing recommended could fill offers
 # the whole catalogue, so an unusual setup is still one prompt, not a restart.
 customize_models() {
-    local harness role catalog cand opts=() list=()
+    local harness role agent catalog cand opts=() list=()
     for harness in $picked_keys; do list+=("$harness:$harness"); done
     printf '\n  %sWhich editor?%s\n\n' "$grey" "$reset" > /dev/tty
     pick_list one "${list[@]}"
@@ -423,7 +456,10 @@ customize_models() {
         [ "${#opts[@]}" -gt 0 ] || continue
         printf '\n  %s%s%s\n\n' "$grey" "$role" "$reset" > /dev/tty
         pick_list one "${opts[@]}"
-        [ -n "$picked" ] && printf -v "model_${harness}_${role}" '%s' "$picked"
+        [ -n "$picked" ] || continue
+        for agent in $(role_agents "$role"); do
+            printf -v "$(assignment_var model "$harness" "$agent")" '%s' "$picked"
+        done
     done
     return 0
 }
@@ -433,6 +469,7 @@ for harness in $picked_keys; do
     resolve_harness_models "$harness"
 done
 spinner_stop
+fill_default_efforts
 
 # Show the whole assignment at once: four pickers in a row would be a worse
 # question than the one it answers.
@@ -517,10 +554,10 @@ project_template() {
     awk 'found || /<!-- Project-specific/ { found = 1; print } found && /^\|---/ { exit }' "$1"
 }
 
-# An agent file without its model pin, so two of them can be compared for
-# local edits without the pin counting as one.
-without_model_line() {
-    grep -v '^model: ' "$1"
+# An agent file without its model and effort, so two of them can be compared
+# for local edits without the pinned assignment counting as one.
+without_assignment_lines() {
+    grep -v -e '^model: ' -e '^thinking: ' "$1"
 }
 
 # Earlier versions appended governance, continuity, and parallel-agent
@@ -596,12 +633,13 @@ for harness in $picked_keys; do
             name="$(basename "$agent")"
             pinned="$(mktemp)"
             write_harness_agent "$agent" pi "$pinned"
-            # The model line is Pandino's to rewrite: an installed agent that
-            # differs from the kit only there is our own earlier output, not a
-            # local edit, so changing models.json takes effect on a re-run.
+            # The model and thinking lines are Pandino's to rewrite: an
+            # installed agent that differs from the kit only there is our own
+            # earlier output, not a local edit, so changing models.json takes
+            # effect on a re-run.
             dst="$target/.pi/agents/$name"
             if [ -e "$dst" ] && ! cmp -s "$pinned" "$dst" \
-                && diff -q <(without_model_line "$agent") <(without_model_line "$dst") > /dev/null
+                && diff -q <(without_assignment_lines "$agent") <(without_assignment_lines "$dst") > /dev/null
             then
                 cp "$pinned" "$dst"
                 say updated "$green" "$dst"

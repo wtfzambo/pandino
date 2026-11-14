@@ -15,9 +15,9 @@
 #   codex     ~/.codex/models_cache.json  bare slug
 #   claude    fixed aliases            fable, opus, sonnet, haiku
 
-# Which role an agent file fills. Taste, spec, and docs reviewers share the reviewer model.
-# Test review has its own role.
-# fallback-runner is deliberately dynamic, so it has no saved or resolved model assignment.
+# Which recommendation list an agent draws from. Taste, spec, and docs reviewers
+# share the reviewer list; test review has its own. An agent file path or a
+# bare agent name both work.
 agent_role() {
     case "$(basename "$1" .md)" in
         implementer)     echo implementer ;;
@@ -60,13 +60,47 @@ superseded_models() {
         claude-opus-5 claude-sonnet-5 deepseek-v4-flash deepseek-v4-flash:0731 glm-5.2
 }
 
-# The saved assignment, as "<harness>_<role>=<model>" lines. A hand-edited file
-# is the user's answer and outranks any recommendation, so unreadable JSON
-# prints nothing rather than guessing.
+# The specialists that carry a model and effort, in workflow order.
+# fallback-runner is deliberately dynamic, so it has no saved assignment.
+pinned_agents() {
+    printf '%s\n' implementer taste-reviewer spec-reviewer docs-reviewer test-reviewer final-reviewer
+}
+
+# The shell variable holding one agent's model, effort, or replaced model in
+# one harness, for example model_pi_final_reviewer.
+assignment_var() {
+    local agent="$3"
+    printf '%s_%s_%s\n' "$1" "$2" "${agent//-/_}"
+}
+
+# Effort levels each harness accepts in its agent definitions.
+# Verified 2026-10: pi docs ThinkingLevel; claude --help --effort; the
+# supported_reasoning_levels Codex caches per model. OpenCode forwards the
+# value to the provider, so it takes the Codex set.
+harness_efforts() {
+    case "$1" in
+        pi)              printf '%s\n' off minimal low medium high xhigh max ;;
+        claude|codex|opencode) printf '%s\n' low medium high xhigh max ;;
+    esac
+}
+
+# The saved assignment, one "<harness> <agent> <model> [effort]" line per
+# agent, tab-separated. The file used to key models by role (implementer,
+# reviewer, test, final) without effort; those entries expand to their agents
+# and leave effort to the caller. A per-agent entry wins over a role entry. A
+# hand-edited file is the user's answer and outranks any recommendation, so
+# unreadable JSON prints nothing rather than guessing.
 read_saved_models() {
     [ -f "$1" ] || return 0
     python3 - "$1" <<'JSON'
 import json, sys
+LEGACY_ROLES = {
+    "implementer": ["implementer"],
+    "reviewer": ["taste-reviewer", "spec-reviewer", "docs-reviewer"],
+    "test": ["test-reviewer"],
+    "final": ["final-reviewer"],
+}
+AGENTS = {"implementer", "taste-reviewer", "spec-reviewer", "docs-reviewer", "test-reviewer", "final-reviewer"}
 try:
     with open(sys.argv[1]) as f:
         saved = json.load(f)
@@ -74,42 +108,48 @@ except Exception:
     sys.exit(0)
 if not isinstance(saved, dict):
     sys.exit(0)
-for harness, roles in saved.items():
-    if isinstance(roles, dict):
-        for role, model in roles.items():
-            if role in ("implementer", "reviewer", "test", "final") and isinstance(model, str) and model:
-                print(f"{harness}_{role}={model}")
+for harness, entries in saved.items():
+    if not isinstance(entries, dict):
+        continue
+    assignment = {}
+    for key, value in entries.items():
+        if key in LEGACY_ROLES and isinstance(value, str) and value:
+            for agent in LEGACY_ROLES[key]:
+                assignment.setdefault(agent, (value, ""))
+    for key, value in entries.items():
+        if key in AGENTS and isinstance(value, dict) and isinstance(value.get("model"), str) and value["model"]:
+            effort = value.get("effort")
+            assignment[key] = (value["model"], effort if isinstance(effort, str) else "")
+    for agent, (model, effort) in assignment.items():
+        print("\t".join([harness, agent, model, effort]))
 JSON
 }
 
-# Write the assignment for the named harnesses, reading each model from the
-# model_<harness>_<role> variables the caller resolved.
+# Write the assignment for the named harnesses, reading each agent's model and
+# effort from the variables the caller resolved.
 save_models() {
-    local file="$1" harness role var
+    local file="$1" harness agent model_var effort_var
     shift
-    {
-        printf '{\n'
-        local first_harness=1
-        for harness in "$@"; do
-            local pairs=()
-            for role in implementer reviewer test final; do
-                var="model_${harness}_${role}"
-                [ -n "${!var-}" ] && pairs+=("      \"$role\": \"${!var}\"")
-            done
-            [ "${#pairs[@]}" -gt 0 ] || continue
-            [ "$first_harness" = 1 ] || printf ',\n'
-            first_harness=0
-            printf '  "%s": {\n' "$harness"
-            local i
-            for i in "${!pairs[@]}"; do
-                printf '%s' "${pairs[$i]}"
-                [ "$i" -lt "$(( ${#pairs[@]} - 1 ))" ] && printf ','
-                printf '\n'
-            done
-            printf '  }'
+    for harness in "$@"; do
+        for agent in $(pinned_agents); do
+            model_var="$(assignment_var model "$harness" "$agent")"
+            effort_var="$(assignment_var effort "$harness" "$agent")"
+            [ -n "${!model_var-}" ] || continue
+            printf '%s\t%s\t%s\t%s\n' "$harness" "$agent" "${!model_var}" "${!effort_var-}"
         done
-        printf '\n}\n'
-    } > "$file"
+    done | python3 -c '
+import json, sys
+saved = {}
+for line in sys.stdin:
+    harness, agent, model, effort = line.rstrip("\n").split("\t")
+    entry = {"model": model}
+    if effort:
+        entry["effort"] = effort
+    saved.setdefault(harness, {})[agent] = entry
+with open(sys.argv[1], "w") as f:
+    json.dump(saved, f, indent=2)
+    f.write("\n")
+' "$file"
 }
 
 # Every model one harness can run, one per line, in the id format that

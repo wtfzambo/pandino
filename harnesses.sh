@@ -37,20 +37,22 @@ agent_description() {
     ' "$1" | sed -e 's/ *$//'
 }
 
-# pi reads the kit's own format, so this only inserts the model pin.
+# pi reads the kit's own format, so this only inserts the model pin and
+# replaces the thinking level with the assigned effort.
 write_pi_agent() {
-    local src="$1" dst="$2" model="$3"
+    local src="$1" dst="$2" model="$3" effort="$4"
     if [ -z "$model" ]; then
         cp "$src" "$dst"
         return
     fi
     # Frontmatter ends at the second fence; the pin goes just above it.
-    awk -v model="$model" '
+    awk -v model="$model" -v effort="$effort" '
         BEGIN { fence = 0 }
         /^---$/ {
             fence++
             if (fence == 2) print "model: " model
         }
+        fence < 2 && /^thinking:/ { print "thinking: " effort; next }
         { print }
     ' "$src" > "$dst"
 }
@@ -65,7 +67,7 @@ claude_tools() {
 }
 
 write_claude_agent() {
-    local src="$1" dst="$2" model="$3" name tools
+    local src="$1" dst="$2" model="$3" effort="$4" name tools
     name="$(basename "$src" .md)"
     tools="$(claude_tools "$(agent_tools "$src")")"
     {
@@ -74,14 +76,14 @@ write_claude_agent() {
         echo "description: $(agent_description "$src")"
         [ -n "$tools" ] && echo "tools: $tools"
         [ -n "$model" ] && echo "model: $model"
-        [ -n "$model" ] && echo "effort: $(agent_thinking "$src")"
+        [ -n "$model" ] && echo "effort: $effort"
         echo "---"
         agent_body "$src"
     } > "$dst"
 }
 
 write_opencode_agent() {
-    local src="$1" dst="$2" model="$3" name tools
+    local src="$1" dst="$2" model="$3" effort="$4" name tools
     name="$(basename "$src" .md)"
     tools="$(agent_tools "$src")"
     {
@@ -92,11 +94,11 @@ write_opencode_agent() {
         [ -n "$model" ] && echo "model: $model"
         case "${model##*/}" in
             gpt-6-*|gpt-6.*)
-                echo "reasoningEffort: $(agent_thinking "$src")"
+                echo "reasoningEffort: $effort"
                 echo "forceReasoning: true"
                 ;;
-            gpt-*|deepseek-*) [ -n "$model" ] && echo "reasoningEffort: $(agent_thinking "$src")" ;;
-            claude-*-5-5) echo "effort: $(agent_thinking "$src")" ;;
+            gpt-*|deepseek-*) [ -n "$model" ] && echo "reasoningEffort: $effort" ;;
+            claude-*-5-5) echo "effort: $effort" ;;
         esac
         if [ -n "$tools" ] && [ "$tools" != "all" ]; then
             echo "tools:"
@@ -111,14 +113,14 @@ write_opencode_agent() {
 # Codex takes TOML, with the prompt in a multi-line string. Inspection-only
 # agents get sandbox_mode = "read-only", matching the boundary in their prompts.
 write_codex_agent() {
-    local src="$1" dst="$2" model="$3" name tools
+    local src="$1" dst="$2" model="$3" effort="$4" name tools
     name="$(basename "$src" .md)"
     tools="$(agent_tools "$src")"
     {
         printf 'name = "%s"\n' "$name"
         printf 'description = "%s"\n' "$(agent_description "$src" | sed 's/"/\\"/g')"
         [ -n "$model" ] && printf 'model = "%s"\n' "$model"
-        [ -n "$model" ] && printf 'model_reasoning_effort = "%s"\n' "$(agent_thinking "$src")"
+        [ -n "$model" ] && printf 'model_reasoning_effort = "%s"\n' "$effort"
         [ -n "$tools" ] && [ "$tools" != "all" ] && printf 'sandbox_mode = "read-only"\n'
         printf 'developer_instructions = """\n'
         # A closing triple quote inside the body would end the string early.
@@ -138,22 +140,20 @@ harness_dir() {
 }
 
 # Translate one kit agent into the layout a harness expects, pinning the model
-# that harness resolved for its role. Callers set model_<harness>_<role>;
-# fallback-runner deliberately has no assignment.
+# and effort that harness resolved for it. Callers set model_<harness>_<agent>
+# and effort_<harness>_<agent>; fallback-runner deliberately has neither.
 write_harness_agent() {
-    local src="$1" harness="$2" dst="$3" role var model
-    role="$(agent_role "$src")"
-    if [ "$role" = fallback-runner ]; then
-        model=""
-    else
-        var="model_${harness}_${role}"
-        model="${!var-}"
-    fi
+    local src="$1" harness="$2" dst="$3" agent model_var effort_var model effort
+    agent="$(basename "$src" .md)"
+    model_var="$(assignment_var model "$harness" "$agent")"
+    effort_var="$(assignment_var effort "$harness" "$agent")"
+    model="${!model_var-}"
+    effort="${!effort_var:-$(agent_thinking "$src")}"
     case "$harness" in
-        pi)       write_pi_agent "$src" "$dst" "$model" ;;
-        claude)   write_claude_agent "$src" "$dst" "$model" ;;
-        opencode) write_opencode_agent "$src" "$dst" "$model" ;;
-        codex)    write_codex_agent "$src" "$dst" "$model" ;;
+        pi)       write_pi_agent "$src" "$dst" "$model" "$effort" ;;
+        claude)   write_claude_agent "$src" "$dst" "$model" "$effort" ;;
+        opencode) write_opencode_agent "$src" "$dst" "$model" "$effort" ;;
+        codex)    write_codex_agent "$src" "$dst" "$model" "$effort" ;;
     esac
 }
 

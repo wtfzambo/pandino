@@ -3,7 +3,7 @@ id: doc-4
 title: Specialist model routing
 type: specification
 created_date: '2026-09-28 22:19'
-updated_date: '2026-10-22 18:01'
+updated_date: '2026-11-14 20:46'
 ---
 # Specialist model routing
 
@@ -19,13 +19,33 @@ These are the operator-selected defaults from 2026-09-29 (TASK-19), with GPT-6.1
 
 The writer and test reviewer deliberately share Sol with different effort settings; on Claude Code, Sonnet takes Sol's place in both roles. Their responsibilities and sessions remain separate; different effort is not model diversity. Claude Code receives the `sonnet` and `opus` aliases rather than full model IDs, so each agent follows the newest version of that family available to the account.
 
-## Configuration ownership and fallbacks
+## Configuration ownership
 
-`models.sh` owns ordered recommendations and agent-to-role mapping. `agents/*.md` owns canonical effort: medium for implementation/final review and high for routine/test review. `harnesses.sh` translates these into native agent definitions.
+`models.sh` owns ordered recommendations and the recommendation list each agent draws from: taste, spec and docs review share the reviewer list. `agents/*.md` owns the default effort: medium for implementation and final review, high for routine and test review. `harnesses.sh` translates the assigned model and effort into native agent definitions.
 
 Automatic recommendations omit superseded generations: GPT-5.x, GPT-6 Sol, Claude Opus/Sonnet 5, DeepSeek V4 Flash and GLM 5.2. GLM 5.3 replaces its older fallback entry. Kimi is an operator-selected exception: keep K2.6 followed by K2.7 Code, excluding K3 because its operation in the user setup is uncertain. Catalogue presence alone does not verify runtime availability. DeepSeek V4 Pro remains eligible because the inspected catalogue has no newer Pro successor. Removing a recommendation does not invalidate an explicitly saved model choice or rewrite historical benchmark records (TASK-20).
 
-`.pandino/models.json` stores the selected model for each harness and role (`implementer`, `reviewer`, `test`, `final`). Saved choices win over recommendations, including a separately chosen test model, unless the saved model is on the superseded list in `models.sh` (GPT-5.6 Terra, Sol and Luna, GPT-6 Sol, Claude Opus 5 and Sonnet 5, DeepSeek V4 Flash, GLM 5.2). A superseded saved model is resolved again on the next install, and the recap names what replaced it, so updating Pandino moves existing installations to the current generation. To keep an older model deliberately, pin one that is not on that list, or edit the generated agent file and resolve the staged merge candidate.
+## Saved assignments
+
+`.pandino/models.json` is the one file an operator edits to choose models and efforts. It holds one block per harness and one entry per pinned agent:
+
+```json
+{
+  "pi": {
+    "final-reviewer": { "model": "openai/gpt-6.1-sol", "effort": "max" }
+  }
+}
+```
+
+The installer reads it, fills in anything missing, writes it back complete, and regenerates the agent files from it. Generated agent files are output. To change a model or effort, edit `models.json` and re-run the installer. A Pi agent file that differs from the kit only in its `model` and `thinking` lines is Pandino output and is rewritten without staging a merge candidate.
+
+- Saved models win over recommendations unless the model is on the superseded list in `models.sh` (GPT-5.6 Terra, Sol and Luna, GPT-6 Sol, Claude Opus 5 and Sonnet 5, DeepSeek V4 Flash, GLM 5.2). A superseded model is resolved again, and the recap names its replacement. To keep an older model deliberately, pin one that is not on that list.
+- A saved effort applies to that agent in that harness. The recap reports an effort the harness does not accept, and the agent takes its default. Accepted levels are `off`, `minimal`, `low`, `medium`, `high`, `xhigh` and `max` on Pi, and `low`, `medium`, `high`, `xhigh` and `max` on Claude Code, Codex and OpenCode.
+- An agent without a saved effort takes the default from `agents/*.md`. On Pi, an installed agent whose `thinking` differs from the kit keeps its own level, and the recap names it. This carries efforts edited by hand before `models.json` held effort into the file.
+- Earlier versions keyed models by role (`implementer`, `reviewer`, `test`, `final`) without effort. The installer reads that format and rewrites it per agent, applying `reviewer` to the taste, spec and docs reviewers.
+- `fallback-runner` has no saved entry. Its caller supplies an explicit model.
+
+## Fallbacks
 
 If a recommendation is unavailable, the resolver uses the next matching catalogue entry from `models.sh`. The installer reports substitutions for provider-qualified catalogues such as Pi and OpenCode; native Codex/Claude adaptations appear in the assignment matrix without separate substitution notices. If it finds no suitable model, the installer reports main-model inheritance. `fallback-runner` remains unpinned and absent from saved model routing; its caller must supply an explicit model.
 
