@@ -15,6 +15,16 @@ Use this playbook when you act as a reviewer. Your agent definition says what yo
 
 Finish when the brief's questions have evidence-backed answers or the budget is spent. At the limit, mark the verdict provisional. Withhold approval when essential evidence is missing, and mark a truncated review incomplete. Raise only real findings: a clean change earns a short report that says it is clean.
 
+## Classify findings
+
+File each finding under one of three headings:
+
+- `must-fix`: the change breaks behavior that works today, or leaves unmet a requirement within the brief's scope from the task, the specification, or the project's definition of done. Label it a plausible risk when the breakage is credible but not shown.
+- `minor`: every other improvement. Style, readability, naming, structure, and wording are minor even when a project rule covers them.
+- `user decision`: a product, scope, or support choice that the task and specification leave open, such as keeping unrequested behavior or supporting another platform or version. State the options and what each one adds or costs, and leave the choice to the user.
+
+Minor findings and user decisions alone leave the verdict clean; the orchestrator settles user decisions with the user.
+
 ## Report format
 
 Use exactly this structure:
@@ -28,6 +38,8 @@ Use exactly this structure:
 - `file:line` | <demonstrated defect | plausible risk | incomplete coverage> | <what is wrong> | <the fix in one sentence> | <role field>
 ### minor
 - same shape
+### user decision
+- `file:line` | <the choice the task leaves open> | <the options and what each one adds or costs> | <role field>
 
 ## Good
 - one or two lines on what works well
@@ -38,4 +50,4 @@ Use exactly this structure:
 - Turns: <used> of <budget>; timed-out commands: <list or none>
 ```
 
-Order findings by severity and keep certainty (the label) separate from severity (the heading). Mark findings that predate the change as pre-existing. Your agent definition names your role field; write "none" under a heading with no findings.
+Order findings by severity and keep certainty (the label) separate from severity (the heading) for must-fix and minor findings. Mark findings that predate the change as pre-existing. Your agent definition names your role field; write "none" under a heading with no findings.

@@ -12,7 +12,7 @@ Find the spec yourself:
 Then interrogate the diff on three fronts:
 
 - **Missing**: requirements the spec asks for that the diff does not deliver, or delivers partially. Check every acceptance criterion one by one; name the ones you cannot trace to the implemented behavior. A passing test suite can support a behavior trace, but test quality or whether a new test is needed belongs to the test reviewer.
-- **Unrequested**: behavior the diff adds that nobody asked for: extra features, new configuration, tooling changes riding along. Scope creep is a finding even when the addition is useful and well built. Report it; the orchestrator decides proportion and scope.
+- **Unrequested**: behavior the diff adds that nobody asked for: extra features, new configuration, tooling changes riding along. Report scope creep under user decision, even when the addition is useful and well built; the user decides whether to keep it.
 - **Wrong**: requirements that look implemented but whose behavior diverges from the spec. Trace the actual values (thresholds, boundaries, defaults, error paths) against the spec's numbers and words, rather than the implementation's own tests. A test suite that agrees with the code proves consistency, not correctness.
 
 Group findings by front within each severity. Role field for each finding: the task or spec line it violates, quoted. When everything traces cleanly both ways, spec to diff and diff to spec, the verdict is clean.

@@ -24,11 +24,11 @@ REVIEW UNDER SCORING:
 {review}
 
 Rules:
-- A planted defect counts as found only if the review identifies the same problem in the same place; naming the exact rule wording is not required. A concern on the same line or in the same code area does not count when it describes a different failure mode.
+- A planted defect counts as found only if the review identifies the same problem in the same place; naming the exact rule wording is not required, and it counts under any review heading. A concern on the same line or in the same code area does not count when it describes a different failure mode.
 - If a ground-truth item is compound, count it only when the review identifies every required component of that item.
 - `Must-fix` ground-truth items count in `defects_found` and `defects_total`. `Minor excess` ground-truth items count separately in `minor_found` and `minor_total`.
 - Older ground truth without those headings treats every numbered planted defect as must-fix and has a minor total of zero.
-- A must-fix or minor finding in the review that is not a listed planted defect and not a real defect in the described code is a false positive. "Good" notes and observations the reviewer explicitly rejects or self-dismisses are not false positives.
+- A must-fix, minor, or user-decision finding in the review that is not a listed planted defect and not a real defect in the described code is a false positive. "Good" notes and observations the reviewer explicitly rejects or self-dismisses are not false positives.
 - If the ground truth says the diff is clean, the relevant total is zero; an actionable finding in that severity is a false positive unless it is a real defect in the described code.
 
 Reply with ONLY a JSON object: {{"defects_found": [<must-fix numbers>], "defects_total": <n>, "minor_found": [<minor numbers>], "minor_total": <n>, "false_positives": <n>, "notes": "<one line>"}}

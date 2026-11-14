@@ -17,6 +17,7 @@ Apply YAGNI and KISS; optimize what is measured to need it.
 Write the plain version you would explain aloud; rewrite code smarter than its problem.
 
 - Use linear, named steps and boring control flow; express straightforward behavior directly. Guard clauses and early returns keep the happy path visually obvious. One nesting level is normal, two prompt consideration, three is the maximum.
+- Give long boolean chains and mixed AND/OR groups semantic names before combining them. Name each coherent decision with a local boolean for one-off logic or a predicate function when the operation warrants one. Preserve evaluation order, short-circuiting and null-safety when extracting conditions.
 - Write code that explains itself. Write a comment only for a constraint imposed by something outside our control (dependency, platform, protocol), linked when possible; for an accepted scale limit of a simple implementation; or for a license. The product reason behind a threshold or domain rule belongs in the specification. Docstrings follow the same rule; a project that needs them says so below the project marker.
 - Treat a comment that justifies a workaround in our own code, and a lint or type-check suppression, as a red flag: fix the root cause even when that costs more. When the cause lies outside the current work, report it to the user.
 
@@ -115,6 +116,7 @@ Mistakes the user has corrected, one row per kind of mistake. See Agent behavior
 | Rule | Enforced by |
 |---|---|
 | Raise a deviation from an agreed estimate (word counts, percentages, budgets) with the user only when it changes a decision; report it in task notes otherwise. | prose |
+| Name a repository item by what it is before its ID in every user-facing message, including option lists, tables, and summaries of other items. | prose |
 
 <!-- BACKLOG.MD GUIDELINES START -->
 <!-- backlog.md-instructions-version: 1.48.0 -->

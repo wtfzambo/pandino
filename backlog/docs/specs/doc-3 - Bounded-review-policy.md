@@ -3,7 +3,7 @@ id: doc-3
 title: Bounded review policy
 type: specification
 created_date: '2026-09-28 16:03'
-updated_date: '2026-10-21 16:16'
+updated_date: '2026-10-30 00:14'
 ---
 # Bounded review policy
 
@@ -31,7 +31,7 @@ The existing Pi translator preserves reviewer frontmatter. Other harness transla
 
 ## Report format and cost record
 
-Every reviewer reports in the structure defined in `reviewing.md`: a verdict, findings by severity with a certainty label and a role-specific field, what works well, and a coverage section listing checks run, unverified areas, turns used against the budget, and timed-out commands. The orchestrator appends each review's turns, wall-clock minutes, and timed-out commands to the task notes. Pandino sets no baseline for these numbers; they let the operator decide whether budgets or reviewers need to change.
+Every reviewer reports in the structure defined in `reviewing.md`: a verdict, findings by severity with a certainty label and a role-specific field, what works well, and a coverage section listing checks run, unverified areas, turns used against the budget, and timed-out commands. A must-fix finding breaks behavior that works today or leaves an in-scope requirement unmet; style and readability findings are minor. A product, scope, or support choice the task leaves open, including whether to keep unrequested behavior, is reported as a user decision with its options, and it does not affect the verdict. The orchestrator judges severity by these definitions and brings user decisions to the user before building any of them. The orchestrator appends each review's turns, wall-clock minutes, and timed-out commands to the task notes. Pandino sets no baseline for these numbers; they let the operator decide whether budgets or reviewers need to change.
 
 ## Command timeouts (experimental)
 
