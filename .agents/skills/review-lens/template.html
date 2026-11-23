@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>__VENDOR_CSS__</style>
+<style>
+/* Each theme is one palette: UI colours plus syntax colours (--s-*), so a theme changes everything at once.
+   Palettes follow the themes' published colours. */
+:root, [data-theme="light"] {
+  --bg: #ffffff; --side: #f5f5f7; --fg: #1d1d1f; --fg2: #86868b; --fg3: #c7c7cc; --hover: rgba(0,0,0,.04);
+  --accent: #0071e3; --high: #ff3b30; --mid: #ff9f0a; --low: #34c759; --skip: #c7c7cc; --amber: #b25000;
+  --ins: rgba(52,199,89,.10); --ins-hi: rgba(52,199,89,.28); --del: rgba(255,59,48,.07); --del-hi: rgba(255,59,48,.22);
+  --s-kw: #ad3da4; --s-str: #c41a16; --s-num: #1c00cf; --s-type: #0b4f79; --s-fn: #326d74; --s-com: #8a99a6; --s-attr: #643820;
+  --shadow: 0 10px 40px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
+}
+[data-theme="dark"] {
+  --bg: #161618; --side: #1e1e21; --fg: #f5f5f7; --fg2: #8e8e93; --fg3: #48484a; --hover: rgba(255,255,255,.05);
+  --accent: #0a84ff; --high: #ff453a; --mid: #ff9f0a; --low: #30d158; --skip: #48484a; --amber: #ffb340;
+  --ins: rgba(48,209,88,.10); --ins-hi: rgba(48,209,88,.28); --del: rgba(255,69,58,.09); --del-hi: rgba(255,69,58,.28);
+  --s-kw: #ff7ab2; --s-str: #ff8170; --s-num: #d9c97c; --s-type: #6bdfff; --s-fn: #67b7a4; --s-com: #7f8c98; --s-attr: #ffa14f;
+  --shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+[data-theme="github-light"] {
+  --bg: #ffffff; --side: #f6f8fa; --fg: #1f2328; --fg2: #656d76; --fg3: #d0d7de; --hover: rgba(208,215,222,.32);
+  --accent: #0969da; --high: #cf222e; --mid: #bf8700; --low: #1a7f37; --skip: #d0d7de; --amber: #9a6700;
+  --ins: #dafbe1; --ins-hi: #aceebb; --del: #ffebe9; --del-hi: #ffcecb;
+  --s-kw: #cf222e; --s-str: #0a3069; --s-num: #0550ae; --s-type: #953800; --s-fn: #8250df; --s-com: #6e7781; --s-attr: #0550ae;
+  --shadow: 0 8px 24px rgba(140,149,159,.2);
+}
+[data-theme="github-dark"] {
+  --bg: #0d1117; --side: #161b22; --fg: #e6edf3; --fg2: #7d8590; --fg3: #30363d; --hover: rgba(177,186,196,.08);
+  --accent: #2f81f7; --high: #f85149; --mid: #d29922; --low: #3fb950; --skip: #30363d; --amber: #d29922;
+  --ins: rgba(46,160,67,.15); --ins-hi: rgba(46,160,67,.4); --del: rgba(248,81,73,.1); --del-hi: rgba(248,81,73,.4);
+  --s-kw: #ff7b72; --s-str: #a5d6ff; --s-num: #79c0ff; --s-type: #ffa657; --s-fn: #d2a8ff; --s-com: #8b949e; --s-attr: #79c0ff;
+  --shadow: 0 8px 24px rgba(1,4,9,.8);
+}
+[data-theme="one-dark"] {
+  --bg: #282c34; --side: #21252b; --fg: #abb2bf; --fg2: #7f848e; --fg3: #4b5263; --hover: rgba(255,255,255,.04);
+  --accent: #61afef; --high: #e06c75; --mid: #e5c07b; --low: #98c379; --skip: #4b5263; --amber: #e5c07b;
+  --ins: rgba(152,195,121,.12); --ins-hi: rgba(152,195,121,.3); --del: rgba(224,108,117,.1); --del-hi: rgba(224,108,117,.3);
+  --s-kw: #c678dd; --s-str: #98c379; --s-num: #d19a66; --s-type: #e5c07b; --s-fn: #61afef; --s-com: #5c6370; --s-attr: #d19a66;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="monokai-pro"] {
+  --bg: #2d2a2e; --side: #221f22; --fg: #fcfcfa; --fg2: #939293; --fg3: #5b595c; --hover: rgba(255,255,255,.05);
+  --accent: #78dce8; --high: #ff6188; --mid: #fc9867; --low: #a9dc76; --skip: #5b595c; --amber: #ffd866;
+  --ins: rgba(169,220,118,.12); --ins-hi: rgba(169,220,118,.3); --del: rgba(255,97,136,.1); --del-hi: rgba(255,97,136,.3);
+  --s-kw: #ff6188; --s-str: #ffd866; --s-num: #ab9df2; --s-type: #78dce8; --s-fn: #a9dc76; --s-com: #727072; --s-attr: #fc9867;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="dracula"] {
+  --bg: #282a36; --side: #21222c; --fg: #f8f8f2; --fg2: #8b93b8; --fg3: #44475a; --hover: rgba(255,255,255,.05);
+  --accent: #bd93f9; --high: #ff5555; --mid: #ffb86c; --low: #50fa7b; --skip: #44475a; --amber: #f1fa8c;
+  --ins: rgba(80,250,123,.10); --ins-hi: rgba(80,250,123,.25); --del: rgba(255,85,85,.10); --del-hi: rgba(255,85,85,.28);
+  --s-kw: #ff79c6; --s-str: #f1fa8c; --s-num: #bd93f9; --s-type: #8be9fd; --s-fn: #50fa7b; --s-com: #6272a4; --s-attr: #ffb86c;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="nord"] {
+  --bg: #2e3440; --side: #3b4252; --fg: #eceff4; --fg2: #9aa5b8; --fg3: #4c566a; --hover: rgba(255,255,255,.04);
+  --accent: #88c0d0; --high: #bf616a; --mid: #d08770; --low: #a3be8c; --skip: #4c566a; --amber: #ebcb8b;
+  --ins: rgba(163,190,140,.12); --ins-hi: rgba(163,190,140,.3); --del: rgba(191,97,106,.12); --del-hi: rgba(191,97,106,.3);
+  --s-kw: #81a1c1; --s-str: #a3be8c; --s-num: #b48ead; --s-type: #8fbcbb; --s-fn: #88c0d0; --s-com: #616e88; --s-attr: #d08770;
+  --shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+[data-theme="catppuccin-latte"] {
+  --bg: #eff1f5; --side: #e6e9ef; --fg: #4c4f69; --fg2: #8c8fa1; --fg3: #bcc0cc; --hover: rgba(76,79,105,.06);
+  --accent: #1e66f5; --high: #d20f39; --mid: #fe640b; --low: #40a02b; --skip: #bcc0cc; --amber: #df8e1d;
+  --ins: rgba(64,160,43,.12); --ins-hi: rgba(64,160,43,.28); --del: rgba(210,15,57,.08); --del-hi: rgba(210,15,57,.22);
+  --s-kw: #8839ef; --s-str: #40a02b; --s-num: #fe640b; --s-type: #df8e1d; --s-fn: #1e66f5; --s-com: #9ca0b0; --s-attr: #179299;
+  --shadow: 0 10px 40px rgba(76,79,105,.15);
+}
+[data-theme="catppuccin-mocha"] {
+  --bg: #1e1e2e; --side: #181825; --fg: #cdd6f4; --fg2: #9399b2; --fg3: #45475a; --hover: rgba(205,214,244,.05);
+  --accent: #89b4fa; --high: #f38ba8; --mid: #fab387; --low: #a6e3a1; --skip: #45475a; --amber: #f9e2af;
+  --ins: rgba(166,227,161,.10); --ins-hi: rgba(166,227,161,.26); --del: rgba(243,139,168,.10); --del-hi: rgba(243,139,168,.26);
+  --s-kw: #cba6f7; --s-str: #a6e3a1; --s-num: #fab387; --s-type: #f9e2af; --s-fn: #89b4fa; --s-com: #6c7086; --s-attr: #94e2d5;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="solarized-light"] {
+  --bg: #fdf6e3; --side: #eee8d5; --fg: #586e75; --fg2: #93a1a1; --fg3: #d3cbb7; --hover: rgba(88,110,117,.06);
+  --accent: #268bd2; --high: #dc322f; --mid: #cb4b16; --low: #859900; --skip: #d3cbb7; --amber: #b58900;
+  --ins: rgba(133,153,0,.12); --ins-hi: rgba(133,153,0,.28); --del: rgba(220,50,47,.08); --del-hi: rgba(220,50,47,.22);
+  --s-kw: #859900; --s-str: #2aa198; --s-num: #d33682; --s-type: #b58900; --s-fn: #268bd2; --s-com: #93a1a1; --s-attr: #cb4b16;
+  --shadow: 0 10px 40px rgba(88,110,117,.15);
+}
+[data-theme="solarized-dark"] {
+  --bg: #002b36; --side: #073642; --fg: #93a1a1; --fg2: #657b83; --fg3: #29434c; --hover: rgba(255,255,255,.04);
+  --accent: #268bd2; --high: #dc322f; --mid: #cb4b16; --low: #859900; --skip: #29434c; --amber: #b58900;
+  --ins: rgba(133,153,0,.14); --ins-hi: rgba(133,153,0,.32); --del: rgba(220,50,47,.12); --del-hi: rgba(220,50,47,.3);
+  --s-kw: #859900; --s-str: #2aa198; --s-num: #d33682; --s-type: #b58900; --s-fn: #268bd2; --s-com: #586e75; --s-attr: #cb4b16;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="tokyo-night"] {
+  --bg: #1a1b26; --side: #16161e; --fg: #c0caf5; --fg2: #787c99; --fg3: #3b4261; --hover: rgba(192,202,245,.05);
+  --accent: #7aa2f7; --high: #f7768e; --mid: #ff9e64; --low: #9ece6a; --skip: #3b4261; --amber: #e0af68;
+  --ins: rgba(158,206,106,.10); --ins-hi: rgba(158,206,106,.26); --del: rgba(247,118,142,.10); --del-hi: rgba(247,118,142,.26);
+  --s-kw: #bb9af7; --s-str: #9ece6a; --s-num: #ff9e64; --s-type: #2ac3de; --s-fn: #7aa2f7; --s-com: #565f89; --s-attr: #73daca;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme="gruvbox-dark"] {
+  --bg: #282828; --side: #1d2021; --fg: #ebdbb2; --fg2: #a89984; --fg3: #504945; --hover: rgba(235,219,178,.05);
+  --accent: #83a598; --high: #fb4934; --mid: #fe8019; --low: #b8bb26; --skip: #504945; --amber: #fabd2f;
+  --ins: rgba(184,187,38,.12); --ins-hi: rgba(184,187,38,.28); --del: rgba(251,73,52,.10); --del-hi: rgba(251,73,52,.28);
+  --s-kw: #fb4934; --s-str: #b8bb26; --s-num: #d3869b; --s-type: #fabd2f; --s-fn: #8ec07c; --s-com: #928374; --s-attr: #fe8019;
+  --shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+[data-theme] { --amber-bg: color-mix(in srgb, var(--amber) 12%, transparent); --ask-bg: color-mix(in srgb, var(--accent) 9%, transparent); --note-bg: color-mix(in srgb, var(--accent) 6%, transparent); }
+* { color-scheme: light dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+code, .mono { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: .9em; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+select { font: inherit; color: var(--fg); background: var(--hover); border: 0; border-radius: 6px; padding: 2px 6px; }
+a { color: var(--accent); text-decoration: none; }
+.dim { color: var(--fg2); }
+
+/* ---------- top bar ---------- */
+#top { display: flex; align-items: center; gap: 32px; padding: 14px 28px 10px; flex: none; height: 52px; }
+#top .group { display: inline-flex; align-items: center; gap: 10px; height: 28px; }
+#top .icon { height: 28px; min-width: 28px; justify-content: center; }
+#stepno { font-size: 12px; color: var(--fg2); font-variant-numeric: tabular-nums; min-width: 40px; text-align: center; line-height: 28px; }
+#steps { margin-left: 4px; }
+#title { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.icon { color: var(--fg2); font-size: 13px; line-height: 1; padding: 5px; border-radius: 6px; display: inline-flex; align-items: center; }
+svg.i { width: 16px; height: 16px; stroke-width: 1.75; flex: none; }
+.icon.on { color: var(--accent); }
+.icon:hover { color: var(--fg); background: var(--hover); }
+.count:empty { display: none; }
+.count { font-size: 12px; margin-left: 3px; }
+.icon:disabled { opacity: .25; cursor: default; background: none; }
+#nav { margin-left: -6px; }
+#nav .icon { padding: 4px; }
+
+.side-head { display: flex; align-items: center; justify-content: space-between; }
+#filter .icon { color: var(--fg2); }
+#filter .icon.on { color: var(--accent); }
+#filter .dots { display: inline-flex; gap: 3px; margin-left: 4px; }
+#filter .menu { min-width: 190px; gap: 2px; padding: 8px; top: 26px; }
+#filter .opt { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; text-align: left; color: var(--fg); }
+#filter .opt:hover { background: var(--hover); }
+#filter .opt.on { background: var(--note-bg); }
+#filter .opt .name { flex: 1; }
+#filter .opt .n { color: var(--fg2); font-size: 12px; font-variant-numeric: tabular-nums; }
+#filter .opt .tick { width: 14px; color: var(--accent); display: inline-flex; }
+#filter .opt .tick svg.i { width: 14px; height: 14px; }
+#filter .clear { color: var(--accent); font-size: 12px; padding: 6px 10px; text-align: left; }
+#progress { font-size: 12px; color: var(--fg2); white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 28px; }
+#progress .hl { color: var(--high); }
+#settings .menu { min-width: 340px; }
+#glossdlg { width: min(640px, 92vw); max-height: 78vh; padding: 20px 24px 24px; }
+#glossdlg[open] { display: flex; flex-direction: column; gap: 16px; }
+#glossq { font: inherit; font-size: 14px; color: var(--fg); background: var(--side); border: 0; border-radius: 10px; padding: 10px 14px; outline: none; }
+#glossq:focus { box-shadow: 0 0 0 3px rgba(0,113,227,.3); }
+#glosslist { overflow: auto; margin: 0; }
+#glosslist .none { grid-column: 1 / -1; color: var(--fg2); }
+.menu-sep { height: 1px; background: var(--hover); margin: 4px -16px; }
+.file.filtered, .t-file.filtered, .t-dir.filtered { display: none; }
+.hidden-note { font-size: 12px; color: var(--fg2); margin-top: -28px; margin-bottom: 36px; }
+#segs { display: flex; gap: 4px; padding: 0 32px; flex: none; }
+.seg { flex: 1; height: 3px; border-radius: 2px; background: var(--fg3); opacity: .5; cursor: pointer; position: relative; transition: opacity .2s; }
+.seg:hover { opacity: 1; }
+.seg.done { background: var(--fg2); }
+.seg.cur { background: var(--accent); opacity: 1; }
+.overview { max-width: 720px; }
+.overview .prose { font-size: 16px; line-height: 1.7; }
+.overview h2 { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg2); margin: 48px 0 14px; }
+.ov-steps { display: grid; grid-template-columns: 28px 1fr auto; gap: 2px 10px; font-size: 14px; }
+.ov-steps button { display: contents; text-align: left; }
+.ov-steps button > * { padding: 7px 0; }
+.ov-steps button:hover .t { color: var(--accent); }
+.ov-steps .n, .ov-steps .c { color: var(--fg2); font-variant-numeric: tabular-nums; }
+.ov-steps .c { display: flex; gap: 14px; align-items: center; font-size: 12px; justify-content: flex-end; }
+.ov-steps .pc { display: inline-flex; gap: 5px; align-items: center; }
+.ov-gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 10px 20px; font-size: 14px; line-height: 1.55; }
+.ov-gloss dt { font-weight: 600; }
+.ov-gloss dd { margin: 0; color: var(--fg2); }
+.ov-gloss .new { color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-left: 6px; }
+.start { margin-top: 40px; color: var(--accent); font-weight: 600; font-size: 14px; }
+.seg.flag::after { content: ""; position: absolute; right: 0; top: -6px; width: 4px; height: 4px; border-radius: 50%; background: var(--mid); }
+
+/* ---------- layout ---------- */
+#layout { flex: 1; display: flex; min-height: 0; }
+#main { flex: 1; overflow: auto; min-width: 0; padding: 40px 48px 50vh; }
+#layout { position: relative; }
+#side { width: 380px; flex: none; background: var(--side); display: flex; flex-direction: column; overflow: hidden; transition: margin-right .25s ease, transform .25s ease; --explain: .5; }
+body.side-closed #side { position: absolute; right: 0; top: 0; bottom: 0; z-index: 30; transform: translateX(100%); box-shadow: none; }
+body.side-closed.peek #side { transform: none; box-shadow: var(--shadow); }
+#edge { position: absolute; right: 0; top: 0; bottom: 0; width: 12px; z-index: 29; display: none; }
+body.side-closed #edge { display: block; }
+.pane { overflow: auto; padding: 32px 28px 24px; min-height: 0; }
+.pane.files { flex: 1 1 auto; }
+.pane.explain { flex: 0 0 calc(var(--explain) * 100%); padding-top: 18px; padding-bottom: 48px; }
+.pane.only { flex: 1; }
+.divider { flex: none; height: 9px; cursor: row-resize; position: relative; }
+.divider::after { content: ""; position: absolute; left: 28px; right: 28px; top: 4px; height: 1px; background: var(--fg3); }
+.divider:hover::after, .divider.drag::after { background: var(--accent); height: 2px; top: 3px; }
+.hunkbar { display: flex; align-items: center; gap: 8px; font-family: inherit; }
+.hunkbar .crumbs { color: var(--fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hunkbar .crumbs b { color: var(--fg); font-weight: 500; }
+.hunkbar .sep { color: var(--fg3); margin: 0 4px; }
+.hunkbar .git { color: var(--fg3); }
+.xbtn { color: var(--fg2); display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 5px; font-size: 11px; }
+.xbtn:hover { color: var(--accent); background: var(--hover); }
+.xbtn svg.i { width: 13px; height: 13px; }
+tr.xrow td { padding: 6px 0 2px !important; background: transparent !important; }
+
+/* ---------- step heading ---------- */
+.kicker { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg2); }
+.step-title { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; margin: 6px 0 44px; }
+
+/* ---------- file ---------- */
+.file { margin-bottom: 56px; scroll-margin-top: 12px; }
+.file.collapsed { margin-bottom: 14px; }
+.fhead { display: flex; align-items: baseline; gap: 10px; position: sticky; top: -40px; z-index: 3; background: var(--bg); padding: 10px 0 4px; cursor: pointer; }
+.fname { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.fdir { font-size: 12px; color: var(--fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; direction: rtl; text-align: left; }
+.file.collapsed .fname { color: var(--fg2); font-weight: 500; }
+.fmeta { font-size: 12px; color: var(--fg2); white-space: nowrap; display: flex; gap: 14px; align-items: baseline; }
+.fmeta .flag { color: var(--amber); }
+.fmeta svg.i { width: 13px; height: 13px; vertical-align: -2px; }
+.fmeta .cbtn { opacity: 0; transition: opacity .15s; }
+.fhead:hover .cbtn { opacity: 1; }
+.check { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--fg3); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: transparent; align-self: center; flex: none; transition: all .15s; }
+.check:hover { box-shadow: inset 0 0 0 1.5px var(--fg2); }
+.check.on { background: var(--low); box-shadow: none; color: var(--bg); }
+.check svg.i { width: 11px; height: 11px; stroke-width: 3; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; display: inline-block; align-self: center; }
+.p-high { background: var(--high); } .p-mid { background: var(--mid); } .p-low { background: var(--low); } .p-skip { background: var(--skip); }
+.note { display: none; font-size: 13px; line-height: 1.6; color: var(--fg); background: var(--note-bg); border-radius: 10px; padding: 10px 14px 10px 38px; margin: 6px 0 18px 17px; max-width: 760px; position: relative; }
+.note > svg.i { position: absolute; left: 13px; top: 12px; width: 14px; height: 14px; color: var(--accent); }
+.file.note-open .note, body.notes-all .note { display: block; }
+.nbtn { color: var(--fg3); padding: 0 2px; align-self: center; display: inline-flex; }
+.nbtn svg.i { width: 14px; height: 14px; }
+.nbtn:hover, .file.note-open .nbtn, body.notes-all .nbtn { color: var(--accent); }
+.file.collapsed .note, .file.collapsed .fbody, .file.collapsed .fcomments { display: none; }
+.fbody { overflow-x: auto; }
+.big { padding: 24px 0; color: var(--fg2); font-size: 13px; }
+.big button { color: var(--accent); }
+.fcomments:empty { display: none; }
+
+/* ---------- diff2html, stripped ---------- */
+:root {
+  --d2h-border-color: transparent; --d2h-dark-border-color: transparent;
+  --d2h-line-border-color: transparent; --d2h-dark-line-border-color: transparent;
+  --d2h-file-header-border-color: transparent; --d2h-dark-file-header-border-color: transparent;
+  --d2h-ins-border-color: transparent; --d2h-dark-ins-border-color: transparent;
+  --d2h-del-border-color: transparent; --d2h-dark-del-border-color: transparent;
+  --d2h-info-border-color: transparent; --d2h-dark-info-border-color: transparent;
+  --d2h-empty-placeholder-border-color: transparent; --d2h-dark-empty-placeholder-border-color: transparent;
+  --d2h-bg-color: transparent; --d2h-dark-bg-color: transparent;
+  --d2h-info-bg-color: transparent; --d2h-dark-info-bg-color: transparent;
+  --d2h-empty-placeholder-bg-color: transparent; --d2h-dark-empty-placeholder-bg-color: transparent;
+  --d2h-ins-bg-color: var(--ins); --d2h-dark-ins-bg-color: var(--ins);
+  --d2h-del-bg-color: var(--del); --d2h-dark-del-bg-color: var(--del);
+  --d2h-ins-highlight-bg-color: var(--ins-hi); --d2h-dark-ins-highlight-bg-color: var(--ins-hi);
+  --d2h-del-highlight-bg-color: var(--del-hi); --d2h-dark-del-highlight-bg-color: var(--del-hi);
+  --d2h-change-ins-color: var(--ins); --d2h-dark-change-ins-color: var(--ins);
+  --d2h-change-del-color: var(--del); --d2h-dark-change-del-color: var(--del);
+  --d2h-dim-color: var(--fg3); --d2h-dark-dim-color: var(--fg3);
+  --d2h-color: var(--fg); --d2h-dark-color: var(--fg);
+}
+.d2h-wrapper { text-align: left; }
+.d2h-diff-table .hljs { color: var(--fg); }
+.d2h-diff-table :is(.hljs-keyword, .hljs-selector-tag, .hljs-built_in.hljs-keyword, .hljs-literal, .hljs-meta .hljs-keyword) { color: var(--s-kw); }
+.d2h-diff-table :is(.hljs-string, .hljs-regexp, .hljs-char, .hljs-template-tag) { color: var(--s-str); }
+.d2h-diff-table :is(.hljs-number, .hljs-symbol, .hljs-bullet) { color: var(--s-num); }
+.d2h-diff-table :is(.hljs-type, .hljs-built_in, .hljs-class .hljs-title, .hljs-title.class_) { color: var(--s-type); }
+.d2h-diff-table :is(.hljs-title, .hljs-title.function_, .hljs-function .hljs-title, .hljs-section) { color: var(--s-fn); }
+.d2h-diff-table :is(.hljs-comment, .hljs-quote, .hljs-doctag) { color: var(--s-com); font-style: italic; }
+.d2h-diff-table :is(.hljs-attr, .hljs-attribute, .hljs-meta, .hljs-variable, .hljs-params, .hljs-property, .hljs-subst) { color: var(--s-attr); }
+.d2h-diff-table .hljs-params { color: var(--fg); }
+.d2h-file-header { display: none; }
+.d2h-file-wrapper, .d2h-files-diff, .d2h-file-side-diff, .d2h-diff-table, .d2h-diff-tbody, .d2h-diff-table td { border: 0 !important; margin: 0; border-radius: 0; }
+.d2h-files-diff { gap: 24px; }
+.d2h-diff-table { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12px; line-height: 1.7; }
+.d2h-code-linenumber, .d2h-code-side-linenumber { cursor: pointer; background: transparent !important; color: var(--fg3) !important; font-size: 11px; }
+.d2h-code-linenumber:hover, .d2h-code-side-linenumber:hover { color: var(--accent) !important; }
+/* diff2html positions line numbers absolutely, which drifts once code lines wrap: make them real table cells. */
+.d2h-code-linenumber { position: static; display: table-cell; width: 6.5em; min-width: 6.5em; vertical-align: top; }
+.d2h-code-linenumber { white-space: nowrap; }
+.d2h-code-linenumber > .line-num1, .d2h-code-linenumber > .line-num2 { display: inline-block; width: 3em; text-align: right; float: none; padding: 0; vertical-align: top; }
+.d2h-code-linenumber { text-align: left; direction: ltr; }
+.d2h-code-linenumber::after { content: none; }
+.d2h-code-side-linenumber { position: static; display: table-cell; width: 3.5em; min-width: 3.5em; vertical-align: top; }
+.d2h-code-line, .d2h-code-side-line { padding: 0 1em; }
+.d2h-code-line-prefix { color: var(--fg2); opacity: .6; }
+.d2h-diff-table td { vertical-align: top; }
+.d2h-info { color: var(--fg2) !important; font-size: 11px; }
+tr:has(> .d2h-info) td { padding-top: 14px; }
+tr:first-child:has(> .d2h-info) td { padding-top: 0; }
+:root .d2h-code-line-ctn.hljs, :root .d2h-code-line-ctn { background: transparent !important; padding: 0; }
+body.wrap .d2h-code-line, body.wrap .d2h-code-side-line { width: auto; }
+body.wrap .d2h-code-line-ctn { white-space: pre-wrap; overflow-wrap: anywhere; }
+.d2h-ins.d2h-code-linenumber, .d2h-del.d2h-code-linenumber, .d2h-ins.d2h-code-side-linenumber, .d2h-del.d2h-code-side-linenumber { background: transparent !important; }
+tr.finding-line td { background: var(--amber-bg) !important; }
+tr.flash-line td { animation: flashline 2s; }
+@keyframes flashline { 0%, 50% { background: rgba(0,113,227,.15); } }
+.file.flash .fname { animation: flashname 1.4s; }
+@keyframes flashname { 0%, 50% { color: var(--accent); } }
+
+/* ---------- comments ---------- */
+tr.crow td { background: transparent !important; padding: 0 !important; white-space: normal; }
+.cbox { margin: 8px 0 12px 7.5em; max-width: 680px; font: 13px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; }
+.fcomments .cbox, .cwrap .cbox { margin-left: 17px; }
+.comment.q { background: var(--ask-bg); }
+.comment .kind { font-weight: 600; }
+.comment.q .kind { color: var(--accent); }
+.comment { background: var(--side); border-radius: 10px; padding: 10px 14px; margin: 6px 0; white-space: pre-wrap; }
+.comment .meta { font-size: 11px; color: var(--fg2); display: flex; gap: 12px; margin-bottom: 2px; }
+.comment .meta button { color: var(--fg2); } .comment .meta button:hover { color: var(--accent); }
+.cbox textarea { width: 100%; min-height: 76px; font: inherit; color: var(--fg); background: var(--side); border: 0; border-radius: 10px; padding: 10px 14px; outline: none; resize: vertical; }
+.cbox textarea:focus { box-shadow: 0 0 0 3px rgba(0,113,227,.3); }
+.cbox .row { display: flex; gap: 16px; justify-content: flex-end; align-items: center; margin-top: 8px; font-size: 13px; }
+.cbox .kinds { display: flex; gap: 2px; margin-right: auto; background: var(--side); border-radius: 8px; padding: 2px; }
+.cbox .kinds button { padding: 2px 10px; border-radius: 6px; color: var(--fg2); font-size: 12px; }
+.cbox .kinds button.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.cbox.ask textarea:focus { box-shadow: 0 0 0 3px rgba(0,113,227,.3); }
+.cbox .row .primary { color: var(--accent); font-weight: 600; }
+
+/* ---------- side panel ---------- */
+#side .step-name { font-size: 20px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; margin: 6px 0 28px; }
+.flist { font-size: 13px; }
+.t-dir { font-size: 11px; color: var(--fg2); margin: 14px 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-dir:first-child { margin-top: 0; }
+.t-file { display: flex; align-items: center; gap: 9px; padding: 3px 8px; margin: 0 -8px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+.t-file:hover { background: var(--hover); }
+.t-file .name { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.t-file.viewed .name { color: var(--fg2); }
+.t-file.active { background: var(--hover); }
+.t-file.active .name { color: var(--accent); font-weight: 600; }
+.t-file .flag { width: 5px; height: 5px; border-radius: 50%; background: var(--mid); flex: none; }
+.t-file .check { width: 15px; height: 15px; font-size: 9px; }
+.tabs { display: flex; gap: 22px; margin-bottom: 18px; font-size: 13px; }
+.tab { color: var(--fg2); font-weight: 500; }
+.tab.on { color: var(--fg); font-weight: 600; }
+.tab .n { color: var(--amber); margin-left: 4px; }
+.prose { font-size: 14px; line-height: 1.65; }
+.prose p { margin: 0 0 14px; }
+.prose ul { padding-left: 18px; margin: 0 0 14px; }
+.prose li { margin-bottom: 6px; }
+.prose code { color: var(--fg); }
+.finding { background: var(--amber-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+.finding .ft { font-weight: 600; font-size: 14px; }
+.finding .sev { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--amber); }
+.finding .where { font-size: 12px; margin: 2px 0 8px; }
+.finding .prose { font-size: 13px; }
+.finding .prose p:last-child { margin-bottom: 0; }
+.empty { color: var(--fg2); font-size: 13px; }
+.legend { font-size: 12px; color: var(--fg2); display: grid; grid-template-columns: 52px 1fr; gap: 6px 12px; align-items: baseline; }
+.legend .k { display: flex; gap: 7px; align-items: center; color: var(--fg); }
+.legend b { color: var(--fg); font-weight: 600; }
+.legend .sep { grid-column: 1 / -1; height: 8px; }
+.legend kbd { font: 11px "SF Mono", ui-monospace, monospace; color: var(--fg); }
+
+.dot { cursor: help; }
+
+/* ---------- links, glossary, popovers ---------- */
+.flink { color: var(--accent) !important; cursor: pointer; }
+.gloss { cursor: help; text-decoration: underline dotted var(--fg3); text-underline-offset: 4px; }
+.flink.gloss { text-decoration: none; }
+#tip { position: fixed; z-index: 50; max-width: 340px; background: var(--bg); color: var(--fg); box-shadow: var(--shadow); border-radius: 12px; padding: 10px 14px; font-size: 13px; pointer-events: none; display: none; }
+#tip b { font-family: "SF Mono", ui-monospace, monospace; font-size: 12px; font-weight: 600; }
+#tip .go { color: var(--fg2); font-size: 11px; margin-top: 4px; }
+.pop { position: relative; }
+.pop .menu { display: none; position: absolute; right: 0; top: 30px; z-index: 20; background: var(--bg); box-shadow: var(--shadow); border-radius: 12px; padding: 14px 16px; min-width: 210px; flex-direction: column; gap: 10px; font-size: 13px; }
+.pop.open .menu { display: flex; }
+.pop .menu label { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+dialog { background: var(--bg); color: var(--fg); border: 0; border-radius: 16px; width: min(760px, 92vw); box-shadow: var(--shadow); padding: 28px; }
+dialog::backdrop { background: rgba(0,0,0,.25); backdrop-filter: blur(4px); }
+dialog h3 { margin: 0 0 4px; font-size: 18px; }
+dialog textarea { width: 100%; height: 50vh; margin-top: 16px; font: 12px/1.6 "SF Mono", ui-monospace, monospace; color: var(--fg); background: var(--side); border: 0; border-radius: 10px; padding: 14px; outline: none; }
+dialog .row { display: flex; gap: 20px; justify-content: flex-end; margin-top: 16px; font-size: 13px; }
+dialog .row .seg-btn { color: var(--fg2); } dialog .row .seg-btn.on { color: var(--fg); font-weight: 600; }
+dialog .row .primary { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<header id="top">
+  <span class="group" id="nav"><button class="icon" id="back" title="Back to where you were (⌘[ or mouse back)" disabled>{{arrow-left}}</button><button class="icon" id="fwd" title="Forward (⌘])" disabled>{{arrow-right}}</button></span>
+  <span class="group" id="steps">
+    <button class="icon" id="home" title="Overview and glossary">{{book-open}}</button>
+    <button class="icon" id="prev" title="Previous step (←)">{{chevron-left}}</button>
+    <span id="stepno"></span>
+    <button class="icon" id="next" title="Next step (→)">{{chevron-right}}</button>
+  </span>
+  <div id="title"></div>
+  <span id="progress"></span>
+  <span class="group">
+    <button class="icon" id="glossbtn" title="Glossary (G)">{{book-a}}</button>
+    <button class="icon" id="export" title="Your comments and questions, ready to copy">{{share}}<span class="count" id="ccount"></span></button>
+  <span class="pop" id="settings">
+    <button class="icon" title="Settings, legend and shortcuts">{{settings-2}}</button>
+    <div class="menu">
+      <label>Theme <select id="theme">
+        <option value="auto">Auto (system)</option><option value="light">Light</option><option value="dark">Dark</option>
+        <option value="github-light">GitHub Light</option><option value="github-dark">GitHub Dark</option>
+        <option value="one-dark">One Dark</option><option value="monokai-pro">Monokai Pro</option><option value="dracula">Dracula</option>
+        <option value="nord">Nord</option><option value="tokyo-night">Tokyo Night</option><option value="gruvbox-dark">Gruvbox Dark</option>
+        <option value="catppuccin-latte">Catppuccin Latte</option><option value="catppuccin-mocha">Catppuccin Mocha</option>
+        <option value="solarized-light">Solarized Light</option><option value="solarized-dark">Solarized Dark</option>
+      </select></label>
+      <label>Diff <select id="layoutsel"><option value="line-by-line">Unified</option><option value="side-by-side">Split</option></select></label>
+      <label>Wrap lines <input type="checkbox" id="wrap" checked></label>
+      <label>Show all AI notes <input type="checkbox" id="notesall"></label>
+      <div class="menu-sep"></div>
+      <div id="legend"></div>
+    </div>
+  </span>
+  <button class="icon" id="sidetoggle" title="Toggle panel (\)">{{panel-right}}</button>
+  </span>
+</header>
+<div id="segs"></div>
+<div id="layout">
+  <main id="main"></main>
+  <aside id="side"></aside>
+  <div id="edge"></div>
+</div>
+<div id="tip"></div>
+<dialog id="glossdlg">
+  <input id="glossq" type="search" placeholder="Search terms and definitions" autocomplete="off">
+  <dl class="ov-gloss" id="glosslist"></dl>
+</dialog>
+<dialog id="dlg">
+  <h3 id="dlgtitle"></h3>
+  <div class="dim" style="font-size:13px" id="dlgsub"></div>
+  <textarea id="dlgtext" readonly></textarea>
+  <div class="row"><span id="dlgmodes" style="display:flex;gap:20px"></span><span style="flex:1"></span><button id="close">Close</button><button class="primary" id="copy">Copy</button></div>
+</dialog>
+<script>__VENDOR_JS__</script>
+<script id="review-data" type="application/json">__DATA__</script>
+<script id="icons" type="application/json">__ICONS__</script>
+<script>
+(() => {
+const DATA = JSON.parse(document.getElementById("review-data").textContent);
+const BIG_LINES = 3000;
+const KEY = "review-lens:" + DATA.id;
+const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+state.viewed ||= {}; state.comments ||= []; state.prefs ||= {};
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+
+const $ = (s, el = document) => el.querySelector(s);
+const ICONS = JSON.parse(document.getElementById("icons").textContent);
+const icon = name => { const t = document.createElement("template"); t.innerHTML = ICONS[name]; return t.content.firstChild; };
+const h = (tag, attrs = {}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === "class") el.className = v; else if (k === "html") el.innerHTML = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v);
+  }
+  for (const kid of kids) if (kid != null) el.append(kid);
+  return el;
+};
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// ---------- index ----------
+const files = [];
+DATA.steps.forEach((step, si) => step.files.forEach(f => { f.step = si; f.idx = files.length; f.findings = []; files.push(f); }));
+const byPath = Object.fromEntries(files.map(f => [f.path, f]));
+DATA.steps.forEach(step => step.findings.forEach(fd => { if (fd.file) byPath[fd.file].findings.push(fd); }));
+const baseName = p => p.split("/").pop();
+const dirName = p => p.slice(0, p.length - baseName(p).length).replace(/\/$/, "");
+const shortDir = d => { const parts = d.split("/").filter(Boolean); return (parts.length > 3 ? "…/" : "") + parts.slice(-3).join("/"); };
+const fileByName = {};
+for (const f of files) { fileByName[baseName(f.path)] ||= f; fileByName[baseName(f.path).replace(/\.[^.]+$/, "")] ||= f; }
+const glossary = DATA.glossary || {};
+const glossKey = t => [t, t.replace(/\(.*$/, ""), t.replace(/\s*=.*$/, ""), t.replace(/[\[\]]/g, ""), t.split(".").pop(), t.split(".")[0]].find(c => c && glossary[c]);
+const fileKey = t => { const c = t.replace(/\(.*$/, "").trim(); return fileByName[c] || fileByName[c.split(".")[0]] || fileByName[baseName(c)]; };
+
+// Code spans in prose become file links and glossary hovers.
+function prose(html, cls = "prose") {
+  const root = h("div", {class: cls, html});
+  for (const code of root.querySelectorAll("code")) {
+    const t = code.textContent.trim(), f = fileKey(t), g = glossKey(t);
+    if (f) { code.classList.add("flink"); code.dataset.file = f.path; }
+    if (g) { code.classList.add("gloss"); code.dataset.gloss = g; }
+  }
+  return root;
+}
+
+// ---------- preferences ----------
+const themeSel = $("#theme"), layoutSel = $("#layoutsel"), wrapBox = $("#wrap");
+themeSel.value = state.prefs.theme || "auto";
+layoutSel.value = state.prefs.layout || "line-by-line";
+wrapBox.checked = state.prefs.wrap ?? true;
+const systemDark = matchMedia("(prefers-color-scheme: dark)");
+const LIGHT_THEMES = new Set(["light", "github-light", "catppuccin-latte", "solarized-light"]);
+const resolvedTheme = () => themeSel.value === "auto" ? (systemDark.matches ? "dark" : "light") : themeSel.value;
+const isDark = () => !LIGHT_THEMES.has(resolvedTheme());
+function applyTheme() {
+  document.documentElement.dataset.theme = resolvedTheme();
+  document.documentElement.style.colorScheme = isDark() ? "dark" : "light";
+  for (const w of document.querySelectorAll(".d2h-wrapper")) {
+    w.classList.remove("d2h-light-color-scheme", "d2h-dark-color-scheme", "d2h-auto-color-scheme");
+    w.classList.add(`d2h-${isDark() ? "dark" : "light"}-color-scheme`);
+  }
+}
+systemDark.addEventListener("change", applyTheme);
+// Split view draws two independent tables, so wrapped rows would drift apart: wrap applies to the unified view only.
+function applyWrap() {
+  const split = layoutSel.value === "side-by-side";
+  wrapBox.disabled = split;
+  document.body.classList.toggle("wrap", wrapBox.checked && !split);
+}
+const notesBox = $("#notesall");
+notesBox.checked = !!state.prefs.notesAll;
+const applyNotes = () => document.body.classList.toggle("notes-all", notesBox.checked);
+notesBox.onchange = () => { state.prefs.notesAll = notesBox.checked; save(); applyNotes(); };
+applyNotes();
+themeSel.onchange = () => { state.prefs.theme = themeSel.value; save(); applyTheme(); };
+layoutSel.onchange = () => { state.prefs.layout = layoutSel.value; save(); applyWrap(); for (const f of files) if (f.rendered) renderDiff(f); };
+wrapBox.onchange = () => { state.prefs.wrap = wrapBox.checked; save(); applyWrap(); };
+const setSide = open => { state.prefs.sideClosed = !open; save(); document.body.classList.remove("peek"); document.body.classList.toggle("side-closed", !open); };
+$("#sidetoggle").onclick = () => setSide(document.body.classList.contains("side-closed"));
+document.body.classList.toggle("side-closed", !!state.prefs.sideClosed);
+const settings = $("#settings");
+settings.querySelector("button").onclick = e => { e.stopPropagation(); settings.classList.toggle("open"); };
+document.addEventListener("click", e => { if (!e.target.closest("#settings")) settings.classList.remove("open"); });
+$("#title").textContent = DATA.title;
+document.title = DATA.title;
+
+// ---------- file cards ----------
+const main = $("#main");
+const io = new IntersectionObserver(entries => {
+  for (const e of entries) if (e.isIntersecting) { const f = files[e.target.dataset.idx]; if (!f.collapsed && !f.rendered) renderDiff(f); }
+}, {root: main, rootMargin: "800px 0px"});
+
+function checkButton(f, small) {
+  const b = h("button", {class: "check", title: "Mark as viewed"}, icon("check"));
+  b.onclick = e => { e.stopPropagation(); setViewed(f, !state.viewed[f.path]); };
+  (f.checks ||= []).push(b);
+  b.classList.toggle("on", !!state.viewed[f.path]);
+  return b;
+}
+function fileCard(f) {
+  f.collapsed = f.priority === "skip" || !!state.viewed[f.path];
+  const flags = f.findings.length ? h("span", {class: "flag", title: "Review findings"}, `⚑ ${f.findings.length}`) : null;
+  f.cbadge = h("span", {});
+  const head = h("div", {class: "fhead"},
+    h("span", {class: `dot p-${f.priority}`}),
+    h("span", {class: "fname"}, baseName(f.path)),
+    h("button", {class: "nbtn", title: "AI note on this file (N toggles all)", onclick: e => { e.stopPropagation(); f.el.classList.toggle("note-open"); }}, icon("sparkles")),
+    h("span", {class: "fdir", title: f.path}, "\u200e" + dirName(f.path)),
+    h("span", {class: "fmeta"},
+      flags, f.cbadge,
+      h("button", {class: "cbtn", title: "Comment, or ask the AI, about the whole file", onclick: e => { e.stopPropagation(); openEditor(f, null, null); }}, "Comment"),
+      h("span", {}, `+${f.added} −${f.deleted}`)),
+    checkButton(f));
+  head.addEventListener("click", e => { if (!e.target.closest("button, .flink")) setCollapsed(f, !f.collapsed); });
+  f.body = h("div", {class: "fbody"});
+  const note = prose(f.note, "note"); note.prepend(icon("sparkles"));
+  f.el = h("section", {class: "file", "data-idx": f.idx}, head, note, f.body, h("div", {class: "fcomments"}));
+  f.el.classList.toggle("collapsed", f.collapsed);
+  f.lines = f.added + f.deleted;
+  updateCommentBadge(f);
+}
+files.forEach(fileCard);
+
+function setCollapsed(f, c) {
+  f.collapsed = c;
+  f.el.classList.toggle("collapsed", c);
+  if (!c && !f.rendered) renderDiff(f);
+}
+
+function renderDiff(f) {
+  if (f.lines > BIG_LINES && !f.forceBig) {
+    f.body.replaceChildren(h("div", {class: "big"}, `${f.lines.toLocaleString()} changed lines, not drawn. `,
+      h("button", {onclick: () => { f.forceBig = true; renderDiff(f); }}, "Draw anyway")));
+    f.rendered = true; return;
+  }
+  f.body.replaceChildren();
+  f.hunks ||= parseHunks(f.diff);
+  const ui = new Diff2HtmlUI(f.body, f.hunks ? patchOf(f) : f.diff, {
+    drawFileList: false, outputFormat: layoutSel.value, matching: "lines", highlight: true,
+    colorScheme: isDark() ? "dark" : "light", fileContentToggle: false, synchronisedScroll: true, stickyFileHeaders: false,
+  });
+  ui.draw();
+  ui.highlightCode();
+  f.rendered = true;
+  decorateHunks(f);
+  for (const fd of f.findings) if (fd.line) findRow(f, fd.line, fd.side || "new")?.forEach(tr => tr.classList.add("finding-line"));
+  drawComments(f);
+}
+
+// ---------- context: breadcrumbs and expansion ----------
+// diff2html draws a patch and cannot insert rows, so expanding rebuilds this file's patch with more context
+// lines taken from the full file, then redraws it.
+const EXPAND_STEP = 20;
+function parseHunks(diff) {
+  const lines = diff.split("\n");
+  const first = lines.findIndex(l => l.startsWith("@@"));
+  if (first < 0) return null;
+  const hunks = [];
+  for (const l of lines.slice(first)) {
+    const m = l.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$/);
+    if (m) { hunks.push({oldStart: +m[1], oldLen: m[2] == null ? 1 : +m[2], newStart: +m[3], newLen: m[4] == null ? 1 : +m[4], context: m[5].trim(), lines: []}); continue; }
+    if (l !== "" || hunks.length) hunks[hunks.length - 1].lines.push(l);
+  }
+  for (const hk of hunks) while (hk.lines.length && hk.lines[hk.lines.length - 1] === "") hk.lines.pop();
+  return {header: lines.slice(0, first), list: hunks};
+}
+function patchOf(f) {
+  const {header, list} = f.hunks;
+  return [...header, ...list.flatMap(hk => [`@@ -${hk.oldStart},${hk.oldLen} +${hk.newStart},${hk.newLen} @@ ${hk.context}`, ...hk.lines])].join("\n") + "\n";
+}
+const canExpand = f => f.hunks && f.old != null && f.new != null;
+const newLines = f => (f._newLines ||= f.new.split("\n").filter((l, i, a) => i < a.length - 1 || l !== ""));
+const gapAbove = (f, i) => { const list = f.hunks.list; const prevEnd = i ? list[i - 1].newStart + list[i - 1].newLen : 1; return list[i].newStart - prevEnd; };
+const gapBelow = f => { const last = f.hunks.list[f.hunks.list.length - 1]; return newLines(f).length - (last.newStart + last.newLen - 1); };
+function expandUp(f, i, n) {
+  const list = f.hunks.list, hk = list[i], k = Math.min(n, gapAbove(f, i));
+  const added = newLines(f).slice(hk.newStart - 1 - k, hk.newStart - 1).map(l => " " + l);
+  hk.lines = [...added, ...hk.lines];
+  hk.newStart -= k; hk.oldStart -= k; hk.newLen += k; hk.oldLen += k;
+  if (i && gapAbove(f, i) === 0) {
+    const prev = list[i - 1];
+    prev.lines.push(...hk.lines); prev.newLen += hk.newLen; prev.oldLen += hk.oldLen;
+    list.splice(i, 1);
+  }
+}
+function expandDown(f, n) {
+  const hk = f.hunks.list[f.hunks.list.length - 1], k = Math.min(n, gapBelow(f));
+  hk.lines.push(...newLines(f).slice(hk.newStart + hk.newLen - 1, hk.newStart + hk.newLen - 1 + k).map(l => " " + l));
+  hk.newLen += k; hk.oldLen += k;
+}
+function expandAll(f) {
+  for (let i = f.hunks.list.length - 1; i >= 0; i--) expandUp(f, i, Infinity);
+  expandDown(f, Infinity);
+}
+function redraw(f, change) {
+  const top = f.el.getBoundingClientRect().top;
+  change();
+  renderDiff(f);
+  main.scrollTop += f.el.getBoundingClientRect().top - top;
+}
+// The breadcrumb of a hunk is keyed by its first changed line, which survives merging hunks.
+function crumbsOf(f, hk) {
+  let o = hk.oldStart, n = hk.newStart;
+  for (const l of hk.lines) {
+    if (l[0] === "+") return f.crumbs[`new:${n}`];
+    if (l[0] === "-") return f.crumbs[`old:${o}`];
+    if (l[0] !== "\\") { o++; n++; }
+  }
+  return null;
+}
+function xbutton(label, iconName, title, onclick) {
+  return h("button", {class: "xbtn", title, onclick: e => { e.stopPropagation(); onclick(); }}, icon(iconName), label);
+}
+function decorateHunks(f) {
+  if (!f.hunks) return;
+  const tables = [...f.body.querySelectorAll(".d2h-diff-table")];
+  tables.forEach((table, ti) => {
+    const infos = [...table.querySelectorAll("tbody tr td.d2h-info:not(.d2h-code-linenumber):not(.d2h-code-side-linenumber)")];
+    infos.forEach((td, i) => {
+      const hk = f.hunks.list[i];
+      if (!hk) return;
+      const line = td.querySelector(".d2h-code-line, .d2h-code-side-line") || td;
+      const chain = crumbsOf(f, hk);
+      const crumbs = h("span", {class: "crumbs", title: chain ? chain.join("\n") : hk.context});
+      if (chain) chain.forEach((c, ci) => crumbs.append(...(ci ? [h("span", {class: "sep"}, "›")] : []), ci === chain.length - 1 ? h("b", {}, c) : c));
+      else if (hk.context) crumbs.append(h("span", {class: "git"}, hk.context));
+      const gap = canExpand(f) ? gapAbove(f, i) : 0;
+      const up = ti === 0 && gap > 0 ? xbutton(gap > EXPAND_STEP ? `${EXPAND_STEP}` : `${gap}`, "chevron-up", `Show ${Math.min(gap, EXPAND_STEP)} more lines above`, () => redraw(f, () => expandUp(f, i, EXPAND_STEP))) : null;
+      line.replaceChildren(ti === 0 ? h("span", {class: "hunkbar"}, up, crumbs) : "");
+    });
+    if (!canExpand(f)) return;
+    const below = gapBelow(f), anyGap = below > 0 || f.hunks.list.some((_, i) => gapAbove(f, i) > 0);
+    if (!anyGap) return;
+    const cols = table.querySelector("tbody tr")?.children.length || 2;
+    const cell = h("td", {colspan: String(cols)});
+    if (ti === 0) cell.append(h("span", {class: "hunkbar"},
+      below > 0 ? xbutton(`${Math.min(below, EXPAND_STEP)}`, "chevron-down", `Show ${Math.min(below, EXPAND_STEP)} more lines below`, () => redraw(f, () => expandDown(f, EXPAND_STEP))) : null,
+      xbutton("Whole file", "unfold-vertical", "Show the whole file around the changes", () => redraw(f, () => expandAll(f)))));
+    table.querySelector("tbody").append(h("tr", {class: "xrow"}, cell));
+  });
+}
+
+// ---------- line lookup ----------
+// Unified view: one table, old/new numbers in .line-num1/.line-num2. Split view: two tables, left = old, right = new.
+function lineOf(td) {
+  const side = td.closest(".d2h-file-side-diff");
+  if (side) {
+    const n = parseInt(td.textContent, 10);
+    return isNaN(n) ? null : {line: n, side: side === side.parentElement.querySelector(".d2h-file-side-diff") ? "old" : "new"};
+  }
+  const n2 = parseInt(td.querySelector(".line-num2")?.textContent, 10);
+  const n1 = parseInt(td.querySelector(".line-num1")?.textContent, 10);
+  if (!isNaN(n2)) return {line: n2, side: "new"};
+  if (!isNaN(n1)) return {line: n1, side: "old"};
+  return null;
+}
+function findRow(f, line, side) {
+  const tables = [...f.body.querySelectorAll(".d2h-file-side-diff")];
+  if (tables.length) {
+    const rows = [...(side === "old" ? tables[0] : tables[1]).querySelectorAll("tbody tr")];
+    const i = rows.findIndex(tr => parseInt(tr.querySelector(".d2h-code-side-linenumber")?.textContent, 10) === line);
+    if (i < 0) return null;
+    return [rows[i], (side === "old" ? tables[1] : tables[0]).querySelectorAll("tbody tr")[i]].filter(Boolean);
+  }
+  const cls = side === "old" ? ".line-num1" : ".line-num2";
+  const tr = [...f.body.querySelectorAll("tbody tr")].find(tr => parseInt(tr.querySelector(cls)?.textContent, 10) === line);
+  return tr ? [tr] : null;
+}
+main.addEventListener("click", e => {
+  const td = e.target.closest(".d2h-code-linenumber, .d2h-code-side-linenumber");
+  if (!td) return;
+  const at = lineOf(td);
+  if (at) openEditor(files[td.closest(".file").dataset.idx], at.line, at.side);
+});
+
+// ---------- comments ----------
+const afterRows = (rows, make) => rows.forEach((tr, i) => tr.after(make(i)));
+const isAsk = c => c.kind === "ask";
+function commentView(c) {
+  const f = byPath[c.file];
+  return h("div", {class: "comment" + (isAsk(c) ? " q" : "")},
+    h("div", {class: "meta"}, h("span", {class: "kind"}, isAsk(c) ? "Question for AI" : "PR comment"), h("span", {}, c.line ? `Line ${c.line}${c.side === "old" ? " (old)" : ""}` : "File"),
+      h("button", {onclick: () => openEditor(f, c.line, c.side, c)}, "Edit"),
+      h("button", {onclick: () => { state.comments = state.comments.filter(x => x !== c); save(); drawComments(f); }}, "Delete")),
+    c.body);
+}
+function updateCommentBadge(f) {
+  const mine = state.comments.filter(c => c.file === f.path);
+  const nc = mine.filter(c => !isAsk(c)).length, nq = mine.length - nc;
+  f.cbadge.replaceChildren(...(nc ? [icon("message-square"), ` ${nc} `] : []), ...(nq ? [icon("message-circle-question"), ` ${nq}`] : []));
+}
+function drawComments(f) {
+  f.body.querySelectorAll("tr.crow").forEach(r => r.remove());
+  const mine = state.comments.filter(c => c.file === f.path);
+  const fileLevel = f.el.querySelector(".fcomments");
+  const loose = mine.filter(c => !c.line);
+  const groups = {};
+  for (const c of mine.filter(c => c.line)) (groups[c.side + ":" + c.line] ||= []).push(c);
+  for (const list of Object.values(groups)) {
+    const rows = findRow(f, list[0].line, list[0].side);
+    if (!rows) { loose.push(...list); continue; }
+    afterRows(rows, i => h("tr", {class: "crow"}, h("td", {colspan: "2"}, i === 0 ? h("div", {class: "cbox"}, ...list.map(commentView)) : null)));
+  }
+  fileLevel.replaceChildren(...(loose.length ? [h("div", {class: "cbox"}, ...loose.map(commentView))] : []));
+  updateCommentBadge(f);
+  updateCounts();
+}
+function openEditor(f, line, side, existing) {
+  if (f.step !== currentStep) showStep(f.step);
+  if (f.collapsed) setCollapsed(f, false);
+  if (!f.rendered) renderDiff(f);
+  document.querySelectorAll("tr.crow-edit, .cwrap").forEach(el => el.remove());
+  let kind = existing?.kind || state.prefs.lastKind || "pr";
+  const ta = h("textarea");
+  ta.value = existing?.body || "";
+  const kindBtn = (k, label) => h("button", {"data-k": k, onclick: () => setKind(k)}, label);
+  const kinds = h("div", {class: "kinds"}, kindBtn("pr", "PR comment"), kindBtn("ask", "Ask the AI"));
+  const setKind = k => {
+    kind = k; state.prefs.lastKind = k; save();
+    kinds.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+    box.classList.toggle("ask", k === "ask");
+    const where = line ? `line ${line}` : "this file";
+    ta.placeholder = k === "ask" ? `What is unclear about ${where}? Stays private, for your AI chat.` : `Comment on ${where} for the PR…`;
+    ta.focus();
+  };
+  const close = () => document.querySelectorAll("tr.crow-edit, .cwrap").forEach(el => el.remove());
+  const submit = () => {
+    const body = ta.value.trim();
+    if (existing) { if (body) { existing.body = body; existing.kind = kind; } else state.comments = state.comments.filter(x => x !== existing); }
+    else if (body) state.comments.push({file: f.path, line, side, body, kind, at: new Date().toISOString()});
+    save(); close(); drawComments(f);
+  };
+  ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit(); if (e.key === "Escape") close(); });
+  const box = h("div", {class: "cbox"}, ta,
+    h("div", {class: "row"}, kinds, h("button", {class: "dim", onclick: close}, "Cancel"), h("button", {class: "primary", onclick: submit}, existing ? "Save" : "Add")));
+  const rows = line ? findRow(f, line, side) : null;
+  if (rows) afterRows(rows, i => h("tr", {class: "crow crow-edit"}, h("td", {colspan: "2"}, i === 0 ? box : null)));
+  else f.el.querySelector(".fcomments").after(h("div", {class: "cwrap"}, box));
+  setKind(kind);
+}
+
+// ---------- viewed / progress ----------
+function setViewed(f, v) {
+  if (v) state.viewed[f.path] = true; else delete state.viewed[f.path];
+  save();
+  for (const b of f.checks) b.classList.toggle("on", v);
+  f.row?.classList.toggle("viewed", v);
+  if (v) { setCollapsed(f, true); if (f.el.getBoundingClientRect().top < main.getBoundingClientRect().top) f.el.scrollIntoView(); }
+  updateCounts();
+}
+// Files a reviewer still has to mark as viewed: skip files and those the filter hides do not count.
+function progressOf(list) {
+  const toReview = list.filter(f => f.priority !== "skip" && shown(f));
+  return {done: toReview.filter(f => state.viewed[f.path]).length, total: toReview.length,
+    highLeft: list.filter(f => f.priority === "high" && !state.viewed[f.path]).length};
+}
+function drawProgress() {
+  const all = progressOf(files);
+  $("#progress").replaceChildren(`${all.done} of ${all.total} reviewed`,
+    ...(all.highLeft ? [" · ", h("span", {class: "hl"}, `${all.highLeft} high left`)] : []));
+}
+function updateCounts() {
+  drawProgress();
+  $("#ccount").textContent = state.comments.length || "";
+  document.querySelectorAll(".seg").forEach((el, si) => el.classList.toggle("done", DATA.steps[si].files.every(f => state.viewed[f.path] || f.priority === "skip")));
+}
+
+// ---------- priority filter ----------
+// No level selected shows every file; selecting levels shows only those, so a review can go in passes.
+const PRIOS = ["high", "mid", "low", "skip"];
+state.prefs.only ||= [];
+const shown = f => !state.prefs.only.length || state.prefs.only.includes(f.priority);
+function toggleLevel(p) {
+  const only = state.prefs.only;
+  state.prefs.only = only.includes(p) ? only.filter(q => q !== p) : PRIOS.filter(q => q === p || only.includes(q));
+  save(); applyFilter();
+}
+// The filter sits beside each step's file list and keeps its selection from step to step; none selected shows all.
+let filterOpen = false;
+document.addEventListener("click", e => { if (filterOpen && !e.target.closest("#filter")) { filterOpen = false; drawFilter(); } });
+function drawFilter() {
+  const el = $("#filter");
+  if (!el) return;
+  const only = state.prefs.only, stepFiles = DATA.steps[currentStep].files;
+  const button = h("button", {class: "icon" + (only.length ? " on" : ""), title: "Show only some priorities",
+    onclick: e => { e.stopPropagation(); filterOpen = !filterOpen; drawFilter(); }},
+    icon("list-filter"), h("span", {class: "dots"}, ...only.map(p => h("span", {class: `dot p-${p}`}))));
+  const opts = PRIOS.map(p => h("button", {class: "opt" + (only.includes(p) ? " on" : ""), title: DATA.priorities[p], onclick: e => { e.stopPropagation(); toggleLevel(p); }},
+    h("span", {class: "tick"}, only.includes(p) ? icon("check") : null), h("span", {class: `dot p-${p}`}), h("span", {class: "name"}, p),
+    h("span", {class: "n"}, String(stepFiles.filter(f => f.priority === p).length))));
+  const clear = only.length ? h("button", {class: "clear", onclick: e => { e.stopPropagation(); state.prefs.only = []; save(); applyFilter(); }}, "Show all") : null;
+  el.classList.toggle("open", filterOpen);
+  el.replaceChildren(button, h("div", {class: "menu"}, ...opts, clear || ""));
+}
+function applyFilter() {
+  drawFilter();
+  for (const f of files) { f.el.classList.toggle("filtered", !shown(f)); f.row?.classList.toggle("filtered", !shown(f)); }
+  // A folder heading hides with its last visible file.
+  document.querySelectorAll("#side .t-dir").forEach(d => {
+    let n = d.nextElementSibling, any = false;
+    while (n && n.classList.contains("t-file")) { any ||= !n.classList.contains("filtered"); n = n.nextElementSibling; }
+    d.classList.toggle("filtered", !any);
+  });
+  document.querySelectorAll(".seg").forEach((el, si) => el.style.opacity = DATA.steps[si].files.some(shown) ? "" : ".15");
+  const hidden = currentStep !== null && currentStep >= 0 ? DATA.steps[currentStep].files.filter(f => !shown(f)).length : 0;
+  const msg = $("#main .hidden-note");
+  if (msg) msg.textContent = hidden ? `${hidden} file${hidden > 1 ? "s" : ""} hidden by the filter` : "";
+  updateCounts();
+}
+
+// ---------- steps ----------
+const OVERVIEW = -1;
+let currentStep = null, currentTab = "explanation";
+DATA.steps.forEach((step, si) => $("#segs").append(h("div", {class: "seg" + (step.findings.length ? " flag" : ""), title: `${si + 1}. ${step.title}`, onclick: () => { if (si !== currentStep) remember(); showStep(si); }})));
+
+function showStep(si) {
+  if (si === OVERVIEW && currentStep !== OVERVIEW) { showOverview(); return; }
+  if (si < 0 || si >= DATA.steps.length || si === currentStep) return;
+  currentStep = si;
+  currentTab = "explanation";
+  const step = DATA.steps[si];
+  io.disconnect();
+  main.replaceChildren(h("div", {class: "kicker"}, `${step.level} · Step ${si + 1} of ${DATA.steps.length}`), h("div", {class: "step-title"}, step.title), h("div", {class: "hidden-note"}), ...step.files.map(f => f.el));
+  for (const f of step.files) if (!f.collapsed && !f.rendered) io.observe(f.el);
+  main.scrollTop = 0;
+  document.querySelectorAll(".seg").forEach((el, i) => el.classList.toggle("cur", i === si));
+  $("#stepno").textContent = `${si + 1} / ${DATA.steps.length}`;
+  drawSide();
+}
+function showOverview() {
+  currentStep = OVERVIEW;
+  io.disconnect();
+  const newTerms = new Set(DATA.new_terms || []);
+  const count = (step, p) => step.files.filter(f => f.priority === p).length;
+  const steps = DATA.steps.map((step, si) => h("button", {onclick: () => { remember(); showStep(si); }},
+    h("span", {class: "n"}, String(si + 1)), h("span", {class: "t"}, step.title),
+    h("span", {class: "c"}, ...["high", "mid"].filter(p => count(step, p)).map(p => h("span", {class: "pc", title: `${count(step, p)} ${p}`}, h("span", {class: `dot p-${p}`}), String(count(step, p)))), h("span", {}, `${step.files.length} files`))));
+  const terms = Object.keys(glossary).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: "base"}));
+  const gloss = h("dl", {class: "ov-gloss"}, ...terms.flatMap(t => [h("dt", {}, t, newTerms.has(t) ? h("span", {class: "new"}, "NEW") : null), h("dd", {}, glossary[t])]));
+  main.replaceChildren(h("div", {class: "overview"},
+    h("div", {class: "kicker"}, "Overview"), h("div", {class: "step-title"}, DATA.title),
+    prose(DATA.overview),
+    h("h2", {}, "Reading order"), h("div", {class: "ov-steps"}, ...steps),
+    h("button", {class: "start", onclick: () => { remember(); showStep(0); }}, "Start with step 1 →"),
+    terms.length ? h("h2", {}, "Glossary") : null, terms.length ? gloss : null));
+  main.scrollTop = 0;
+  document.querySelectorAll(".seg").forEach(el => el.classList.remove("cur"));
+  $("#stepno").textContent = `0 / ${DATA.steps.length}`;
+  $("#side").replaceChildren(h("div", {class: "pane only"}, h("div", {class: "kicker"}, `${files.length} files · ${DATA.steps.length} steps`), h("div", {class: "step-name"}, "Before you start"),
+    h("div", {class: "prose"}, h("p", {}, "Read the overview, then go step by step. Each step lists its files here, with a short explanation of what to follow."),
+      h("p", {}, "Terms underlined with dots open their definition on hover."))));
+}
+function drawSide() {
+  const step = DATA.steps[currentStep], nf = step.findings.length;
+  const list = h("div", {class: "flist"});
+  let dir = null;
+  for (const f of step.files) {
+    const d = dirName(f.path);
+    if (d !== dir) { dir = d; list.append(h("div", {class: "t-dir", title: d}, shortDir(d))); }
+    f.checks = f.checks.filter(b => b.isConnected || b.closest(".file"));
+    f.row = h("div", {class: "t-file" + (state.viewed[f.path] ? " viewed" : ""), title: f.path, onclick: () => goFile(f)},
+      h("span", {class: `dot p-${f.priority}`}), h("span", {class: "name"}, baseName(f.path)),
+      f.findings.length ? h("span", {class: "flag", title: "Review findings"}) : null, checkButton(f, true));
+    list.append(f.row);
+  }
+  const tab = (key, label, extra) => h("button", {class: "tab" + (currentTab === key ? " on" : ""), onclick: () => { currentTab = key; drawSide(); }}, label, extra);
+  let body;
+  if (currentTab === "explanation") body = [prose(step.explanation)];
+  else if (!nf) body = [h("div", {class: "empty"}, "Nothing to flag in this step.")];
+  else body = step.findings.map(fd => {
+    const f = fd.file && byPath[fd.file];
+    return h("div", {class: "finding"},
+      h("div", {class: "sev"}, fd.severity), h("div", {class: "ft"}, fd.title),
+      f ? h("div", {class: "where"}, h("a", {href: "#", onclick: e => { e.preventDefault(); goFile(f, fd.line, fd.side); }}, baseName(f.path) + (fd.line ? `:${fd.line}` : ""))) : null,
+      prose(fd.body));
+  });
+  $("#side").replaceChildren(
+    h("div", {class: "pane files"},
+      h("div", {class: "side-head"}, h("div", {class: "kicker"}, `${step.level} · ${step.files.length} files`), h("span", {class: "pop", id: "filter"})),
+      h("div", {class: "step-name"}, step.title), list),
+    divider(),
+    h("div", {class: "pane explain"}, h("div", {class: "tabs"}, tab("explanation", "Explanation"), tab("review", "Review", nf ? h("span", {class: "n"}, String(nf)) : null)), ...body));
+  applyFilter();
+  markActive();
+}
+// The explanation pane keeps between a third and most of the panel; the reader's choice is remembered.
+const EXPLAIN_MIN = 1 / 3, EXPLAIN_MAX = .85;
+const side = $("#side");
+side.style.setProperty("--explain", state.prefs.explain || .5);
+function divider() {
+  const d = h("div", {class: "divider", title: "Drag to resize"});
+  d.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    d.setPointerCapture(e.pointerId);
+    d.classList.add("drag");
+    const move = ev => {
+      const r = side.getBoundingClientRect();
+      const fraction = Math.min(EXPLAIN_MAX, Math.max(EXPLAIN_MIN, (r.bottom - ev.clientY) / r.height));
+      side.style.setProperty("--explain", fraction.toFixed(3));
+      state.prefs.explain = +fraction.toFixed(3);
+    };
+    const up = () => { d.classList.remove("drag"); d.removeEventListener("pointermove", move); save(); };
+    d.addEventListener("pointermove", move);
+    d.addEventListener("pointerup", up, {once: true});
+  });
+  return d;
+}
+// A hidden panel slides in over the page while the pointer rests on the right edge.
+$("#edge").addEventListener("mouseenter", () => document.body.classList.add("peek"));
+side.addEventListener("mouseleave", () => document.body.classList.remove("peek"));
+function legend() {
+  const key = (k, what) => [h("kbd", {}, k), h("span", {}, what)];
+  return h("div", {class: "legend"},
+    h("b", {style: "grid-column: 1 / -1"}, "Priority"),
+    ...["high", "mid", "low", "skip"].flatMap(p => [h("span", {class: "k"}, h("span", {class: `dot p-${p}`}), p), h("span", {}, DATA.priorities[p])]),
+    h("div", {class: "sep"}), h("b", {style: "grid-column: 1 / -1"}, "Reading"),
+    h("span", {class: "k", style: "color: var(--accent)"}, icon("sparkles")), h("span", {}, "AI note on a file"), ...key("1 2 3", "click a line number: comment, or ask the AI"),
+    ...key("← →", "previous / next step"), ...key("⌘[ ⌘]", "back / forward after a jump"),
+    ...key("N", "show all AI notes"), ...key("G", "glossary"), ...key("\\", "hide or pin the side panel; when hidden, it slides in from the right edge"));
+}
+$("#legend").append(legend());
+
+// ---------- glossary ----------
+// Every term this repository's reviews have defined, searchable from any step.
+const glossDlg = $("#glossdlg"), glossQ = $("#glossq");
+function glossaryRows(query) {
+  const q = query.trim().toLowerCase(), newTerms = new Set(DATA.new_terms || []);
+  const terms = Object.keys(glossary).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: "base"}))
+    .filter(t => !q || t.toLowerCase().includes(q) || glossary[t].toLowerCase().includes(q));
+  if (!terms.length) return [h("div", {class: "none"}, "No term matches.")];
+  return terms.flatMap(t => [h("dt", {}, t, newTerms.has(t) ? h("span", {class: "new"}, "NEW") : null), h("dd", {}, glossary[t])]);
+}
+function openGlossary() {
+  glossQ.value = "";
+  $("#glosslist").replaceChildren(...glossaryRows(""));
+  glossDlg.showModal();
+  glossQ.focus();
+}
+glossQ.addEventListener("input", () => $("#glosslist").replaceChildren(...glossaryRows(glossQ.value)));
+glossDlg.addEventListener("click", e => { if (e.target === glossDlg) glossDlg.close(); });
+$("#glossbtn").onclick = openGlossary;
+// ---------- back / forward ----------
+// Jumps (links, findings, file list, step bar) remember where you were reading, like a browser.
+const past = [], future = [];
+const here = () => ({step: currentStep, top: main.scrollTop});
+function restore(pos) {
+  showStep(pos.step);
+  if (pos.step === OVERVIEW) { main.scrollTop = pos.top; return; }
+  main.scrollTop = pos.top;
+  for (const f of DATA.steps[pos.step].files) if (!f.collapsed && !f.rendered && f.el.getBoundingClientRect().top < innerHeight * 2) renderDiff(f);
+  requestAnimationFrame(() => { main.scrollTop = pos.top; markActive(); });
+}
+function remember() {
+  const pos = here(), last = past[past.length - 1];
+  if (!last || last.step !== pos.step || Math.abs(last.top - pos.top) > 200) past.push(pos);
+  future.length = 0;
+  updateNav();
+}
+function goBack() { if (!past.length) return; future.push(here()); restore(past.pop()); updateNav(); }
+function goFwd() { if (!future.length) return; past.push(here()); restore(future.pop()); updateNav(); }
+function updateNav() { $("#back").disabled = !past.length; $("#fwd").disabled = !future.length; }
+$("#back").onclick = goBack;
+$("#fwd").onclick = goFwd;
+document.addEventListener("mouseup", e => { if (e.button === 3) { e.preventDefault(); goBack(); } if (e.button === 4) { e.preventDefault(); goFwd(); } });
+
+async function goFile(f, line, side) {
+  remember();
+  if (f.step !== currentStep) showStep(f.step);
+  if (f.collapsed) setCollapsed(f, false);
+  f.el.scrollIntoView({block: "start"});
+  markActive();
+  f.el.classList.remove("flash"); void f.el.offsetWidth; f.el.classList.add("flash");
+  if (!line) return;
+  await wait(50);
+  const rows = findRow(f, line, side || "new");
+  if (!rows) return;
+  rows[0].scrollIntoView({block: "center"});
+  rows.forEach(r => { r.classList.remove("flash-line"); void r.offsetWidth; r.classList.add("flash-line"); });
+}
+function markActive() {
+  const top = main.getBoundingClientRect().top + 60;
+  const el = [...main.querySelectorAll(".file")].find(el => el.getBoundingClientRect().bottom > top);
+  document.querySelectorAll(".t-file.active").forEach(x => x.classList.remove("active"));
+  const row = el && files[el.dataset.idx].row;
+  if (!row) return;
+  row.classList.add("active");
+  const side = $("#side"), r = row.getBoundingClientRect(), sr = side.getBoundingClientRect();
+  if (r.top < sr.top || r.bottom > sr.bottom) row.scrollIntoView({block: "nearest"});
+}
+main.addEventListener("scroll", markActive, {passive: true});
+// Steps with no file under the filter are skipped.
+function nextShown(dir) {
+  if (currentStep === 0 && dir < 0) return OVERVIEW;
+  for (let i = currentStep + dir; i >= 0 && i < DATA.steps.length; i += dir) if (DATA.steps[i].files.some(shown)) return i;
+  return -1;
+}
+$("#prev").onclick = () => showStep(nextShown(-1));
+$("#home").onclick = () => { remember(); showStep(OVERVIEW); };
+$("#next").onclick = () => showStep(nextShown(1));
+document.addEventListener("keydown", e => {
+  if (e.target.closest("textarea, input, select")) return;
+  if ((e.metaKey || e.ctrlKey) && e.key === "[") { e.preventDefault(); goBack(); return; }
+  if ((e.metaKey || e.ctrlKey) && e.key === "]") { e.preventDefault(); goFwd(); return; }
+  if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); goBack(); return; }
+  if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); goFwd(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "ArrowRight") showStep(nextShown(1));
+  if (e.key === "ArrowLeft") showStep(nextShown(-1));
+  if (e.key === "g") { e.preventDefault(); openGlossary(); return; }
+  if (e.key === "n") { notesBox.checked = !notesBox.checked; notesBox.onchange(); }
+  if (e.key === "\\") setSide(document.body.classList.contains("side-closed"));
+});
+
+// ---------- links and glossary ----------
+document.addEventListener("click", e => {
+  const a = e.target.closest(".flink");
+  if (a) { e.preventDefault(); e.stopPropagation(); goFile(byPath[a.dataset.file]); }
+}, true);
+const tip = $("#tip");
+document.addEventListener("mouseover", e => {
+  const dot = e.target.closest(".dot[class*='p-']");
+  if (dot && !dot.closest(".legend")) {
+    const p = ["high", "mid", "low", "skip"].find(p => dot.classList.contains("p-" + p));
+    tip.replaceChildren(h("b", {}, p), h("div", {}, DATA.priorities[p]));
+    placeTip(dot); return;
+  }
+  const el = e.target.closest(".gloss, .flink");
+  if (!el) return;
+  const g = el.dataset.gloss, f = el.dataset.file && byPath[el.dataset.file];
+  tip.replaceChildren(h("b", {}, g || baseName(f.path)));
+  if (g) tip.append(h("div", {}, glossary[g]));
+  if (f) tip.append(h("div", {class: "go"}, `Open ${baseName(f.path)} →`));
+  placeTip(el);
+});
+function placeTip(el) {
+  const r = el.getBoundingClientRect();
+  tip.style.display = "block";
+  tip.style.left = Math.max(8, Math.min(r.left, innerWidth - tip.offsetWidth - 12)) + "px";
+  tip.style.top = (r.bottom + 8 + tip.offsetHeight > innerHeight ? r.top - tip.offsetHeight - 8 : r.bottom + 8) + "px";
+}
+const hideTip = () => { tip.style.display = "none"; };
+document.addEventListener("mouseout", e => { if (e.target.closest(".gloss, .flink, .dot")) hideTip(); });
+document.addEventListener("mousedown", hideTip, true);
+document.addEventListener("scroll", hideTip, true);
+
+// ---------- export ----------
+// The code a comment points at, read back from the patch so a question carries its own context.
+function snippet(f, line, side, around = 3) {
+  const out = [];
+  let o = 0, n = 0;
+  for (const l of f.diff.split("\n")) {
+    const m = l.match(/^@@ -(\d+)(?:,\d+)? \+(\d+)/);
+    if (m) { o = +m[1]; n = +m[2]; continue; }
+    if (!o && !n) continue;
+    const c = l[0];
+    if (c === "\\") continue;
+    const at = side === "old" ? o : n;
+    if (c !== (side === "old" ? "+" : "-") && Math.abs(at - line) <= around) out.push((at === line ? "> " : "  ") + l);
+    if (c === "+") n++; else if (c === "-") o++; else { o++; n++; }
+  }
+  return out.join("\n");
+}
+const where = c => c.line ? `line ${c.line}${c.side === "old" ? " (old side)" : ""}` : "whole file";
+const prComments = () => state.comments.filter(c => !isAsk(c));
+const asks = () => state.comments.filter(isAsk);
+const prMarkdown = () => {
+  const out = [];
+  for (const f of files) {
+    const mine = prComments().filter(c => c.file === f.path);
+    if (!mine.length) continue;
+    out.push(`### ${f.path}`, ...mine.map(c => `- ${where(c)}: ${c.body.replace(/\n/g, "\n  ")}`), "");
+  }
+  return out.join("\n") || "No PR comments yet.";
+};
+const prJson = () => JSON.stringify({pr: DATA.pr || null, comments: prComments().map(({file, line, side, body}) => ({file, line, side, body}))}, null, 2);
+const askPrompt = () => {
+  const qs = asks();
+  if (!qs.length) return "No questions yet.";
+  const out = [`I am reviewing a pull request ("${DATA.title}") in a codebase I don't know well. Answer each question below in plain words, for someone new to the language and the project. Explain concepts, don't review the code.`, ""];
+  qs.forEach((c, i) => {
+    const f = byPath[c.file];
+    out.push(`## ${i + 1}. ${f.path}, ${where(c)}`, "", `Context: ${f.note.replace(/<[^>]+>/g, "")}`, "");
+    if (c.line) out.push("```" + (f.path.split(".").pop() || ""), snippet(f, c.line, c.side), "```", "");
+    out.push(`Question: ${c.body}`, "");
+  });
+  return out.join("\n");
+};
+const dlg = $("#dlg"), dlgText = $("#dlgtext");
+function openDialog(title, sub, modes) {
+  $("#dlgtitle").textContent = title;
+  $("#dlgsub").textContent = sub;
+  const btns = modes.map(([label, fn]) => h("button", {class: "seg-btn", onclick: () => pickMode(label)}, label));
+  const pickMode = label => { btns.forEach(b => b.classList.toggle("on", b.textContent === label)); dlgText.value = modes.find(m => m[0] === label)[1](); };
+  $("#dlgmodes").replaceChildren(...(modes.length > 1 ? btns : []));
+  pickMode(modes[0][0]);
+  dlg.showModal();
+}
+$("#export").onclick = () => openDialog("Your comments and questions",
+  "PR comments as Markdown to paste or JSON for an agent to post; questions as a prompt for any AI chat.",
+  [[`PR comments (${prComments().length})`, prMarkdown], ["PR comments as JSON", prJson], [`Questions for the AI (${asks().length})`, askPrompt]]);
+$("#copy").onclick = () => navigator.clipboard.writeText(dlgText.value);
+$("#close").onclick = () => dlg.close();
+
+applyWrap();
+updateNav();
+showOverview();
+updateCounts();
+applyTheme();
+})();
+</script>
+</body>
+</html>
