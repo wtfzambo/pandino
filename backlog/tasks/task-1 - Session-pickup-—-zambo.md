@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-23 16:33'
+updated_date: '2026-11-23 16:34'
 labels:
   - continuity
   - handoff
@@ -18,20 +18,19 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-23 (local CET). Pandino is on main; the review-lens skill landed in three commits on top of 8a0ec13: 6354070 (the skill, TASK-33), 6b6bad7 (review findings and a Reset button for expanded context), 358667f (three final-review defects). Not pushed: main is ahead of origin/main by 3 commits plus this pickup. Tree clean.
+2026-11-23 (local CET). Pandino is on main; the review-lens skill landed in three commits on top of 8a0ec13: 6354070 (the skill, TASK-33), 6b6bad7 (review findings and a Reset button for expanded context), 358667f (three final-review defects). Pushed to origin/main together with this pickup. Tree clean.
 
 The review-lens skill (TASK-33, Done) lives in .agents/skills/review-lens and the installer now copies it next to the session skills. It turns a PR or branch into one self-contained HTML walkthrough for a human reader: prepare.py captures the change with Git, one agent writes review.json in one pass, render.py validates it and inlines the viewer. Priority comes from five change categories (contract, behavior, interface, support, mechanical) that render.py maps to high, mid, low, skip; the rules were tuned against two blind oracles on six open PRs (data in /tmp/rlx, not durable). All five Pandino reviewers ran (taste, spec, test, docs, final); every must-fix was fixed with a regression test and the final correction check came back clean. Costs are in TASK-33's notes. Two new Corrections rows in AGENTS.md cover walkthrough runs (one agent, one pass) and file ranking (reader's attention, weighing consequences.
 
 The operator replies in Italian; repository artifacts stay in English. The operator wants the skill used on real PRs of LumaMDX (Azure DevOps) and picks the chat model before invoking it.
 
 WHAT'S NEXT
-1. Push main when the operator authorizes it: git push origin main.
-2. Earlier pending item, still open: update SnitchBro (~/mystuff/01_projects/quitcorn) to this Pandino with the pandino-update skill; confirm its models.json keeps per-agent entries (docs low, final max).
-3. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
-4. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
+1. Earlier pending item, still open: update SnitchBro (~/mystuff/01_projects/quitcorn) to this Pandino with the pandino-update skill; confirm its models.json keeps per-agent entries (docs low, final max).
+2. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
+3. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
 
 WAITING ON / GATED BY
-Operator authorization to push. Operator direction for the SnitchBro update. The browser test in tests/test_review_lens.py runs only where puppeteer-core is importable from the working directory (it is under /tmp/rl-check on this machine) and skips elsewhere. OpenCode effort levels are still assumed equal to Codex's, unverified.
+Operator direction for the SnitchBro update. The browser test in tests/test_review_lens.py runs only where puppeteer-core is importable from the working directory (it is under /tmp/rl-check on this machine) and skips elsewhere. OpenCode effort levels are still assumed equal to Codex's, unverified.
 
 VERIFY
 git status -sb; git log --oneline -4; python3 -B -m unittest tests.test_review_lens tests.test_bench_timeout; bash tests/test_install.sh; backlog task view TASK-33 --plain.
