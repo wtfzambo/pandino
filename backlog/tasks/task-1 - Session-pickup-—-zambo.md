@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-14 21:37'
+updated_date: '2026-11-23 16:33'
 labels:
   - continuity
   - handoff
@@ -18,24 +18,25 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-14 (local CET). Pandino is on main; reviewer severity work committed as d7ff8fb on top of ca35e1a and pushed to origin/main together with this pickup. Tree clean after the push.
+2026-11-23 (local CET). Pandino is on main; the review-lens skill landed in three commits on top of 8a0ec13: 6354070 (the skill, TASK-33), 6b6bad7 (review findings and a Reset button for expanded context), 358667f (three final-review defects). Not pushed: main is ahead of origin/main by 3 commits plus this pickup. Tree clean.
 
-Committed in d7ff8fb with operator authorization: reviewer must-fix and operator-decision reporting (TASK-23.1, Done, rationale in decision-11). Must-fix now means breaking behavior that works today or leaving an in-scope requirement unmet; style and readability are minor; open product, scope and support choices go under a new user decision heading that does not affect the verdict, and the orchestrator brings them to the operator before building any. Changed .pandino/playbooks/reviewing.md, .pandino/playbooks/review.md step 4, agents/spec-reviewer.md and bench/review/prompts/spec.md, the bounded review policy (doc-3), bench/review/judge.py (a planted defect counts under any heading; an invented user decision is a false positive), and a new AGENTS.md Corrections row (name a repository item by what it is before its ID). Also committed: the review-value audit of one SLYE session (TASK-30), which motivated it. No live benchmark was run; whether this reduces discarded work is unobserved.
+The review-lens skill (TASK-33, Done) lives in .agents/skills/review-lens and the installer now copies it next to the session skills. It turns a PR or branch into one self-contained HTML walkthrough for a human reader: prepare.py captures the change with Git, one agent writes review.json in one pass, render.py validates it and inlines the viewer. Priority comes from five change categories (contract, behavior, interface, support, mechanical) that render.py maps to high, mid, low, skip; the rules were tuned against two blind oracles on six open PRs (data in /tmp/rlx, not durable). All five Pandino reviewers ran (taste, spec, test, docs, final); every must-fix was fixed with a regression test and the final correction check came back clean. Costs are in TASK-33's notes. Two new Corrections rows in AGENTS.md cover walkthrough runs (one agent, one pass) and file ranking (reader's attention, weighing consequences.
 
-Earlier on 2026-11-14 another session landed TASK-31 (models.json keeps model and effort per agent, decision-12) and TASK-32 (SnitchBro GPT-6.1 routing as per-agent pairs, decision-13). SnitchBro (~/mystuff/01_projects/quitcorn) pins Sol/Terra: implementer Sol medium, docs Terra low, spec and taste Terra medium, test Sol high, final Sol max. Kit defaults in agents/*.md are unchanged.
-
-The operator replies in Italian; repository artifacts stay in English.
+The operator replies in Italian; repository artifacts stay in English. The operator wants the skill used on real PRs of LumaMDX (Azure DevOps) and picks the chat model before invoking it.
 
 WHAT'S NEXT
-1. Update SnitchBro to this Pandino with the pandino-update skill, run from ~/mystuff/01_projects/quitcorn. Confirm its models.json converts to per-agent entries keeping docs low and final max, and that spec-reviewer and the review playbooks pick up the d7ff8fb changes.
-2. When the operator has run a real delivery under this kit, and only when asked, retrace that session like TASK-30 to see whether delta reviews, the must-fix definition and user decisions reduced discarded work.
-3. The rest of blocking-finding calibration (TASK-23: uncertain risks, explicitly deferred checks, worked examples) stays parked until the operator asks.
+1. Push main when the operator authorizes it: git push origin main.
+2. Earlier pending item, still open: update SnitchBro (~/mystuff/01_projects/quitcorn) to this Pandino with the pandino-update skill; confirm its models.json keeps per-agent entries (docs low, final max).
+3. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
+4. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
 
 WAITING ON / GATED BY
-Operator direction for the SnitchBro update. OpenCode effort levels are assumed equal to Codex's (low to max), unverified against a live OpenCode. Further Haiku benchmark runs still require an approved containment boundary per FINDINGS.md.
+Operator authorization to push. Operator direction for the SnitchBro update. The browser test in tests/test_review_lens.py runs only where puppeteer-core is importable from the working directory (it is under /tmp/rl-check on this machine) and skips elsewhere. OpenCode effort levels are still assumed equal to Codex's, unverified.
 
 VERIFY
-git status -sb; git log --oneline -3; bash tests/test_review_bench.sh; bash tests/test_install.sh; backlog task view TASK-23.1 --plain.
+git status -sb; git log --oneline -4; python3 -B -m unittest tests.test_review_lens tests.test_bench_timeout; bash tests/test_install.sh; backlog task view TASK-33 --plain.
+EOF
+)
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
