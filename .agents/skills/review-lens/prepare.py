@@ -60,9 +60,9 @@ def moved_lines(repo: Path, merge_base: str, head: str) -> dict[str, set[int]]:
     path, new = None, 0
     for raw in coloured.splitlines():
         line = ANSI.sub("", raw)
-        header = re.match(r"diff --git a/.*? b/(.*)", line)
-        if header:
-            path = header.group(1)
+        paths = header_paths(line) if line.startswith("diff --git ") else None
+        if paths:
+            path = paths[1]
             continue
         hunk = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)", line)
         if hunk:
@@ -79,14 +79,36 @@ def moved_lines(repo: Path, merge_base: str, head: str) -> dict[str, set[int]]:
     return moved
 
 
+# Git writes a path in C-style quotes when it holds a quote, a backslash, a control or non-ASCII byte, or (in a diff
+# header) when quoting is needed to tell the two paths apart; see core.quotePath in git-config(1).
+QUOTED = r'"(?:[^"\\]|\\.)*"'
+HEADER = re.compile(rf'diff --git (?P<old>{QUOTED}|a/.*?) (?P<new>{QUOTED}|b/.*)$')
+
+
+def unquote(path: str) -> str:
+    if not path.startswith('"'):
+        return path
+    raw = path[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")
+    return raw.encode("latin-1").decode("utf-8", "replace")
+
+
+def header_paths(line: str) -> tuple[str, str] | None:
+    """The old and new path of a "diff --git" line, without their a/ and b/ prefixes."""
+    header = HEADER.match(line)
+    if header is None:
+        return None
+    old, new = unquote(header.group("old")), unquote(header.group("new"))
+    return old[2:], new[2:]
+
+
 def split_patch(patch: str) -> dict[str, str]:
     blocks = re.split(r"(?=^diff --git )", patch, flags=re.MULTILINE)[1:]
     by_path = {}
     for block in blocks:
-        header = re.match(r"diff --git a/(.*?) b/(.*)\n", block)
-        if header is None:
+        paths = header_paths(block.split("\n", 1)[0])
+        if paths is None:
             raise PrepareError(f"Unreadable diff header: {block[:120]!r}")
-        by_path[header.group(2)] = block
+        by_path[paths[1]] = block
     return by_path
 
 
@@ -155,7 +177,7 @@ def touching_commits(repo: Path, merge_base: str, head: str) -> dict[str, list[s
         if line.startswith("@@"):
             commit = line[2:]
         elif line.strip() and commit:
-            by_file.setdefault(line.strip(), []).append(commit)
+            by_file.setdefault(unquote(line.strip()), []).append(commit)
     return by_file
 
 
@@ -180,7 +202,7 @@ def contents(repo: Path, merge_base: str, head: str, block: str, path: str, stat
     """The file before and after the change, so the page can show context the diff leaves out."""
     if status == "binary":
         return {"old": None, "new": None}
-    old_path = re.match(r"diff --git a/(.*?) b/", block).group(1)
+    old_path = header_paths(block.split("\n", 1)[0])[0]
     return {
         "old": None if status == "added" else file_text(repo, merge_base, old_path),
         "new": None if status == "deleted" else file_text(repo, head, path),

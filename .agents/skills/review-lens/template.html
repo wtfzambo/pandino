@@ -468,8 +468,19 @@ const shortDir = d => { const parts = d.split("/").filter(Boolean); return (part
 const fileByName = {};
 for (const f of files) { fileByName[baseName(f.path)] ||= f; fileByName[baseName(f.path).replace(/\.[^.]+$/, "")] ||= f; }
 const glossary = DATA.glossary || {};
-const glossKey = t => [t, t.replace(/\(.*$/, ""), t.replace(/\s*=.*$/, ""), t.replace(/[\[\]]/g, ""), t.split(".").pop(), t.split(".")[0]].find(c => c && glossary[c]);
-const fileKey = t => { const c = t.replace(/\(.*$/, "").trim(); return fileByName[c] || fileByName[c.split(".")[0]] || fileByName[baseName(c)]; };
+function glossKey(text) {
+  const withoutCall = text.replace(/\(.*$/, "");
+  const withoutAssignment = text.replace(/\s*=.*$/, "");
+  const withoutBrackets = text.replace(/[\[\]]/g, "");
+  const lastMember = text.split(".").pop();
+  const firstMember = text.split(".")[0];
+  return [text, withoutCall, withoutAssignment, withoutBrackets, lastMember, firstMember].find(c => c && glossary[c]);
+}
+function fileKey(text) {
+  const name = text.replace(/\(.*$/, "").trim();
+  const withoutExtension = name.split(".")[0];
+  return fileByName[name] || fileByName[withoutExtension] || fileByName[baseName(name)];
+}
 
 // Code spans in prose become file links and glossary hovers.
 function prose(html, cls = "prose") {
@@ -529,7 +540,7 @@ const io = new IntersectionObserver(entries => {
   for (const e of entries) if (e.isIntersecting) { const f = files[e.target.dataset.idx]; if (!f.collapsed && !f.rendered) renderDiff(f); }
 }, {root: main, rootMargin: "800px 0px"});
 
-function checkButton(f, small) {
+function checkButton(f) {
   const b = h("button", {class: "check", title: "Mark as viewed"}, icon("check"));
   b.onclick = e => { e.stopPropagation(); setViewed(f, !state.viewed[f.path]); };
   (f.checks ||= []).push(b);
@@ -634,6 +645,14 @@ function expandAll(f) {
 function redraw(f, change) {
   const top = f.el.getBoundingClientRect().top;
   change();
+  f.expanded = true;
+  renderDiff(f);
+  main.scrollTop += f.el.getBoundingClientRect().top - top;
+}
+function resetContext(f) {
+  const top = f.el.getBoundingClientRect().top;
+  f.hunks = parseHunks(f.diff);
+  f.expanded = false;
   renderDiff(f);
   main.scrollTop += f.el.getBoundingClientRect().top - top;
 }
@@ -669,12 +688,13 @@ function decorateHunks(f) {
     });
     if (!canExpand(f)) return;
     const below = gapBelow(f), anyGap = below > 0 || f.hunks.list.some((_, i) => gapAbove(f, i) > 0);
-    if (!anyGap) return;
+    if (!anyGap && !f.expanded) return;
     const cols = table.querySelector("tbody tr")?.children.length || 2;
     const cell = h("td", {colspan: String(cols)});
     if (ti === 0) cell.append(h("span", {class: "hunkbar"},
       below > 0 ? xbutton(`${Math.min(below, EXPAND_STEP)}`, "chevron-down", `Show ${Math.min(below, EXPAND_STEP)} more lines below`, () => redraw(f, () => expandDown(f, EXPAND_STEP))) : null,
-      xbutton("Whole file", "unfold-vertical", "Show the whole file around the changes", () => redraw(f, () => expandAll(f)))));
+      anyGap ? xbutton("Whole file", "unfold-vertical", "Show the whole file around the changes", () => redraw(f, () => expandAll(f))) : null,
+      f.expanded ? xbutton("Reset", "fold-vertical", "Back to the changes only", () => resetContext(f)) : null));
     table.querySelector("tbody").append(h("tr", {class: "xrow"}, cell));
   });
 }
@@ -899,7 +919,7 @@ function drawSide() {
     f.checks = f.checks.filter(b => b.isConnected || b.closest(".file"));
     f.row = h("div", {class: "t-file" + (state.viewed[f.path] ? " viewed" : ""), title: f.path, onclick: () => goFile(f)},
       h("span", {class: `dot p-${f.priority}`}), h("span", {class: "name"}, baseName(f.path)),
-      f.findings.length ? h("span", {class: "flag", title: "Review findings"}) : null, checkButton(f, true));
+      f.findings.length ? h("span", {class: "flag", title: "Review findings"}) : null, checkButton(f));
     list.append(f.row);
   }
   const tab = (key, label, extra) => h("button", {class: "tab" + (currentTab === key ? " on" : ""), onclick: () => { currentTab = key; drawSide(); }}, label, extra);

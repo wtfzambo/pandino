@@ -24,12 +24,8 @@ PRIORITY_MEANING = {
     "skip": "mechanical change with no separate effect to assess",
 }
 
-
-# Word limits keep the page readable on a large PR; the overview carries the big picture.
 MAX_WORDS = {"overview": 220, "explanation": 200, "note": 40, "finding": 70, "glossary": 45}
 
-
-# A step explanation has four parts: what it adds, how it connects, concepts, how to read it.
 EXPLANATION_PARTS = 4
 MAX_STEP_FILES = 20
 
@@ -94,7 +90,7 @@ def build(review: dict, patch: str, texts: dict[str, dict[str, str | None]]) -> 
             if f.get("category") not in PRIORITY_OF_CATEGORY:
                 raise ReviewError(f"{path}: category must be one of {tuple(PRIORITY_OF_CATEGORY)}")
             f["priority"] = PRIORITY_OF_CATEGORY[f["category"]]
-            if not (f.get("note") or "").strip():
+            if not words(f.get("note") or ""):
                 raise ReviewError(f"{path}: every file needs a context note")
             check_length("note", path, f["note"])
             seen[path] = step["title"]
@@ -103,7 +99,6 @@ def build(review: dict, patch: str, texts: dict[str, dict[str, str | None]]) -> 
             f["old"], f["new"] = text["old"], text["new"]
             f["crumbs"] = hunk_crumbs(blocks[path], text["old"], text["new"])
             f["added"], f["deleted"] = count_changes(blocks[path])
-        # Files the reader should start with come first; the agent's order is kept within each priority.
         step["files"].sort(key=lambda f: PRIORITIES.index(f["priority"]))
         step_paths = {f["path"] for f in step["files"]}
         for fd in step["findings"]:

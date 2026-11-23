@@ -118,7 +118,7 @@ Mistakes the user has corrected, one row per kind of mistake. See Agent behavior
 |---|---|
 | Raise a deviation from an agreed estimate (word counts, percentages, budgets) with the user only when it changes a decision; report it in task notes otherwise. | prose |
 | Name a repository item by what it is before its ID in every user-facing message, including option lists, tables, and summaries of other items. | prose |
-| For a PR walkthrough, use one agent and one reading pass by default. A large file count alone does not justify paid parallel runs. | prose |
+| Write a PR walkthrough with one agent in one reading pass, whatever the PR's size. | prose |
 | Rank walkthrough files by the reader's attention: weigh the behavior change and the consequences if it is wrong. | prose |
 
 <!-- BACKLOG.MD GUIDELINES START -->

@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@agent'
 created_date: '2026-11-20 16:47'
-updated_date: '2026-11-23 15:49'
+updated_date: '2026-11-23 16:21'
 labels: []
 dependencies: []
 priority: medium
@@ -74,5 +74,5 @@ AC 'five runs agree on 90% of PR 350' replaced: on the final rules, 3 runs per m
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Added the review-lens skill to the Pandino kit: it turns a PR or branch into one self-contained HTML walkthrough for a human reader. Git-based preparation, a single agent pass, and a validating renderer; priority comes from five change categories that the renderer maps to high, mid, low and skip. Tuned against two blind oracles on six PRs (C#, Java, Rust, Python, Go, TypeScript): 92-100% accuracy across Haiku, Sonnet, Sol and Opus on the files the oracles agree on. Verified with unit tests, the installer test, and headless-Chrome checks of the rendered PR 350 page. Follow-up: tracking glossary definition changes (TASK-34).
+Added the review-lens skill to the Pandino kit: it turns a PR or branch into one self-contained HTML walkthrough for a human reader. Git-based preparation, a single agent pass, and a validating renderer; priority comes from five change categories that the renderer maps to high, mid, low and skip. Tuned against two blind oracles on six PRs in six languages (C#, Java, Rust, Python, Go, TypeScript): 92-100% accuracy across Haiku, Sonnet, Sol and Opus on the files the oracles agree on. Verified with unit tests, a browser filter test, the installer test, and headless-Chrome checks of the rendered PR 350 page. Follow-up: tracking glossary definition changes (TASK-34).
 <!-- SECTION:FINAL_SUMMARY:END -->
