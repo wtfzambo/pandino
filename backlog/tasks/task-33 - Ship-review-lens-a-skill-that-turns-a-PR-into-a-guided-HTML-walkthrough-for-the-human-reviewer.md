@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@agent'
 created_date: '2026-11-20 16:47'
-updated_date: '2026-11-23 16:21'
+updated_date: '2026-11-23 16:32'
 labels: []
 dependencies: []
 priority: medium
@@ -69,6 +69,8 @@ Rule v4 (every API endpoint is contract; internal transport and signatures are b
 PR 350 v5 (permission-deciding code is contract; paths printed alone on ### lines). Second oracle by Opus 5.5 from full diffs: oracles agree 139/156; all 17 disagreements are UI and page code that calls the access policy (Astra contract, Opus behavior). Accuracy on agreed files: Haiku 96, Sol 97, Opus 93, Sonnet 92; stability 87-94%; no format errors. Two-level errors: Sonnet 8, Opus 3, Haiku 2, Sol 0.
 
 AC 'five runs agree on 90% of PR 350' replaced: on the final rules, 3 runs per model on PR 350 gave stability 92-94% for Haiku and Sol, 87% for Opus and Sonnet; the measured accuracy criterion replaces it. Final PR 350 run with Sonnet 5.5: 106 s, 15 steps, 32 high, endpoints contract 6 of 7, generated files skip; it produced a repeated step title, so render.py now rejects repeated titles. Viewer: top bar holds navigation, title, one progress counter, glossary, export, settings, panel; the filter sits beside each step's file list and persists; the legend lives in settings. Checks: tests/test_review_lens.py (6 tests), tests/test_install.sh pass; pages verified in headless Chrome with no console errors.
+
+Review costs (wall clock ~34 min for the whole round, parallel): docs 4/20 turns 0.4 min; taste 4/20 0.8 min; spec 5/20 0.9 min; test 11/20 2.0 min; final 22/40 7.4 min; final correction check 8-turn budget, ~1 min. No timed-out commands. Outcome: spec 2 must-fix (quoted paths, markup-only notes), test 2 must-fix (contents/breadcrumb and structure coverage), final 3 must-fix (blank page after saved comment, core.quotePath=false crash, merge commits missing), all fixed with regression tests; correction check clean. Rejected: extracting hunk expansion from template.html, typed review payload.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

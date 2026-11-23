@@ -441,6 +441,7 @@ const KEY = "review-lens:" + DATA.id;
 const state = JSON.parse(localStorage.getItem(KEY) || "{}");
 state.viewed ||= {}; state.comments ||= []; state.prefs ||= {};
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const isAsk = c => c.kind === "ask";
 
 const $ = (s, el = document) => el.querySelector(s);
 const ICONS = JSON.parse(document.getElementById("icons").textContent);
@@ -734,7 +735,6 @@ main.addEventListener("click", e => {
 
 // ---------- comments ----------
 const afterRows = (rows, make) => rows.forEach((tr, i) => tr.after(make(i)));
-const isAsk = c => c.kind === "ask";
 function commentView(c) {
   const f = byPath[c.file];
   return h("div", {class: "comment" + (isAsk(c) ? " q" : "")},

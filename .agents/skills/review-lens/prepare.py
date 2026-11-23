@@ -25,7 +25,10 @@ class PrepareError(RuntimeError):
 
 
 def git(repo: Path, *args: str) -> str:
-    result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, errors="replace")
+    # core.quotePath=true makes every path in Git's output either plain or an escaped-ASCII quoted string, whatever the
+    # user's setting, so unquote() reads one format.
+    result = subprocess.run(["git", "-C", str(repo), "-c", "core.quotePath=true", *args], capture_output=True, text=True,
+                            errors="replace")
     if result.returncode != 0:
         raise PrepareError(f"git {' '.join(args)}: {result.stderr.strip()}")
     return result.stdout
@@ -170,7 +173,7 @@ def generated_hints(repo: Path, head: str, path: str, status: str) -> list[str]:
 
 
 def touching_commits(repo: Path, merge_base: str, head: str) -> dict[str, list[str]]:
-    log = git(repo, "log", "--format=@@%h %s", "--name-only", f"{merge_base}..{head}")
+    log = git(repo, "log", "--format=@@%h %s", "--name-only", "--diff-merges=first-parent", f"{merge_base}..{head}")
     by_file: dict[str, list[str]] = {}
     commit = None
     for line in log.splitlines():

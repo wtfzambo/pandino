@@ -130,14 +130,20 @@ class ReviewLensTest(unittest.TestCase):
 
 
     def test_paths_git_quotes_in_diff_headers_are_prepared_and_rendered(self):
+        for quote_path in ('true', 'false'):
+            with self.subTest(core_quote_path=quote_path):
+                self.check_quoted_paths(quote_path)
+
+    def check_quoted_paths(self, quote_path):
         with tempfile.TemporaryDirectory() as tmp:
             repo, work = Path(tmp) / 'repo', Path(tmp) / 'work'
             repo.mkdir()
             git(repo, 'init', '-q')
             git(repo, 'config', 'user.name', 'Test')
             git(repo, 'config', 'user.email', 'test@example.org')
+            git(repo, 'config', 'core.quotePath', quote_path)
             git(repo, 'commit', '--allow-empty', '-qm', 'base')
-            names = ['Session pickup — z.md', 'with "quote".txt', 'two words.txt']
+            names = ['Session pickup — z.md', 'with "quote".txt', 'two words.txt', 'Résumé — "draft".md']
             for name in names:
                 (repo / name).write_text('x\n')
             git(repo, 'add', '.')
@@ -153,6 +159,33 @@ class ReviewLensTest(unittest.TestCase):
             (work / 'review.json').write_text(json.dumps({'title': 'Files', 'overview': 'Adds files.', 'glossary': {}, 'steps': [{'title': 'Files', 'level': 'L4', 'explanation': explanation, 'files': files}]}))
             result = subprocess.run([sys.executable, '-B', SKILL / 'render.py', '--work', work], capture_output=True, text=True, env=env)
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_files_changed_in_a_merge_commit_list_that_commit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, work = Path(tmp) / 'repo', Path(tmp) / 'work'
+            repo.mkdir()
+            git(repo, 'init', '-q', '-b', 'main')
+            git(repo, 'config', 'user.name', 'Test')
+            git(repo, 'config', 'user.email', 'test@example.org')
+            (repo / 'f.txt').write_text('a\n')
+            git(repo, 'add', '.')
+            git(repo, 'commit', '-qm', 'base')
+            git(repo, 'checkout', '-qb', 'feature')
+            (repo / 'f.txt').write_text('feature\n')
+            git(repo, 'commit', '-qam', 'feature edit')
+            git(repo, 'checkout', '-q', 'main')
+            (repo / 'f.txt').write_text('main\n')
+            git(repo, 'commit', '-qam', 'main edit')
+            git(repo, 'checkout', '-q', 'feature')
+            subprocess.run(['git', '-C', repo, 'merge', '-q', 'main'], capture_output=True)
+            (repo / 'f.txt').write_text('resolved\n')
+            (repo / 'added-in-merge.txt').write_text('new\n')
+            git(repo, 'add', '.')
+            git(repo, 'commit', '-qm', 'merge main')
+            env = dict(os.environ, REVIEW_LENS_HOME=str(Path(tmp) / 'home'))
+            subprocess.run([sys.executable, '-B', SKILL / 'prepare.py', '--repo', repo, '--base', 'main', '--head', 'feature', '--out', work], check=True, capture_output=True, env=env)
+            commits = {f['path']: [c.split(' ', 1)[1] for c in f['commits']] for f in json.loads((work / 'manifest.json').read_text())['files']}
+            self.assertEqual(commits, {'f.txt': ['merge main', 'feature edit'], 'added-in-merge.txt': ['merge main']})
 
 
 CHROME = Path('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
@@ -172,7 +205,13 @@ await page.evaluate(() => document.querySelector('#filter .opt').click());
 const high = await visible();
 await page.evaluate(() => document.querySelector('#filter .clear').click());
 const cleared = await visible();
-console.log(JSON.stringify({all, high, cleared, errors}));
+await page.evaluate(() => document.querySelector('.file .cbtn').click());
+await page.evaluate(() => { const box = document.querySelector('.cbox textarea'); box.value = 'Why?'; });
+await page.evaluate(() => document.querySelector('.cbox .primary').click());
+await page.reload({waitUntil: 'load'});
+await page.evaluate(() => document.querySelector('#next').click());
+const reopened = await visible();
+console.log(JSON.stringify({all, high, cleared, reopened, errors}));
 await browser.close();
 """
 
@@ -186,7 +225,7 @@ def puppeteer_dir():
 
 
 class ViewerTest(unittest.TestCase):
-    def test_priority_filter_shows_all_then_only_chosen_level_then_all(self):
+    def test_filter_and_a_saved_comment_survive_reopening(self):
         modules = puppeteer_dir() if CHROME.exists() else None
         if modules is None:
             self.skipTest('needs Google Chrome and puppeteer-core')
@@ -215,7 +254,7 @@ class ViewerTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             seen = json.loads(result.stdout.strip().splitlines()[-1])
             everything = ['logic.py', 'notes.md', 'schema.sql']
-            self.assertEqual(seen, {'all': everything, 'high': ['schema.sql'], 'cleared': everything, 'errors': []})
+            self.assertEqual(seen, {'all': everything, 'high': ['schema.sql'], 'cleared': everything, 'reopened': everything, 'errors': []})
 
 
 class OutlineTest(unittest.TestCase):
