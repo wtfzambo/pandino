@@ -157,6 +157,16 @@ svg.i { width: 16px; height: 16px; stroke-width: 1.75; flex: none; }
 #glossq:focus { box-shadow: 0 0 0 3px rgba(0,113,227,.3); }
 #glosslist { overflow: auto; margin: 0; }
 #glosslist .none { grid-column: 1 / -1; color: var(--fg2); }
+#finddlg { width: min(640px, 92vw); margin-top: 12vh; padding: 12px; }
+#finddlg[open] { display: flex; flex-direction: column; gap: 8px; }
+#findq { font: inherit; font-size: 14px; color: var(--fg); background: var(--side); border: 0; border-radius: 10px; padding: 10px 14px; outline: none; }
+#findlist { max-height: 50vh; overflow: auto; display: flex; flex-direction: column; }
+#findlist .hit { display: flex; align-items: baseline; gap: 8px; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+#findlist .hit.on { background: var(--side); }
+#findlist .hit .dir, #findlist .hit .st, #findlist .none { color: var(--fg2); font-size: 12px; }
+#findlist .hit > * { white-space: nowrap; flex-shrink: 0; }
+#findlist .hit .st { margin-left: auto; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#findlist .none { padding: 6px 10px; }
 .menu-sep { height: 1px; background: var(--hover); margin: 4px -16px; }
 .file.filtered, .t-file.filtered, .t-dir.filtered { display: none; }
 .hidden-note { font-size: 12px; color: var(--fg2); margin-top: -28px; margin-bottom: 36px; }
@@ -390,6 +400,7 @@ dialog .row .primary { color: var(--accent); font-weight: 600; }
   <div id="title"></div>
   <span id="progress"></span>
   <span class="group">
+    <button class="icon" id="findbtn" title="Go to file (⌘E)">{{search}}</button>
     <button class="icon" id="glossbtn" title="Glossary (G)">{{book-a}}</button>
     <button class="icon" id="export" title="Your comments and questions, ready to copy">{{share}}<span class="count" id="ccount"></span></button>
   <span class="pop" id="settings">
@@ -423,6 +434,10 @@ dialog .row .primary { color: var(--accent); font-weight: 600; }
 <dialog id="glossdlg">
   <input id="glossq" type="search" placeholder="Search terms and definitions" autocomplete="off">
   <dl class="ov-gloss" id="glosslist"></dl>
+</dialog>
+<dialog id="finddlg">
+  <input id="findq" type="search" placeholder="Go to file" autocomplete="off">
+  <div id="findlist"></div>
 </dialog>
 <dialog id="dlg">
   <h3 id="dlgtitle"></h3>
@@ -894,14 +909,14 @@ function showOverview() {
   const steps = DATA.steps.map((step, si) => h("button", {onclick: () => { remember(); showStep(si); }},
     h("span", {class: "n"}, String(si + 1)), h("span", {class: "t"}, step.title),
     h("span", {class: "c"}, ...["high", "mid"].filter(p => count(step, p)).map(p => h("span", {class: "pc", title: `${count(step, p)} ${p}`}, h("span", {class: `dot p-${p}`}), String(count(step, p)))), h("span", {}, `${step.files.length} files`))));
-  const terms = Object.keys(glossary).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: "base"}));
-  const gloss = h("dl", {class: "ov-gloss"}, ...terms.flatMap(t => [h("dt", {}, t, newTerms.has(t) ? h("span", {class: "new"}, "NEW") : null), h("dd", {}, glossary[t])]));
+  const terms = [...newTerms].sort((a, b) => a.localeCompare(b, undefined, {sensitivity: "base"}));
+  const gloss = h("dl", {class: "ov-gloss"}, ...terms.flatMap(t => [h("dt", {}, t), h("dd", {}, glossary[t])]));
   main.replaceChildren(h("div", {class: "overview"},
     h("div", {class: "kicker"}, "Overview"), h("div", {class: "step-title"}, DATA.title),
     prose(DATA.overview),
     h("h2", {}, "Reading order"), h("div", {class: "ov-steps"}, ...steps),
     h("button", {class: "start", onclick: () => { remember(); showStep(0); }}, "Start with step 1 →"),
-    terms.length ? h("h2", {}, "Glossary") : null, terms.length ? gloss : null));
+    terms.length ? h("h2", {}, "New terms") : null, terms.length ? gloss : null));
   main.scrollTop = 0;
   document.querySelectorAll(".seg").forEach(el => el.classList.remove("cur"));
   $("#stepno").textContent = `0 / ${DATA.steps.length}`;
@@ -975,7 +990,7 @@ function legend() {
     h("div", {class: "sep"}), h("b", {style: "grid-column: 1 / -1"}, "Reading"),
     h("span", {class: "k", style: "color: var(--accent)"}, icon("sparkles")), h("span", {}, "AI note on a file"), ...key("1 2 3", "click a line number: comment, or ask the AI"),
     ...key("← →", "previous / next step"), ...key("⌘[ ⌘]", "back / forward after a jump"),
-    ...key("N", "show all AI notes"), ...key("G", "glossary"), ...key("\\", "hide or pin the side panel; when hidden, it slides in from the right edge"));
+    ...key("N", "show all AI notes"), ...key("G", "glossary"), ...key("⌘E", "go to file"), ...key("\\", "hide or pin the side panel; when hidden, it slides in from the right edge"));
 }
 $("#legend").append(legend());
 
@@ -1017,6 +1032,50 @@ function remember() {
 }
 function goBack() { if (!past.length) return; future.push(here()); restore(past.pop()); updateNav(); }
 function goFwd() { if (!future.length) return; past.push(here()); restore(future.pop()); updateNav(); }
+// ---------- go to file ----------
+// Matches the query's characters in order, as VS Code's quick open does: each character prefers the next word start
+// (a capital or the letter after / . _ -), and matches in the file name score above matches in the folders.
+const findDlg = $("#finddlg"), findQ = $("#findq");
+let hits = [], hitIdx = 0;
+const isWordStart = (path, i) => i === 0 || /[\/._\- ]/.test(path[i - 1]) || (/[A-Z]/.test(path[i]) && /[a-z]/.test(path[i - 1]));
+// A query that jumps to word starts can run out of path, so it falls back to plain in-order matching.
+const fuzzyScore = (query, path) => Math.max(matchScore(query, path, true), matchScore(query, path, false));
+function matchScore(query, path, preferWordStarts) {
+  const q = query.toLowerCase(), p = path.toLowerCase(), nameStart = p.length - baseName(p).length;
+  let score = 0, at = 0;
+  for (const ch of q) {
+    let found = p.indexOf(ch, at);
+    if (preferWordStarts) for (let i = found; i >= 0; i = p.indexOf(ch, i + 1)) if (isWordStart(path, i)) { found = i; break; }
+    if (found < 0) return -1;
+    score += (found >= nameStart ? 2 : 1) + (isWordStart(path, found) ? 2 : 0) + (found === at ? 1 : 0);
+    at = found + 1;
+  }
+  return score;
+}
+function drawHits() {
+  const q = findQ.value.trim();
+  hits = files.map(f => ({f, s: q ? fuzzyScore(q, f.path) : 0})).filter(x => x.s >= 0).sort((a, b) => b.s - a.s).map(x => x.f);
+  hitIdx = Math.min(hitIdx, Math.max(0, hits.length - 1));
+  if (!hits.length) { $("#findlist").replaceChildren(h("div", {class: "none"}, "No file matches.")); return; }
+  $("#findlist").replaceChildren(...hits.map((f, i) => h("div", {class: "hit" + (i === hitIdx ? " on" : ""), title: f.path, onclick: () => openHit(i)},
+    h("span", {class: `dot p-${f.priority}`}), h("span", {}, baseName(f.path)), h("span", {class: "dir"}, shortDir(dirName(f.path))),
+    h("span", {class: "st"}, `${f.step + 1}. ${DATA.steps[f.step].title}`))));
+  $("#findlist .on")?.scrollIntoView({block: "nearest"});
+}
+function openFind() {
+  findQ.value = ""; hitIdx = 0;
+  drawHits();
+  findDlg.showModal();
+  findQ.focus();
+}
+function openHit(i) { const f = hits[i]; findDlg.close(); if (f) goFile(f); }
+findQ.addEventListener("input", () => { hitIdx = 0; drawHits(); });
+findQ.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hitIdx = (hitIdx + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % Math.max(1, hits.length); drawHits(); }
+  if (e.key === "Enter") { e.preventDefault(); openHit(hitIdx); }
+});
+findDlg.addEventListener("click", e => { if (e.target === findDlg) findDlg.close(); });
+$("#findbtn").onclick = openFind;
 function updateNav() { $("#back").disabled = !past.length; $("#fwd").disabled = !future.length; }
 $("#back").onclick = goBack;
 $("#fwd").onclick = goFwd;
@@ -1057,6 +1116,7 @@ $("#prev").onclick = () => showStep(nextShown(-1));
 $("#home").onclick = () => { remember(); showStep(OVERVIEW); };
 $("#next").onclick = () => showStep(nextShown(1));
 document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") { e.preventDefault(); findDlg.open ? findDlg.close() : openFind(); return; }
   if (e.target.closest("textarea, input, select")) return;
   if ((e.metaKey || e.ctrlKey) && e.key === "[") { e.preventDefault(); goBack(); return; }
   if ((e.metaKey || e.ctrlKey) && e.key === "]") { e.preventDefault(); goFwd(); return; }
@@ -1132,10 +1192,12 @@ const prMarkdown = () => {
   return out.join("\n") || "No PR comments yet.";
 };
 const prJson = () => JSON.stringify({pr: DATA.pr || null, comments: prComments().map(({file, line, side, body}) => ({file, line, side, body}))}, null, 2);
+const WRITING_RULES = "https://github.com/wtfzambo/pandino/blob/main/.pandino/playbooks/writing.md";
 const askPrompt = () => {
   const qs = asks();
   if (!qs.length) return "No questions yet.";
-  const out = [`I am reviewing a pull request ("${DATA.title}") in a codebase I don't know well. Answer each question below in plain words, for someone new to the language and the project. Explain concepts, don't review the code.`, ""];
+  const out = [`I am reviewing a pull request ("${DATA.title}") in a codebase I don't know well. Answer each question below in plain words, for someone new to the language and the project. Explain concepts, don't review the code.`,
+    `Before answering, read the writing rules at ${WRITING_RULES} (or .pandino/playbooks/writing.md in the repository) and write by them.`, ""];
   qs.forEach((c, i) => {
     const f = byPath[c.file];
     out.push(`## ${i + 1}. ${f.path}, ${where(c)}`, "", `Context: ${f.note.replace(/<[^>]+>/g, "")}`, "");

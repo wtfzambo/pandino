@@ -1,28 +1,6 @@
 # Writing
 
-Use this playbook to write or edit documentation, specifications, decisions, README files, playbooks, or multi-line commit messages. The prose rules in `AGENTS.md` always apply.
-
-## Pick the document's mode
-
-One document has one mode; move other content to its own document and link it.
-
-| Document | Mode | Write |
-|---|---|---|
-| Specification | reference | Current promises only: behavior, options, limits, errors. Mirror the structure of the thing described. |
-| Runbook | how-to | Steps toward one goal for a competent reader, named by the task. Forks as "If you want X, do Y". |
-| Decision | explanation | Context, the choice, the alternatives, the consequences. Opinion belongs here. |
-| Playbook, agent definition | how-to for an agent | Imperative steps with their trigger. Every sentence is an instruction. |
-| README | orientation | What it is, how to start, links to the authoritative documents. |
-
-## Shape it for a reader in a hurry
-
-- Make the first line say what the document is for, or the first action to take.
-- Start with the content and end when it is done: the first sentence carries information, and the last one is the final step or fact.
-- Number multi-step work. Each step is one action, and the list has the fewest steps that still work.
-- Give quantities and times in concrete units ("about 15 minutes", "three files").
-- Write a problem as its cause and its fix.
-- Put a side topic in its own section or document and link it.
-- Use headings that let a reader scan back to a point.
+Use this playbook for any text a person reads: an answer, a note, a code comment, a commit message, or a document. The prose rules in `AGENTS.md` always apply. The sentence rules and the final check apply to every text; the sections on documents apply to documentation, specifications, decisions, README files, playbooks, and multi-line commit messages.
 
 ## Write the sentences
 
@@ -47,4 +25,26 @@ Reread and rewrite:
 - abstract metaphors (substrate, north star, surface for an interface), as the concrete word;
 - bold on every other phrase, decorative emoji, and chatbot phrases, by deleting them.
 
-Then read only the first and the last line. A reader should know what the document is for and what to do next.
+## Pick the document's mode
+
+One document has one mode; move other content to its own document and link it.
+
+| Document | Mode | Write |
+|---|---|---|
+| Specification | reference | Current promises only: behavior, options, limits, errors. Mirror the structure of the thing described. |
+| Runbook | how-to | Steps toward one goal for a competent reader, named by the task. Forks as "If you want X, do Y". |
+| Decision | explanation | Context, the choice, the alternatives, the consequences. Opinion belongs here. |
+| Playbook, agent definition | how-to for an agent | Imperative steps with their trigger. Every sentence is an instruction. |
+| README | orientation | What it is, how to start, links to the authoritative documents. |
+
+## Shape it for a reader in a hurry
+
+- Make the first line say what the document is for, or the first action to take.
+- Start with the content and end when it is done: the first sentence carries information, and the last one is the final step or fact.
+- Number multi-step work. Each step is one action, and the list has the fewest steps that still work.
+- Give quantities and times in concrete units ("about 15 minutes", "three files").
+- Write a problem as its cause and its fix.
+- Put a side topic in its own section or document and link it.
+- Use headings that let a reader scan back to a point.
+
+For a document, read only the first and the last line once it is done. A reader should know what the document is for and what to do next.

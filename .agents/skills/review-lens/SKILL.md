@@ -31,15 +31,19 @@ One change often spans several files: a new stored column is declared in an enti
 
 ## Write `review.json`
 
-Write from the big picture down: the concept and the architecture first, the details only where the reader looks.
+Write from the big picture down: the concept and the architecture first, the details only where the reader looks. Write for an engineer who knows the stack but not this product, its roles or this codebase, and who may open any step or file on its own. Follow the sentence rules and the final check in Pandino's writing playbook: `.pandino/playbooks/writing.md` in a Pandino repository, otherwise https://github.com/wtfzambo/pandino/blob/main/.pandino/playbooks/writing.md.
+
+Write each product concept by its canonical glossary name in `<code>`, such as `Held amendment`, also in prose of another language, so the reader can hover for the definition; never translate the name. Write the glossary terms in the original language of the code or product; write the definitions in the language of the guide. Explain in prose what happens and why; leave to the glossary what a thing is.
+
+When the code treats two situations that look alike differently, such as no answer and a refusal, or a list of references and the content they point to, say which situation occurs, what the code does, and what the user sees as a result.
 
 - **overview** (at most 220 words): what the change is for and how it is built, in plain sentences a newcomer can follow. Start with the outcome, for example "This PR adds three tables that record addenda, held amendments and signature requests, so that…". Then describe the architecture by following one real action through the layers, such as "when a resident sends a note, the page calls a new endpoint, which asks the access rules whether it is allowed and then saves…". Name each layer by what it does; do not list layers with semicolons or use jargon such as "concern classes" without saying what it means.
 - **step explanation** (at most 200 words, four `<p>` paragraphs): the reader's guide while the step's code is on screen. Make each paragraph carry real content and stop when it is said; a short true paragraph beats a padded one.
-  1. What this step adds to the picture in the overview.
+  1. Where the reader starts, without relying on earlier steps: which user action or call reaches this code and what data arrives, named in full ("the list" or "the pages" alone only after saying of what).
   2. How it connects: where its data or calls come from, who uses them next, where the thing ends up.
   3. The concepts needed to read it: a language or framework idiom, a domain rule. Name glossary terms in `<code>` rather than redefining them.
   4. How to read it: which of this step's files to open first, what to follow, what can be skimmed. Name only files of this step.
-- **file note** (at most 40 words): one sentence on what this file's change does.
+- **file note** (at most 40 words): one sentence on what this file's change does, readable without the step: name the thing it acts on in full rather than an internal label, and name glossary terms in `<code>`.
 - **glossary** (at most 45 words per term): define every term the overview and step explanations use that a newcomer to this project would not know. Go through them word by word: each user role (all of them, not only the main ones), each state or status, each internal product or feature name, and each language or framework idiom. Say what the thing is in the real world before what the code does with it. Keep a stored term's wording unless the change alters its meaning.
 - **finding** (at most 70 words): only a concrete reading question that arises naturally.
 

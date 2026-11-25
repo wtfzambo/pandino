@@ -47,7 +47,7 @@ It asks which editors to set up, then shows the model each specialist will run o
 |---|---|
 | `AGENTS.md` | repo root — the rules every agent reads on every turn, an index of playbooks, and a project section with a Corrections table |
 | playbooks | `.pandino/playbooks/` — how-to guides agents read when the index says the work calls for them: workflow, review, reviewing, design, testing, debugging, writing, docs. Rewritten on every install |
-| skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it, `pandino-update` updates this kit, `review-lens` turns a PR into a guided HTML page for your own review. Invoke them by name or let the index trigger them |
+| skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it, `pandino-update` updates this kit, [`review-lens`](.agents/skills/review-lens/README.md) turns a PR into a guided HTML page for your own review. Invoke them by name or let the index trigger them |
 | the seven helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — six specialists with a model pinned, plus the unpinned fallback-runner |
 | `models.json` | `.pandino/`. Which model and effort each specialist runs on, per editor. Edit it and re-run to change them |
 | `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
@@ -147,7 +147,7 @@ To test unpublished Pandino changes, run a local checkout's installer instead of
 | [design](.pandino/playbooks/design.md) | designing new modules or interfaces, and checking code for red flags |
 | [testing](.pandino/playbooks/testing.md) | writing or reviewing tests, or choosing how to verify |
 | [debugging](.pandino/playbooks/debugging.md) | fixing a bug or an unexplained failure |
-| [writing](.pandino/playbooks/writing.md) | writing documentation, decisions, playbooks, or commit messages |
+| [writing](.pandino/playbooks/writing.md) | writing any text a person reads: answers, notes, comments, commits, documents |
 | [docs](.pandino/playbooks/docs.md) | changing documented behavior or recording a decision or finding |
 
 The workflow in short: one agent plans and coordinates, starts from the smallest observable slice, and keeps an action only when the slice needs it. Small fixes are done directly. Substantial work starts with a sketch of types and signatures plus failing tests on the requirement's invariants, which the user sees in the plan; the implementer makes them pass. Relevant reviewers run once near the end, in a fixed report format, within turn budgets the [bounded review policy](backlog/docs/specs/doc-3%20-%20Bounded-review-policy.md) describes. When the user corrects the same kind of mistake twice, the Corrections table in `AGENTS.md` turns it into a proposal to enforce it in code, types, lint, or a test.

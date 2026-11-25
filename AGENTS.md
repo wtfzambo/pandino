@@ -66,7 +66,7 @@ Prefer a functional core: pure business logic, I/O at the edges.
 - Describe each thing by what it is and does. Mention a contrast only to correct a misreading the reader is likely to make.
 - Write each paragraph on one line and leave wrapping to the editor.
 
-How to write documents, decisions, playbooks, and commit messages: `.pandino/playbooks/writing.md`.
+How to write any text a person reads, from an answer or a code comment to a document: `.pandino/playbooks/writing.md`.
 
 ## Agent behavior
 
@@ -90,7 +90,7 @@ Before work that a line below covers, read the named file in full and follow it.
 - Designing new modules, public interfaces, or types that cross a module boundary: `.pandino/playbooks/design.md`.
 - Writing, changing, or reviewing tests, or choosing how to verify a change: `.pandino/playbooks/testing.md`.
 - Fixing a bug, or a failure whose cause is unknown: `.pandino/playbooks/debugging.md`.
-- Writing or editing documentation, specifications, decisions, README, playbooks, or multi-line commit messages: `.pandino/playbooks/writing.md`.
+- Writing any text a person reads, such as an answer, a note, a code comment, a commit message, or a document: `.pandino/playbooks/writing.md`.
 - Changing documented behavior, making a choice worth recording, or disproving a plausible hypothesis: `.pandino/playbooks/docs.md`.
 - Ending a session or handing work over: skill `pandino-handoff` (`.agents/skills/pandino-handoff/SKILL.md`).
 - Updating Pandino in this repository: skill `pandino-update` (`.agents/skills/pandino-update/SKILL.md`).

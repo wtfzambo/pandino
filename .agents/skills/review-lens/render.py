@@ -57,7 +57,7 @@ def check_explanation(step: dict) -> None:
     where = f"step {step['title']!r}"
     parts = len(re.findall(r"<p[\s>]", step["explanation"]))
     if parts != EXPLANATION_PARTS:
-        raise ReviewError(f"{where}: the explanation has {parts} paragraphs; write {EXPLANATION_PARTS}: what it adds, how it connects, concepts, how to read it")
+        raise ReviewError(f"{where}: the explanation has {parts} paragraphs; write {EXPLANATION_PARTS}: where it starts, how it connects, concepts, how to read it")
 
 
 def build(review: dict, patch: str, texts: dict[str, dict[str, str | None]]) -> dict:
@@ -117,6 +117,18 @@ def build(review: dict, patch: str, texts: dict[str, dict[str, str | None]]) -> 
     return review
 
 
+def unmarked_terms(review: dict, glossary: dict[str, str]) -> list[str]:
+    """Name each step or file note that writes a glossary term as plain text and never in <code>, so it opens no definition."""
+    texts = [(f"step {s['title']!r}", s["explanation"]) for s in review["steps"]]
+    texts += [(f["path"], f["note"]) for s in review["steps"] for f in s["files"]]
+    found = []
+    for where, html in texts:
+        marked = {m.strip() for m in re.findall(r"<code>(.*?)</code>", html)}
+        plain = re.sub(r"<code>.*?</code>", " ", html)
+        found += [f"{where}: {t}" for t in glossary if t not in marked and re.search(rf"(?<!\w){re.escape(t)}(?!\w)", plain)]
+    return found
+
+
 def render(review: dict, patch: str, texts: dict[str, dict[str, str | None]], known_terms: dict[str, str]) -> str:
     """Validate the review and return the page; the page's glossary is the stored one plus the review's terms."""
     data = build(review, patch, texts)
@@ -168,6 +180,8 @@ def main() -> None:
         page = render(review, (args.work / "patch.diff").read_text(), texts, known)
     except (ReviewError, PrepareError) as error:
         sys.exit(f"review-lens: {error}")
+    for warning in unmarked_terms(review, {**known, **review.get("glossary", {})}):
+        print(f"review-lens: glossary term as plain text, write it in <code>: {warning}", file=sys.stderr)
     output.write_text(page)
     stored.parent.mkdir(parents=True, exist_ok=True)
     stored.write_text(json.dumps(dict(sorted(review["glossary"].items(), key=lambda t: t[0].lower())), ensure_ascii=False, indent=1))

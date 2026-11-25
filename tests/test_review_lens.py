@@ -9,6 +9,7 @@ import unittest
 
 SKILL = Path(__file__).resolve().parents[1] / '.agents/skills/review-lens'
 sys.dont_write_bytecode = True
+sys.path.insert(0, str(SKILL))
 
 
 def load_skill_module(name):
@@ -70,6 +71,7 @@ class ReviewLensTest(unittest.TestCase):
             self.assertEqual((rendered['order.py']['old'], rendered['order.py']['new']), (order_before, order_after))
             self.assertEqual(rendered['order.py']['crumbs'], {'old:3': ['class Order', 'def cancel(self)']})
             self.assertEqual(data['new_terms'], ['Scribe'])
+            self.assertEqual(result.stderr, '')
             stored = Path(json.loads((work / 'manifest.json').read_text())['glossary_file'])
             self.assertEqual(json.loads(stored.read_text()), {'Scribe': 'Writes notes for a provider.'})
             review['glossary'] = {'Resident': 'A doctor in training.'}
@@ -106,6 +108,12 @@ class ReviewLensTest(unittest.TestCase):
             step['findings'] = [{'title': 'Question', 'file': 'elsewhere', 'severity': 'low'}]
             self.assertIn('not a file of step', render().stderr)
 
+
+    def test_glossary_terms_written_as_plain_text_are_reported(self):
+        render = load_skill_module('render')
+        glossary = {'Held amendment': 'A pending change.', 'Signed': 'The signature is confirmed.'}
+        review = {'overview': 'A <code>Held amendment</code> waits.', 'steps': [{'title': 'Sign', 'explanation': '<p>A Held amendment is signed.</p><p>The result is <code>Signed</code>, or Signed again.</p>', 'files': [{'path': 'a.cs', 'note': 'Loads the Held amendment.'}]}]}
+        self.assertEqual(render.unmarked_terms(review, glossary), ["step 'Sign': Held amendment", 'a.cs: Held amendment'])
 
     def test_lines_moved_from_another_file_are_counted_and_left_out_of_the_preview(self):
         with tempfile.TemporaryDirectory() as tmp:
