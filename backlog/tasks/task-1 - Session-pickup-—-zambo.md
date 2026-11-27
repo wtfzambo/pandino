@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-25 13:38'
+updated_date: '2026-11-27 08:39'
 labels:
   - continuity
   - handoff
@@ -18,21 +18,25 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-25 (local CET). Pandino is on main at 7cc5657 (review-lens improvements, TASK-35, Done), followed by this pickup commit; both pushed to origin/main. Tree clean.
+2026-11-27 (local CET). Pandino is on main at 8ecea51 (the pandino-ui skill, TASK-36, Done), followed by this pickup commit. Both commits are local only: main is ahead of origin/main and NOT pushed, because pushing publishes the skill to every installer run and the operator has not asked for it. Tree clean.
 
-Improving the review-lens skill (TASK-35, Done) came from operator feedback on the LumaMDX PR 366 walkthrough. SKILL.md now asks for a self-contained first paragraph per step, an explanation whenever two look-alike states are treated differently (no answer vs failure), canonical glossary names in <code> even in prose of another language (definitions may be translated), and file notes readable on their own. render.py warns when a glossary term appears only as plain text. The viewer has Cmd/Ctrl+E fuzzy file search and shows only new terms on the overview. The exported AI-question prompt links Pandino's writing playbook. .pandino/playbooks/writing.md was reordered so its sentence rules apply to any text, and the AGENTS.md trigger now covers every text a person reads. The skill has a human README; its dark-mode screenshots live in imgs/review-lens/ and load by raw GitHub URL.
+The pandino-ui skill (TASK-36, Done; rationale in decision-14) lives in .agents/skills/pandino-ui/: SKILL.md (145 lines) plus references/anti-patterns.md and references/web.md. install.sh copies it with the other skills, AGENTS.md lists it in the playbook index, README.md names it. It is written first for product screens (the operator's real target is a clinical web app with a poor UI), and treats marketing pages separately. Product and design context goes in a root DESIGN.md. Some modes and anti-patterns are inspired by Impeccable (Apache 2.0), rewritten, credited in Sources, no dependency.
+
+Checks run, all recorded in the TASK-36 notes: tests/test_install.sh; a fresh --yes install; context probes on pi and Codex showing only the description loads; a stand-in reviewer that found the skill through the index line; two six-model with/without comparisons (a landing page and a note editor); one read-only critique of a real product screen in the operator's other repository, which changed no file there.
 
 The operator replies in Italian; repository artifacts stay in English.
 
 WHAT'S NEXT
-1. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
-2. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
+1. Ask the operator whether to push main (git push origin main).
+2. If the operator wants more from the skill: the critique agent's unaddressed feedback is in the TASK-36 notes (rules that cannot be checked from code on a component-library screen; anti-patterns.md is mostly marketing-page aesthetics; no guidance when a project rule forbids the natural fix). The operator wants the skill kept short, so add nothing without asking.
+3. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
+4. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
 
 WAITING ON / GATED BY
-The browser test in tests/test_review_lens.py skips unless puppeteer-core is importable; the file search has no automated test, only a manual Chrome check. OpenCode effort levels are still assumed equal to Codex's, unverified.
+Push of main: the operator's word. Claude Code and opencode loading of pandino-ui rests on their documentation only: Claude Code's login had expired on this machine and opencode is not installed. The browser test in tests/test_review_lens.py skips unless puppeteer-core is importable. OpenCode effort levels are still assumed equal to Codex's, unverified.
 
 VERIFY
-git status -sb; git log --oneline -3; python3 -B -m unittest tests.test_review_lens tests.test_bench_timeout; bash tests/test_install.sh; backlog task view TASK-35 --plain.
+git status -sb; git log --oneline -3; bash tests/test_install.sh; python3 -B -m unittest tests.test_review_lens tests.test_bench_timeout; wc -l .agents/skills/pandino-ui/SKILL.md; backlog task view TASK-36 --plain.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## WHERE WE LEFT OFF
