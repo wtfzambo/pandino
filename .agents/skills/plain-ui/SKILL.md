@@ -1,6 +1,6 @@
 ---
-name: pandino-ui
-description: Build, change, or review a user interface, such as a screen, component, form, chart, or table, and its copy. Use only when the work touches UI code, UI copy, or visual design.
+name: plain-ui
+description: Build, change, or review a user interface, such as a screen, component, form, chart, or table, and its copy. Use only when the work touches UI code, UI copy, or visual design. Offers five modes by name (distill, quieter, clarify, harden, critique).
 ---
 
 # Interface design
@@ -105,7 +105,7 @@ These rules hold on every platform. MUST and NEVER have no exceptions; SHOULD yi
 
 ## Modes
 
-Run a mode when the user names it. Each one changes an existing UI, except `critique`.
+Run a mode when the user names it. When the user invokes this skill without a request, or asks what it can do, list the five modes with one line each and ask which to run. Each one changes an existing UI, except `critique`.
 
 - **distill.** Remove every element that fails the central rule, merge duplicate controls, and cut repeated text. Output: the edited UI and a list of what you removed and why. Stop when removing one more element would lose a function, a signal, or information the user needs.
 - **quieter.** Lower the intensity of a loud UI: fewer colors, lighter weights, less motion, flatter surfaces. Output: the edited UI. Stop when the primary action is still the first thing seen and every signal still reads.
@@ -133,7 +133,7 @@ Report a short list of findings ordered by severity, each with `file:line` and t
 | P2 | An annoyance with a workaround. |
 | P3 | Polish with no effect on the task. |
 
-A problem that would make a user contact support, or a mistake the user cannot undo, is at least P1. A reviewer following `.pandino/playbooks/reviewing.md` keeps its report format and its definitions of `must-fix` and `minor`, and adds the P level to each finding.
+A problem that would make a user contact support, or a mistake the user cannot undo, is at least P1. In a Pandino repository, a reviewer following `.pandino/playbooks/reviewing.md` keeps its report format and its definitions of `must-fix` and `minor`, and adds the P level to each finding.
 
 ## Sources
 

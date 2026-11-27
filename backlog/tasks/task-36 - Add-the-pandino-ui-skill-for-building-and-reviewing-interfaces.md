@@ -1,10 +1,10 @@
 ---
 id: TASK-36
-title: Add the pandino-ui skill for building and reviewing interfaces
+title: Add the plain-ui skill for building and reviewing interfaces
 status: Done
 assignee: []
 created_date: '2026-11-27 00:38'
-updated_date: '2026-11-27 08:39'
+updated_date: '2026-11-27 09:35'
 labels:
   - skills
 dependencies: []
@@ -47,6 +47,8 @@ Second comparison, 2026-11-27, on a product screen: a fictional clinical note ed
 Third check, 2026-11-27: one fresh agent ran critique, read-only, on a real large product screen (a clinical note editor in another repository, about 4,500 lines of markup and 44 sidebar controls). It returned 15 findings (7 P1, 6 P2, 2 P3) with file and line; six spot-checked against the code and confirmed. Skill gaps it reported: the eraser pass needs a chosen role and state on a state-dependent screen; no guidance when a project rule forbids the natural fix; severity ignores irreversible mistakes; many rules cannot be checked from code on a component-library screen; anti-patterns.md is mostly marketing-page aesthetics; the reference conditions give no gating in critique. Not yet acted on; waiting for the operator.
 
 Applied on the operator's approval, 2026-11-27: a blocked primary action says beside it what is missing; a review reads the product rules first and names the role and state it covers; a mistake the user cannot undo is at least P1. SKILL.md is 145 lines; tests/test_install.sh and the Python unit tests pass.
+
+Renamed on the operator's request, 2026-11-27: the skill is now plain-ui, without the pandino- prefix, because it works alone when its folder is copied elsewhere; its one mention of Pandino is conditional. The description now names the five modes, and the skill lists them when invoked without a request. A first wording of that description contained a colon followed by a space, which is invalid unquoted YAML: pi dropped the skill silently and six comparison runs went ahead without it. tests/test_install.sh now fails on such a description. Fourth comparison: six models rebuilt the real note editor as a static mockup from the critique, once with the critique alone (the runs where the skill failed to load) and once with the skill loaded. Both variants applied the P1 fixes; the skill added little on top of a critique that already existed.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

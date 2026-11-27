@@ -1173,5 +1173,13 @@ if find "$tmp_dir" -name FINDINGS.md -print -quit | grep -q .; then
     exit 1
 fi
 
+# An unquoted YAML value containing ": " is invalid, and an editor then drops the skill without an error.
+for skill_file in "$repo_dir"/.agents/skills/*/SKILL.md; do
+    if sed -n 's/^description: //p' "$skill_file" | grep -q ': '; then
+        echo "FAIL: $skill_file has ': ' in its description, which breaks its frontmatter" >&2
+        exit 1
+    fi
+done
+
 bash -n "$repo_dir/install.sh" "$repo_dir/check-update" "$repo_dir/tests/test_install.sh"
 echo "test_install.sh: PASS"
