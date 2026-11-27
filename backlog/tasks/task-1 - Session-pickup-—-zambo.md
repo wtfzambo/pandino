@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - zambo
 created_date: '2026-08-05 11:36'
-updated_date: '2026-11-27 09:35'
+updated_date: '2026-11-27 09:45'
 labels:
   - continuity
   - handoff
@@ -18,7 +18,7 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 WHERE WE LEFT OFF
-2026-11-27 (local CET). Pandino is on main at the commit that renames the interface skill to plain-ui (TASK-36, Done; three commits since origin/main: add, pickup, rename), followed by this pickup commit. All are local only: main is ahead of origin/main and NOT pushed, because pushing publishes the skill to every installer run and the operator has not asked for it. Tree clean.
+2026-11-27 (local CET). Pandino is on main at f9c07df (the interface skill renamed to plain-ui; TASK-36, Done), followed by pickup commits; everything is pushed to origin/main, so installer runs now ship the skill. Tree clean.
 
 The plain-ui skill (TASK-36, Done; rationale in decision-14) lives in .agents/skills/plain-ui/: SKILL.md (145 lines) plus references/anti-patterns.md and references/web.md. install.sh copies it with the other skills, AGENTS.md lists it in the playbook index, README.md names it. Its description names five modes (distill, quieter, clarify, harden, critique) and it lists them when invoked without a request. It has no pandino- prefix because it works alone when copied. It is written first for product screens (the operator's real target is a clinical web app with a poor UI), and treats marketing pages separately. Product and design context goes in a root DESIGN.md. Some modes and anti-patterns are inspired by Impeccable (Apache 2.0), rewritten, credited in Sources, no dependency.
 
@@ -27,13 +27,13 @@ Checks run, all recorded in the TASK-36 notes: tests/test_install.sh; a fresh --
 The operator replies in Italian; repository artifacts stay in English.
 
 WHAT'S NEXT
-1. Ask the operator whether to push main (git push origin main).
+1. Nothing is in progress. The operator liked parts of the mockups built from the critique with the skill loaded and may return to the skill later; wait for that request.
 2. If the operator wants more from the skill: the critique agent's unaddressed feedback is in the TASK-36 notes (rules that cannot be checked from code on a component-library screen; anti-patterns.md is mostly marketing-page aesthetics; no guidance when a project rule forbids the natural fix). The operator wants the skill kept short, so add nothing without asking.
 3. Glossary definition changes in review-lens (TASK-34) stay parked until the operator asks.
 4. The rest of blocking-finding calibration (TASK-23) stays parked until the operator asks.
 
 WAITING ON / GATED BY
-Push of main: the operator's word. Claude Code and opencode loading of plain-ui rests on their documentation only: Claude Code's login had expired on this machine and opencode is not installed. The browser test in tests/test_review_lens.py skips unless puppeteer-core is importable. OpenCode effort levels are still assumed equal to Codex's, unverified.
+Claude Code and opencode loading of plain-ui rests on their documentation only: Claude Code's login had expired on this machine and opencode is not installed. The browser test in tests/test_review_lens.py skips unless puppeteer-core is importable. OpenCode effort levels are still assumed equal to Codex's, unverified.
 
 VERIFY
 git status -sb; git log --oneline -3; bash tests/test_install.sh; python3 -B -m unittest tests.test_review_lens tests.test_bench_timeout; wc -l .agents/skills/plain-ui/SKILL.md; backlog task view TASK-36 --plain.

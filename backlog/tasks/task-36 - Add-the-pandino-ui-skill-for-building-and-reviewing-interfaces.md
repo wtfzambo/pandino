@@ -4,7 +4,7 @@ title: Add the plain-ui skill for building and reviewing interfaces
 status: Done
 assignee: []
 created_date: '2026-11-27 00:38'
-updated_date: '2026-11-27 09:35'
+updated_date: '2026-11-27 09:45'
 labels:
   - skills
 dependencies: []
@@ -49,6 +49,8 @@ Third check, 2026-11-27: one fresh agent ran critique, read-only, on a real larg
 Applied on the operator's approval, 2026-11-27: a blocked primary action says beside it what is missing; a review reads the product rules first and names the role and state it covers; a mistake the user cannot undo is at least P1. SKILL.md is 145 lines; tests/test_install.sh and the Python unit tests pass.
 
 Renamed on the operator's request, 2026-11-27: the skill is now plain-ui, without the pandino- prefix, because it works alone when its folder is copied elsewhere; its one mention of Pandino is conditional. The description now names the five modes, and the skill lists them when invoked without a request. A first wording of that description contained a colon followed by a space, which is invalid unquoted YAML: pi dropped the skill silently and six comparison runs went ahead without it. tests/test_install.sh now fails on such a description. Fourth comparison: six models rebuilt the real note editor as a static mockup from the critique, once with the critique alone (the runs where the skill failed to load) and once with the skill loaded. Both variants applied the P1 fixes; the skill added little on top of a critique that already existed.
+
+Closed 2026-11-27: pushed to origin/main on the operator's request. The operator liked parts of the critique-plus-skill mockups and may revisit the skill later.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
