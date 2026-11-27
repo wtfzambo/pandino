@@ -95,6 +95,7 @@ Before work that a line below covers, read the named file in full and follow it.
 - Ending a session or handing work over: skill `pandino-handoff` (`.agents/skills/pandino-handoff/SKILL.md`).
 - Updating Pandino in this repository: skill `pandino-update` (`.agents/skills/pandino-update/SKILL.md`).
 - Helping the user understand a pull request or branch they are about to review: skill `review-lens` (`.agents/skills/review-lens/SKILL.md`).
+- Building, changing, or reviewing a user interface: skill `pandino-ui` (`.agents/skills/pandino-ui/SKILL.md`).
 
 The project section below the project marker may add rules to any playbook and list the project's own playbooks with their triggers; follow those lines as well. When one kind of work keeps recurring in a project, write a playbook for it outside `.pandino/`, which the installer overwrites, and add its trigger line there.
 

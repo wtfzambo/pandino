@@ -47,7 +47,7 @@ It asks which editors to set up, then shows the model each specialist will run o
 |---|---|
 | `AGENTS.md` | repo root — the rules every agent reads on every turn, an index of playbooks, and a project section with a Corrections table |
 | playbooks | `.pandino/playbooks/` — how-to guides agents read when the index says the work calls for them: workflow, review, reviewing, design, testing, debugging, writing, docs. Rewritten on every install |
-| skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it, `pandino-update` updates this kit, [`review-lens`](.agents/skills/review-lens/README.md) turns a PR into a guided HTML page for your own review. Invoke them by name or let the index trigger them |
+| skills | `.agents/skills/` (and `.claude/skills/` for Claude Code) — `pandino-pickup` resumes from the session snapshot, `pandino-handoff` replaces it, `pandino-update` updates this kit, [`review-lens`](.agents/skills/review-lens/README.md) turns a PR into a guided HTML page for your own review, `pandino-ui` holds the rules for building and reviewing interfaces, loads only when the work touches a UI, and records the product's users, platform, and design system in a root `DESIGN.md`. Invoke them by name or let the index trigger them |
 | the seven helpers | whichever you picked: `.pi/agents/`, `.claude/agents/`, `.opencode/agent/`, `.codex/agents/` — six specialists with a model pinned, plus the unpinned fallback-runner |
 | `models.json` | `.pandino/`. Which model and effort each specialist runs on, per editor. Edit it and re-run to change them |
 | `install.json` | `.pandino/` — the official repository and exact kit commit from the latest successful install, or an unknown (`null`) revision when it could not be determined |
@@ -94,7 +94,7 @@ Install Pandino (https://github.com/wtfzambo/pandino) into this repository.
 
 4. Merge anything in .pandino/merge/ into the existing files by hand, following the precedence rules in Pandino's README. Keep this repo's own rules below the project marker. Then delete .pandino/merge/.
 
-5. Check that it landed: backlog/ exists, AGENTS.md has the playbook index, the project marker, and Backlog's own block, .pandino/playbooks/ exists, and .agents/skills/ holds pandino-pickup, pandino-handoff, pandino-update and review-lens.
+5. Check that it landed: backlog/ exists, AGENTS.md has the playbook index, the project marker, and Backlog's own block, .pandino/playbooks/ exists, and .agents/skills/ holds pandino-pickup, pandino-handoff, pandino-update, review-lens and pandino-ui.
 
 6. For an editor other than pi, select it in the installer or write the same seven helpers where that tool looks for them. Copy the instructions verbatim, pin the six specialists, and leave `fallback-runner` unpinned. For a tool without subagents, tell me that the workflow will run as one agent taking each role in turn.
 
